@@ -1,5 +1,5 @@
 // 网络优先：有网时拿最新版本并更新缓存，没网时用缓存，保证离线也能打开记账
-const CACHE = 'sr-v3';
+const CACHE = 'sr-v4';
 const FILES = ['/', '/index.html', '/manifest.webmanifest', '/icon-180.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
