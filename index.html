@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Self restraint">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <title>Self restraint</title>
 <style>
 :root{--bg:#f2f2f7;--card:#fff;--text:#1c1c1e;--sub:#8e8e93;--line:#e5e5ea;--fill:#e9e9ef;--accent:#5e5ce6;--ok:#34c759;--warn:#ff9f0a;--over:#ff3b30}
@@ -619,7 +619,8 @@ async function importFile(file){
 async function toggleBadge(on){
   if (on) {
     const fail = m => { toast(m, 'warn'); $('#badgeT').checked = false; };
-    if (!('setAppBadge' in navigator) || !('Notification' in window)) return fail('需要先添加到主屏幕再打开（iOS 16.4 以上）');
+    if (navigator.standalone === false) return fail('你现在是在 Safari 里打开的，请回到桌面，点 Self restraint 图标打开后再开启');
+    if (!('setAppBadge' in navigator) || !('Notification' in window)) return fail('这台设备不支持图标角标（需要 iOS 16.4 以上）');
     if (await Notification.requestPermission() !== 'granted') return fail('需要允许通知，角标才能显示');
   } else if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
   S.settings.badge = on; save(); updateBadge();
@@ -756,7 +757,7 @@ document.addEventListener('visibilitychange', () => {
 runRecurring();
 go('home');
 dailyReview();
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js', {scope: '/'});
 </script>
 </body>
 </html>
