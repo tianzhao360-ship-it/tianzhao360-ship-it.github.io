@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Self restraint">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Self restraint</title>
+<style>
+:root{--bg:#f2f2f7;--card:#fff;--text:#1c1c1e;--sub:#8e8e93;--line:#e5e5ea;--fill:#e9e9ef;--accent:#5e5ce6;--ok:#34c759;--warn:#ff9f0a;--over:#ff3b30}
+@media (prefers-color-scheme: dark){:root{--bg:#000;--card:#1c1c1e;--text:#f2f2f7;--sub:#98989f;--line:#2c2c2e;--fill:#2c2c2e;--accent:#7d7aff;--ok:#30d158;--warn:#ff9f0a;--over:#ff453a}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-text-size-adjust:100%}
+body{padding-top:env(safe-area-inset-top);overscroll-behavior-y:none}
+main{padding:4px 16px calc(100px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;padding:10px 0 14px}
+h1{font-size:30px;margin:0;font-weight:800;letter-spacing:-.5px}
+h4{margin:22px 4px 6px;font-size:13px;font-weight:500;color:var(--sub)}
+p{margin:8px 0}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+.muted{color:var(--sub);font-size:13px}.xs{font-size:11px}
+.big{font-size:42px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1.15;margin:2px 0 10px}
+.big2{font-size:26px;font-weight:700;margin:4px 0 8px;font-variant-numeric:tabular-nums}
+.num{font-size:24px;font-weight:700}
+.red{color:var(--over)}.green{color:var(--ok)}
+.split{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.right{text-align:right}
+.lv-ok{--lv:var(--ok)}.lv-warn{--lv:var(--warn)}.lv-over{--lv:var(--over)}.lv-none{--lv:var(--accent)}
+.bar{height:10px;border-radius:5px;background:var(--fill);overflow:hidden;margin:6px 0}
+.bar.sm{height:6px}
+.bar>i{display:block;height:100%;border-radius:inherit;background:var(--lv,var(--accent));transition:width .4s}
+.hero.lv-over .big{color:var(--over)}
+.tip{margin-top:10px;padding:8px 10px;border-radius:10px;font-size:14px;background:color-mix(in srgb,var(--lv) 14%,transparent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mini{background:var(--card);border-radius:14px;padding:12px}
+.mini b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.notice{background:color-mix(in srgb,var(--accent) 14%,var(--card));font-size:15px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line)}
+.row:last-child{border-bottom:0}
+.ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none}
+.mid{flex:1;min-width:0}
+.mid>div:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row>b{font-variant-numeric:tabular-nums}
+.tag{color:var(--warn)}
+.empty{color:var(--sub);text-align:center;padding:22px 8px;font-size:14px}
+.alert{display:grid;grid-template-columns:1fr auto;padding-top:10px;font-size:14px}
+.alert .bar{grid-column:1/-1}
+.dayh{display:flex;justify-content:space-between;color:var(--sub);font-size:13px;margin:16px 4px 6px}
+button{font:inherit;color:inherit;cursor:pointer}
+.icon{width:38px;height:38px;border:0;border-radius:50%;background:var(--card);display:grid;place-items:center;color:var(--text);font-size:22px}
+.icon:disabled{opacity:.3}
+.icon svg{width:20px;height:20px}
+.link{border:0;background:none;color:var(--accent);padding:6px 4px;font-size:15px}
+.link.danger,.danger{color:var(--over)}.link.green{color:var(--ok)}
+.btn{border:0;border-radius:10px;background:var(--accent);color:#fff;padding:10px 14px;font-weight:600;white-space:nowrap}
+input,select{font:inherit;font-size:16px;color:var(--text);background:var(--fill);border:0;border-radius:10px;padding:10px 12px;width:100%;min-width:0;outline:none;-webkit-appearance:none;appearance:none}
+input[type=search]{background:var(--card);margin-bottom:10px}
+.seg{display:flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:7px 4px;border-radius:8px;font-size:14px}
+.seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.monthnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:0 -16px 4px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;background:var(--card);border-radius:16px;padding:6px 12px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.stat3 b{display:block;font-size:17px}
+svg.chart{width:100%;height:auto;display:block;margin-top:8px}
+.ax{fill:var(--sub);font-size:9px;text-anchor:middle}
+.b0{fill:var(--accent)}.b1{fill:var(--over)}.bl{stroke:var(--warn);stroke-dasharray:4 3;stroke-width:1}
+.donutwrap{display:flex;justify-content:center;margin:6px 0}
+.donut{width:180px;height:180px}
+.donut .track{stroke:var(--fill)}
+.dt1{font-size:3px;fill:var(--sub);text-anchor:middle}.dt2{font-size:4.4px;fill:var(--text);font-weight:700;text-anchor:middle}
+.catrow{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;padding:8px 0}
+.catrow .bar{grid-column:2/-1;margin:0}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.heat div{aspect-ratio:1;border-radius:8px;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--fill);line-height:1.1}
+.heat div small{font-size:8px;opacity:.85}
+.heat .hd{background:none;aspect-ratio:auto;color:var(--sub)}
+.heat .pad0{background:none}
+.heat .today{outline:2px solid var(--accent)}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--sub);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;background:var(--lv);vertical-align:-1px}
+.wishform{display:grid;grid-template-columns:1fr 90px auto;gap:6px;margin:10px 0}
+.wish{display:flex;align-items:center;gap:6px;padding:10px 0;border-bottom:.5px solid var(--line)}
+.wish:last-child{border-bottom:0}
+.group{background:var(--card);border-radius:14px;padding:0 14px}
+.fld{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:.5px solid var(--line);font-size:15px;min-height:46px}
+.fld:last-child{border-bottom:0}
+.fld>span:first-child{flex:1}
+.fld input{max-width:120px;text-align:right}
+.addrow{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0}
+.addrow input,.addrow select{flex:1 1 30%}
+.rowbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:13px 0;border-bottom:.5px solid var(--line);color:var(--accent);font-size:15px}
+.rowbtn:last-child{border-bottom:0}
+.note{font-size:13px;color:var(--sub);margin:6px 4px}
+.center{text-align:center}
+.switch{width:50px;height:30px;flex:none;border-radius:15px;background:var(--fill);position:relative;transition:.2s}
+.switch:checked{background:var(--ok)}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.2s}
+.switch:checked::after{left:22px}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:space-around;align-items:center;background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:.5px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav.tabs button{flex:1;background:none;border:0;color:var(--sub);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0}
+nav.tabs button.on{color:var(--accent)}
+nav.tabs svg{width:24px;height:24px}
+nav.tabs .add{flex:none;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;margin:-22px 8px 0;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 45%,transparent);justify-content:center}
+nav.tabs .add svg{width:28px;height:28px}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.38);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+.mask.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;max-height:94vh;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);z-index:21;padding:6px 16px calc(14px + env(safe-area-inset-bottom))}
+.sheet.on{transform:none}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 4px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;min-height:40px}
+.amt{text-align:right;padding:6px 4px 10px}
+.amt .expr{display:block;color:var(--sub);font-size:14px;min-height:20px}
+.amt .amtv{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums}
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.catb{border:1.5px solid transparent;background:var(--card);border-radius:12px;padding:6px 2px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.catb span{font-size:22px}
+.catb.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--card))}
+.fields{display:grid;grid-template-columns:1fr 140px;gap:8px;margin-top:10px}
+.fields input{background:var(--card)}
+.sheet .seg{margin:10px 0 0}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.pad button{height:50px;border:0;border-radius:12px;background:var(--card);font-size:22px}
+.pad button:active{opacity:.6}
+.pad .ok{grid-row:span 2;height:auto;background:var(--accent);color:#fff;font-size:18px;font-weight:600}
+.dialog{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);padding:24px}
+.dialog.on{display:flex}
+.dlg{background:var(--card);border-radius:18px;padding:20px 18px 12px;max-width:340px;width:100%}
+.dlg h3{margin:0 0 6px;font-size:18px}
+.dlg p{color:var(--sub);font-size:15px}
+.dbtns{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.dbtns button{border:0;border-radius:12px;padding:12px;background:var(--fill);font-size:16px}
+.dbtns .primary{background:var(--accent);color:#fff;font-weight:600}
+.dbtns .danger{background:var(--over);color:#fff}
+.toast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translate(-50%,-150%);z-index:50;background:var(--card);color:var(--text);padding:10px 16px;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.18);font-size:15px;max-width:92vw;transition:transform .3s;border-left:4px solid var(--lv)}
+.toast.on{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<main>
+  <section class="page" id="home"></section>
+  <section class="page" id="list">
+    <header class="top"><h1>明细</h1></header>
+    <div class="monthnav">
+      <button class="icon" data-act="listNav" data-v="-1" aria-label="上个月">‹</button>
+      <b id="listMonth"></b>
+      <button class="icon" id="listNext" data-act="listNav" data-v="1" aria-label="下个月">›</button>
+    </div>
+    <input id="q" type="search" placeholder="搜索备注、分类、金额">
+    <div class="chips" id="listChips"></div>
+    <div id="listBody"></div>
+  </section>
+  <section class="page" id="stats"></section>
+  <section class="page" id="restraint"></section>
+</main>
+
+<nav class="tabs">
+  <button data-act="go" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>首页</button>
+  <button data-act="go" data-v="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>明细</button>
+  <button class="add" data-act="add" aria-label="记一笔"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button data-act="go" data-v="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M6 17v-5M11 17V6M16 17v-8M21 17v-3"/></svg>统计</button>
+  <button data-act="go" data-v="restraint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>克制</button>
+</nav>
+
+<div class="mask" id="mask" data-act="close"></div>
+<div class="sheet" id="addSheet"></div>
+<div class="sheet" id="setSheet"></div>
+<div class="dialog" id="dialog"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+const KEY = 'selfrestraint.v1';
+const DEFAULT_CATS = [
+  {id:'food',   name:'餐饮',   emoji:'🍜', color:'#ff9f0a'},
+  {id:'snack',  name:'零食饮料', emoji:'🧋', color:'#ff6482'},
+  {id:'traffic',name:'交通',   emoji:'🚇', color:'#0a84ff'},
+  {id:'shop',   name:'购物',   emoji:'🛍️', color:'#bf5af2'},
+  {id:'fun',    name:'娱乐',   emoji:'🎮', color:'#5e5ce6'},
+  {id:'sub',    name:'充值订阅', emoji:'💳', color:'#ac8e68'},
+  {id:'daily',  name:'日用',   emoji:'🧴', color:'#64d2ff'},
+  {id:'study',  name:'学习',   emoji:'📚', color:'#30d158'},
+  {id:'phone',  name:'话费网络', emoji:'📱', color:'#5ac8fa'},
+  {id:'social', name:'人情社交', emoji:'🎁', color:'#ff453a'},
+  {id:'dress',  name:'服饰美妆', emoji:'👕', color:'#ffd60a'},
+  {id:'health', name:'医疗',   emoji:'💊', color:'#66d4cf'},
+  {id:'other',  name:'其他',   emoji:'📦', color:'#8e8e93'},
+];
+const PALETTE = ['#ff9f0a','#ff6482','#0a84ff','#bf5af2','#30d158','#ffd60a','#64d2ff','#ff453a','#5e5ce6','#ac8e68'];
+const DAY_NAMES = ['日','一','二','三','四','五','六'];
+
+/* ---------- 数据 ---------- */
+function fresh(){
+  return {v:1, records:[], cats:DEFAULT_CATS.map(c=>({...c})), recurring:[], wishes:[], lastCat:'food',
+    settings:{daily:0, weekly:0, monthly:0, big:20000, cooldown:72, catBudgets:{}, badge:false, lastOpen:''}};
+}
+function merge(s){ const f = fresh(); return Object.assign(f, s, {settings:Object.assign(f.settings, s.settings)}); }
+function load(){
+  try { const raw = localStorage.getItem(KEY); if (raw) return merge(JSON.parse(raw)); } catch (e) {}
+  return fresh();
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：手机存储空间可能不足', 'over'); }
+}
+let S = load();
+
+/* ---------- 工具 ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate()+n); return x; };
+const startOfWeek = d => addDays(d, -((d.getDay()+6) % 7));
+const daysIn = d => new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+const dayDiff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const monthKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+const nextMonthKey = k => { const [y,m] = k.split('-').map(Number); return monthKey(new Date(y, m, 1)); };
+const md = d => `${d.getMonth()+1}/${d.getDate()}`;
+const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const today = () => ymd(new Date());
+// 金额一律用「分」存整数，避免 0.1+0.2 这类浮点误差
+const yuan = c => (c/100).toLocaleString('zh-CN', {minimumFractionDigits: c%100 ? 2 : 0, maximumFractionDigits: 2});
+const fmt = c => '¥' + yuan(c);
+const toCents = v => Math.round(parseFloat(v || 0) * 100) || 0;
+const pct = (a, b) => b ? Math.min(100, Math.round(a / b * 100)) : 0;
+const sum = rs => rs.reduce((a, r) => a + r.amt, 0);
+const inRange = (from, to) => S.records.filter(r => r.d >= from && r.d <= to);
+const dayMap = rs => rs.reduce((m, r) => (m[r.d] = (m[r.d] || 0) + r.amt, m), {});
+const sorted = rs => [...rs].sort((a, b) => b.d.localeCompare(a.d) || (b.tm||'').localeCompare(a.tm||'') || b.ts - a.ts);
+const catOf = id => S.cats.find(c => c.id === id) || S.cats.find(c => c.id === 'other') || DEFAULT_CATS[DEFAULT_CATS.length-1];
+const groupCat = rs => {
+  const m = {}; rs.forEach(r => { (m[r.cat] ||= {v:0, n:0}); m[r.cat].v += r.amt; m[r.cat].n++; });
+  return Object.entries(m).map(([id, x]) => ({c:catOf(id), id, ...x})).sort((a, b) => b.v - a.v);
+};
+
+function dayProgress(){ const n = new Date(); return (n.getHours()*60 + n.getMinutes()) / 1440; }
+function weekProgress(){ const n = new Date(); return (((n.getDay()+6) % 7) + dayProgress()) / 7; }
+function monthProgress(){ const n = new Date(); return (n.getDate() - 1 + dayProgress()) / daysIn(n); }
+
+function budgets(){
+  const st = S.settings, dim = daysIn(new Date());
+  const daily = st.daily || (st.monthly ? Math.floor(st.monthly / dim) : 0);
+  const weekly = st.weekly || daily * 7;
+  return {daily, weekly, monthly: st.monthly, dailyDerived: !st.daily && !!daily};
+}
+
+// 根据「已花 / 预算」以及「这个周期已经过去了多少」判断状态，返回 'none' | 'ok' | 'warn' | 'over'
+// spent、budget 单位是分；progress 是 0~1：今天已过去的比例（晚上 18 点≈0.75）、本周/本月已过去的比例，过去的日子传 1
+function budgetLevel(spent, budget, progress = 1) {
+  if (!budget) return 'none';
+  const used = spent / budget;
+  if (used > 1) return 'over';
+  if (used >= 0.8) return 'warn';
+  // 花钱速度比时间进度快 25 个百分点以上（且已用掉三成），也提前提醒；早上买个早餐不会触发
+  if (used >= 0.3 && used - progress > 0.25) return 'warn';
+  return 'ok';
+}
+
+/* ---------- 弹层 ---------- */
+const openStack = [];
+function openSheet(id){ $('#'+id).classList.add('on'); openStack.push(id); $('#mask').classList.add('on'); }
+function closeSheet(id){
+  id = id || openStack[openStack.length-1]; if (!id) return;
+  $('#'+id).classList.remove('on');
+  const i = openStack.indexOf(id); if (i >= 0) openStack.splice(i, 1);
+  if (!openStack.length) $('#mask').classList.remove('on');
+}
+function ask(title, msg, btns){
+  return new Promise(res => {
+    const box = $('#dialog');
+    box.innerHTML = `<div class="dlg"><h3>${esc(title)}</h3><p>${esc(msg).replace(/\n/g,'<br>')}</p><div class="dbtns">${
+      btns.map((b, i) => `<button data-i="${i}" class="${b.primary?'primary':''}${b.danger?' danger':''}">${esc(b.t)}</button>`).join('')}</div></div>`;
+    box.classList.add('on');
+    box.onclick = e => {
+      const b = e.target.closest('button[data-i]'); if (!b) return;
+      box.classList.remove('on'); box.onclick = null; res(btns[+b.dataset.i].v);
+    };
+  });
+}
+let toastTimer;
+function toast(msg, lv = 'none'){
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast on lv-' + lv;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3000);
+}
+
+/* ---------- 首页 ---------- */
+function rowHTML(r){
+  const c = catOf(r.cat);
+  return `<div class="row" data-act="edit" data-v="${r.id}"><span class="ico" style="background:${c.color}26">${c.emoji}</span>
+    <div class="mid"><div>${esc(r.note || c.name)}</div><div class="muted">${esc(c.name)} · ${r.d === today() ? (r.tm||'') : r.d.slice(5)}${r.need==='want' ? ' · <span class="tag">想要</span>' : ''}</div></div>
+    <b>-${yuan(r.amt)}</b></div>`;
+}
+function catBudgetAlerts(all){
+  const now = new Date(), from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)), rs = inRange(from, today());
+  return S.cats.filter(c => S.settings.catBudgets[c.id]).map(c => {
+    const budget = S.settings.catBudgets[c.id], spent = sum(rs.filter(r => r.cat === c.id));
+    return {c, budget, spent, lv: budgetLevel(spent, budget, monthProgress())};
+  }).filter(a => all || a.lv === 'warn' || a.lv === 'over');
+}
+function streaks(){
+  const b = budgets(); if (!b.daily || !S.records.length) return null;
+  const first = S.records.reduce((m, r) => r.d < m ? r.d : m, today());
+  const map = dayMap(S.records), y = ymd(addDays(new Date(), -1));
+  let cur = 0, best = 0;
+  for (let d = parse(first); ymd(d) <= y; d = addDays(d, 1)) {
+    if ((map[ymd(d)] || 0) <= b.daily) { cur++; best = Math.max(best, cur); } else cur = 0;
+  }
+  return {cur, best};
+}
+const wishLeft = w => w.created + S.settings.cooldown * 3600e3 - Date.now();
+
+function renderHome(){
+  const now = new Date(), t = today(), b = budgets();
+  const tSum = sum(S.records.filter(r => r.d === t));
+  const wSum = sum(inRange(ymd(startOfWeek(now)), t));
+  const mSum = sum(inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t));
+  const s7 = sum(inRange(ymd(addDays(now, -6)), t)), s30 = sum(inRange(ymd(addDays(now, -29)), t));
+  const lv = budgetLevel(tSum, b.daily, dayProgress());
+  const tips = {none:'点这里设置预算，之后会提醒你今天还能花多少 →', ok:'节奏不错，继续保持 👍', warn:'花得有点快了，接下来悠着点 ⚠️', over:'今天已经超预算了，剩下的时间尽量别再花钱 🛑'};
+  let h = `<header class="top"><div><div class="muted">${now.getMonth()+1}月${now.getDate()}日 周${DAY_NAMES[now.getDay()]}</div><h1>Self restraint</h1></div>
+    <button class="icon" data-act="settings" aria-label="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button></header>`;
+  if (!navigator.standalone && /iPhone|iPad/.test(navigator.userAgent))
+    h += `<div class="card notice">📲 先把我放到主屏幕：点 Safari 的「分享」按钮 →「添加到主屏幕」。从主屏幕打开，数据保存更稳定。</div>`;
+  h += `<div class="card hero lv-${lv}" ${b.daily ? '' : 'data-act="settings"'}>
+    <div class="muted">今日已花</div><div class="big">${fmt(tSum)}</div>
+    ${b.daily ? `<div class="bar"><i style="width:${pct(tSum, b.daily)}%"></i></div>
+      <div class="split"><span>${tSum <= b.daily ? `还能花 <b>${fmt(b.daily - tSum)}</b>` : `已超支 <b class="red">${fmt(tSum - b.daily)}</b>`}</span>
+      <span class="muted">日预算 ${fmt(b.daily)}${b.dailyDerived ? '（按月折算）' : ''}</span></div>` : ''}
+    <div class="tip">${tips[lv]}</div></div>`;
+  const mini = (label, v, budget, prog, sub) => `<div class="mini lv-${budgetLevel(v, budget, prog)}"><span class="muted">${label}</span><b>${fmt(v)}</b>
+    ${budget ? `<div class="bar sm"><i style="width:${pct(v, budget)}%"></i></div><span class="muted xs">预算 ${fmt(budget)}</span>` : `<span class="muted xs">${sub || ''}</span>`}</div>`;
+  h += `<div class="grid2">${mini('本周', wSum, b.weekly, weekProgress())}${mini('本月', mSum, b.monthly, monthProgress())}
+    ${mini('近7天', s7, 0, 1, '日均 ' + fmt(Math.round(s7/7)))}${mini('近30天', s30, 0, 1, '日均 ' + fmt(Math.round(s30/30)))}</div>`;
+  if (b.monthly) {
+    const left = daysIn(now) - now.getDate() + 1, per = Math.max(0, Math.floor((b.monthly - (mSum - tSum)) / left));
+    h += `<div class="card"><div class="split"><b>本月计划</b><span class="muted">还剩 ${left} 天</span></div><p>${b.monthly >= mSum
+      ? `本月还能花 <b>${fmt(b.monthly - mSum)}</b>。从今天起每天平均不超过 <b>${fmt(per)}</b>，就能守住月预算。`
+      : `本月已经超预算 <b class="red">${fmt(mSum - b.monthly)}</b>，剩下的日子请只花必要的钱。`}</p></div>`;
+  }
+  const alerts = catBudgetAlerts(false);
+  if (alerts.length) h += `<div class="card"><b>分类预算提醒</b>${alerts.map(a => `<div class="alert lv-${a.lv}"><span>${a.c.emoji} ${esc(a.c.name)}${a.lv==='over'?' 已超':''}</span><span>${fmt(a.spent)} / ${fmt(a.budget)}</span><div class="bar sm"><i style="width:${pct(a.spent, a.budget)}%"></i></div></div>`).join('')}</div>`;
+  const sk = streaks();
+  if (sk) h += `<div class="card split"><div><div class="muted">连续不超日预算</div><div class="num">${sk.cur} 天</div></div><div class="right"><div class="muted">最长纪录</div><div class="num">${sk.best} 天</div></div></div>`;
+  const ready = S.wishes.filter(w => w.status === 'wait' && wishLeft(w) <= 0).length;
+  if (ready) h += `<div class="card notice" data-act="go" data-v="restraint">🧊 冷静清单里有 ${ready} 件东西冷静期到了，去做个决定 →</div>`;
+  const tr = sorted(S.records.filter(r => r.d === t));
+  h += `<div class="card"><div class="split"><b>今日明细</b><span class="muted">${tr.length} 笔</span></div>${tr.length ? tr.map(rowHTML).join('') : '<div class="empty">今天还没记账。花了钱就马上点下面的 ＋ 记一笔 ✍️</div>'}</div>`;
+  $('#home').innerHTML = h;
+}
+
+/* ---------- 明细 ---------- */
+let listMonth = 0, listCat = '', listQ = '';
+function renderList(){
+  const n = new Date(), s = new Date(n.getFullYear(), n.getMonth() + listMonth, 1), e = new Date(s.getFullYear(), s.getMonth()+1, 0);
+  let rs = inRange(ymd(s), ymd(e));
+  const monthTotal = sum(rs);
+  if (listCat) rs = rs.filter(r => r.cat === listCat);
+  const q = listQ.trim().toLowerCase();
+  if (q) rs = rs.filter(r => (r.note + catOf(r.cat).name + yuan(r.amt) + (r.amt/100)).toLowerCase().includes(q));
+  $('#listMonth').textContent = `${s.getFullYear()}年${s.getMonth()+1}月`;
+  $('#listNext').disabled = listMonth >= 0;
+  $('#listChips').innerHTML = `<button class="chip ${listCat ? '' : 'on'}" data-act="listCat" data-v="">全部</button>` +
+    S.cats.map(c => `<button class="chip ${listCat === c.id ? 'on' : ''}" data-act="listCat" data-v="${c.id}">${c.emoji} ${esc(c.name)}</button>`).join('');
+  const groups = {}; sorted(rs).forEach(r => (groups[r.d] ||= []).push(r));
+  let h = `<div class="card split"><div><div class="muted">${listCat || q ? '筛选结果' : '本月合计'}</div><div class="num">${fmt(sum(rs))}</div></div>
+    <div class="right muted">${rs.length} 笔${listCat || q ? `<br>占当月 ${pct(sum(rs), monthTotal)}%` : ''}</div></div>`;
+  h += Object.keys(groups).map(d => { const dt = parse(d);
+    return `<div class="dayh"><span>${dt.getMonth()+1}月${dt.getDate()}日 周${DAY_NAMES[dt.getDay()]}${d === today() ? ' · 今天' : ''}</span><span>${fmt(sum(groups[d]))}</span></div>
+      <div class="card" style="padding:4px 16px">${groups[d].map(rowHTML).join('')}</div>`; }).join('') || '<div class="empty">这里还没有记录</div>';
+  $('#listBody').innerHTML = h;
+}
+
+/* ---------- 统计 ---------- */
+let statKind = 'month', statOff = 0;
+function period(kind, off){
+  const n = new Date(); let s, e, label;
+  if (kind === 'week') { s = addDays(startOfWeek(n), off*7); e = addDays(s, 6); label = off === 0 ? '本周' : off === -1 ? '上周' : `${md(s)} – ${md(e)}`; }
+  else if (kind === 'month') { s = new Date(n.getFullYear(), n.getMonth()+off, 1); e = new Date(s.getFullYear(), s.getMonth()+1, 0); label = off === 0 ? '本月' : `${s.getFullYear()}年${s.getMonth()+1}月`; }
+  else if (kind === 'year') { s = new Date(n.getFullYear()+off, 0, 1); e = new Date(n.getFullYear()+off, 11, 31); label = `${s.getFullYear()}年`; }
+  else { e = addDays(n, off*30); s = addDays(e, -29); label = off === 0 ? '近30天' : `${md(s)} – ${md(e)}`; }
+  return {s, e, from: ymd(s), to: ymd(e), label};
+}
+function barChart(vals, labels, line){
+  const W = 340, H = 150, top = 14, bot = 18, n = vals.length, max = Math.max(line || 0, ...vals, 1), bw = W / n, every = Math.ceil(n / 8);
+  const y = v => H - bot - v / max * (H - top - bot);
+  let g = '';
+  vals.forEach((v, i) => {
+    const x = i * bw, h = H - bot - y(v);
+    if (v) g += `<rect x="${x + bw*.18}" y="${y(v)}" width="${bw*.64}" height="${Math.max(h, 1)}" rx="${Math.min(3, bw*.2)}" class="${line && v > line ? 'b1' : 'b0'}"/>`;
+    g += `<rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent" data-act="tip" data-v="${labels[i]}：${fmt(v)}"/>`;
+    if (i % every === 0) g += `<text x="${i ? x + bw/2 : 1}" y="${H - 4}" class="ax"${i ? '' : ' style="text-anchor:start"'}>${labels[i]}</text>`;
+  });
+  if (line) g += `<line x1="0" x2="${W}" y1="${y(line)}" y2="${y(line)}" class="bl"/><text x="${W - 2}" y="${y(line) - 3}" class="ax" style="text-anchor:end">预算 ${fmt(line)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function donut(items, total){
+  let acc = 0;
+  const segs = items.map(it => { const p = it.v / total * 100;
+    const s = `<circle r="15.9155" cx="21" cy="21" fill="none" stroke="${it.c.color}" stroke-width="6" stroke-dasharray="${p} ${100 - p}" stroke-dashoffset="${25 - acc}"/>`;
+    acc += p; return s; }).join('');
+  return `<div class="donutwrap"><svg viewBox="0 0 42 42" class="donut"><circle r="15.9155" cx="21" cy="21" fill="none" class="track" stroke-width="6"/>${segs}
+    <text x="21" y="19.5" class="dt1">总支出</text><text x="21" y="25" class="dt2">${fmt(total)}</text></svg></div>`;
+}
+function heatmap(p, map, daily){
+  const t = today(), lead = (p.s.getDay() + 6) % 7, vals = Object.values(map), max = Math.max(1, ...vals);
+  let h = ['一','二','三','四','五','六','日'].map(d => `<div class="hd">${d}</div>`).join('') + '<div class="pad0"></div>'.repeat(lead);
+  for (let i = 1; i <= daysIn(p.s); i++) {
+    const d = ymd(new Date(p.s.getFullYear(), p.s.getMonth(), i)), v = map[d] || 0;
+    let style = '', cls = d === t ? 'today' : '';
+    if (d <= t && v) {
+      if (daily) { cls += ' lv-' + budgetLevel(v, daily, 1); style = 'background:color-mix(in srgb,var(--lv) 38%,var(--card))'; }
+      else style = `background:color-mix(in srgb,var(--accent) ${Math.round(15 + 70 * v / max)}%,var(--card))`;
+    }
+    h += `<div class="${cls}" style="${style}" data-act="tip" data-v="${i}日：${fmt(v)}">${i}${v ? `<small>${v >= 100000 ? Math.round(v/100000) + 'k' : Math.round(v/100)}</small>` : ''}</div>`;
+  }
+  return `<div class="heat">${h}</div>` + (daily ? `<div class="legend"><span class="lv-ok">预算内</span><span class="lv-warn">接近</span><span class="lv-over">超预算</span></div>` : '');
+}
+function renderStats(){
+  const p = period(statKind, statOff), pp = period(statKind, statOff - 1), t = today(), b = budgets();
+  const end = p.to < t ? p.to : t;
+  const rs = p.from > t ? [] : inRange(p.from, end), total = sum(rs);
+  const elapsed = p.from > t ? 0 : dayDiff(p.from, end) + 1;
+  let cmpTo = statOff === 0 ? ymd(addDays(pp.s, elapsed - 1)) : pp.to; if (cmpTo > pp.to) cmpTo = pp.to;
+  const prev = sum(inRange(pp.from, cmpTo)), chg = prev ? Math.round((total - prev) / prev * 100) : null;
+  const map = dayMap(rs), cats = groupCat(rs), want = sum(rs.filter(r => r.need === 'want'));
+  let h = `<header class="top"><h1>统计</h1></header>
+    <div class="seg">${[['week','周'],['month','月'],['year','年'],['30d','近30天']].map(([k, l]) => `<button data-act="stat" data-v="${k}" class="${statKind === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div class="monthnav"><button class="icon" data-act="statNav" data-v="-1">‹</button><b>${p.label}</b><button class="icon" data-act="statNav" data-v="1" ${statOff >= 0 ? 'disabled' : ''}>›</button></div>
+    <div class="card"><div class="muted">总支出</div><div class="big" style="margin-bottom:4px">${fmt(total)}</div>
+    <div class="stat3"><div><span class="muted">日均</span><b>${fmt(elapsed ? Math.round(total / elapsed) : 0)}</b></div><div><span class="muted">笔数</span><b>${rs.length}</b></div>
+    <div><span class="muted">${statOff === 0 ? '比上期同期' : '比上一期'}</span><b class="${chg > 0 ? 'red' : 'green'}">${chg === null ? '—' : (chg > 0 ? '↑' : '↓') + Math.abs(chg) + '%'}</b></div></div></div>`;
+  if (!rs.length) { $('#stats').innerHTML = h + '<div class="empty">这段时间没有支出记录</div>'; return; }
+  let vals = [], labels = [], line;
+  if (statKind === 'year') {
+    for (let m = 0; m < 12; m++) { const k = `${p.s.getFullYear()}-${pad(m+1)}`; vals.push(sum(rs.filter(r => r.d.startsWith(k)))); labels.push(m + 1 + '月'); }
+    line = b.monthly;
+  } else {
+    for (let d = p.s; ymd(d) <= p.to; d = addDays(d, 1)) { vals.push(map[ymd(d)] || 0); labels.push(statKind === 'week' ? '周' + DAY_NAMES[d.getDay()] : (statKind === '30d' && (d === p.s || d.getDate() === 1) ? md(d) : String(d.getDate()))); }
+    line = b.daily;
+  }
+  h += `<div class="card"><b>支出趋势</b><span class="muted"> · 点柱子看金额</span>${barChart(vals, labels, line)}</div>`;
+  h += `<div class="card"><b>钱都花在哪了</b>${donut(cats, total)}${cats.map(x => `<div class="catrow" ${statKind === 'month' ? `data-act="catJump" data-v="${x.id}"` : ''}>
+    <span>${x.c.emoji}</span><span>${esc(x.c.name)} <span class="muted">${x.n}笔</span></span><span><b>${fmt(x.v)}</b> <span class="muted">${Math.round(x.v / total * 100)}%</span></span>
+    <div class="bar sm"><i style="width:${x.v / cats[0].v * 100}%;background:${x.c.color}"></i></div></div>`).join('')}</div>`;
+  h += `<div class="card"><div class="split"><b>必要 vs 想要</b><span class="muted">想要占 ${pct(want, total)}%</span></div>
+    <div class="bar" style="height:14px;display:flex"><i style="width:${100 - pct(want, total)}%;background:var(--accent);border-radius:0"></i><i style="width:${pct(want, total)}%;background:var(--warn);border-radius:0"></i></div>
+    <div class="split muted"><span>必要 ${fmt(total - want)}</span><span>想要 ${fmt(want)}</span></div></div>`;
+  if (statKind === 'month') h += `<div class="card"><b>消费日历</b>${heatmap(p, map, b.daily)}</div>`;
+  if (statKind !== 'week') {
+    const wd = [0,0,0,0,0,0,0]; rs.forEach(r => wd[(parse(r.d).getDay() + 6) % 7] += r.amt);
+    const top = wd.indexOf(Math.max(...wd));
+    h += `<div class="card"><b>星期几最能花</b><span class="muted"> · 周${['一','二','三','四','五','六','日'][top]}花得最多</span>${barChart(wd, ['周一','周二','周三','周四','周五','周六','周日'])}</div>`;
+  }
+  h += `<div class="card"><b>最大的 5 笔</b>${[...rs].sort((a, b) => b.amt - a.amt).slice(0, 5).map(rowHTML).join('')}</div>`;
+  $('#stats').innerHTML = h;
+}
+
+/* ---------- 克制 ---------- */
+function fmtLeft(ms){ const m = Math.ceil(ms / 60000), hh = Math.floor(m / 60); return hh >= 24 ? `${Math.floor(hh/24)}天${hh%24}小时` : hh ? `${hh}小时${m%60}分` : `${m}分钟`; }
+function renderRestraint(){
+  const now = new Date(), t = today(), b = budgets();
+  const saved = S.wishes.filter(w => w.status === 'skip'), savedSum = saved.reduce((a, w) => a + w.price, 0);
+  const waiting = S.wishes.filter(w => w.status === 'wait').sort((a, b) => a.created - b.created);
+  const done = S.wishes.filter(w => w.status !== 'wait').sort((a, b) => b.decided - a.decided).slice(0, 8);
+  const mRs = inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t), mSum = sum(mRs), want = sum(mRs.filter(r => r.need === 'want'));
+  let h = `<header class="top"><h1>克制</h1></header>
+    <div class="card"><div class="muted">靠冷静期忍住没买，一共省下</div><div class="big green">${fmt(savedSum)}</div><div class="muted">忍住了 ${saved.length} 次</div></div>
+    <div class="card"><b>🧊 冷静清单</b><p class="muted">想买但还没付钱的东西先放这里，等 ${S.settings.cooldown} 小时后还想要再买。大多数冲动会自己消失。</p>
+    <div class="wishform"><input id="wName" placeholder="想买什么" maxlength="30"><input id="wPrice" type="number" inputmode="decimal" placeholder="价格"><button class="btn" data-act="wishAdd">放进去</button></div>
+    ${waiting.map(w => { const left = wishLeft(w);
+      return `<div class="wish"><div class="mid"><div>${esc(w.name)} · <b>${fmt(w.price)}</b></div><div class="muted">${left > 0 ? `还需冷静 ${fmtLeft(left)}` : '冷静期结束了：现在还想要吗？'}</div></div>
+      ${left > 0 ? '' : `<button class="link" data-act="wishBuy" data-v="${w.id}">买了</button>`}<button class="link green" data-act="wishSkip" data-v="${w.id}">不要了</button></div>`; }).join('') || '<div class="empty">清单是空的</div>'}
+    ${done.length ? `<p class="muted" style="margin-top:14px">最近的决定</p>${done.map(w => `<div class="wish"><div class="mid"><div>${esc(w.name)}</div></div><span class="${w.status === 'skip' ? 'green' : 'muted'}">${w.status === 'skip' ? '忍住了 +' : '买了 '}${fmt(w.price)}</span><button class="link danger" data-act="wishDel" data-v="${w.id}">×</button></div>`).join('')}` : ''}</div>`;
+  h += `<div class="card"><b>本月「想要」类消费</b><div class="big2">${fmt(want)} <span class="muted">占本月 ${pct(want, mSum)}%</span></div>
+    <div class="bar"><i style="width:${pct(want, mSum)}%;background:var(--warn)"></i></div>
+    <p class="muted">记账时标成「想要」的钱，不花也不影响生活。这个比例越低，说明自控越好。</p></div>`;
+  if (b.daily) {
+    const map = dayMap(mRs), passed = now.getDate() - 1; let okDays = 0;
+    for (let i = 1; i <= passed; i++) if ((map[ymd(new Date(now.getFullYear(), now.getMonth(), i))] || 0) <= b.daily) okDays++;
+    h += `<div class="card"><b>本月守住日预算的天数</b>${passed ? `<div class="big2">${okDays} / ${passed} 天</div><div class="bar lv-${okDays === passed ? 'ok' : okDays / passed >= .7 ? 'warn' : 'over'}"><i style="width:${pct(okDays, passed)}%"></i></div>` : '<p class="muted">今天是本月第一天，从今天开始加油</p>'}</div>`;
+  }
+  const cats = groupCat(mRs);
+  if (cats.length) {
+    const top = cats[0], perDay = Math.round(top.v / now.getDate());
+    h += `<div class="card"><b>花钱最多的地方</b><p>本月在「${top.c.emoji} ${esc(top.c.name)}」上花了 <b>${fmt(top.v)}</b>，占 ${pct(top.v, mSum)}%，平均每天 ${fmt(perDay)}。</p>
+      <p class="muted">如果这一项每天少花 ¥10，一年就能多存 ¥3,650。</p></div>`;
+  }
+  $('#restraint').innerHTML = h;
+}
+
+/* ---------- 记一笔 ---------- */
+let draft = null;
+function openAdd(r, preset){
+  draft = r ? {id:r.id, amt:String(r.amt / 100), cat:r.cat, need:r.need || 'need', note:r.note || '', d:r.d, tm:r.tm, ts:r.ts}
+            : {id:null, amt:'', cat:S.lastCat || 'food', need:'need', note:'', d:today(), ...preset};
+  if (!S.cats.some(c => c.id === draft.cat)) draft.cat = S.cats[0].id;
+  const keys = ['1','2','3','del','4','5','6','+','7','8','9','ok','.','0','C'];
+  $('#addSheet').innerHTML = `<div class="grab"></div>
+    <div class="sheet-h"><button class="link" data-act="close" data-v="addSheet">取消</button><b>${draft.id ? '编辑支出' : '记一笔'}</b>${draft.id ? '<button class="link danger" data-act="delRec">删除</button>' : '<span style="width:40px"></span>'}</div>
+    <div class="amt"><span class="expr" id="expr"></span><span class="amtv" id="amtv"></span></div>
+    <div class="cats">${S.cats.map(c => `<button class="catb ${c.id === draft.cat ? 'on' : ''}" data-act="cat" data-v="${c.id}"><span>${c.emoji}</span>${esc(c.name)}</button>`).join('')}</div>
+    <div class="seg"><button data-act="need" data-v="need" class="${draft.need === 'need' ? 'on' : ''}">必要（不花不行）</button><button data-act="need" data-v="want" class="${draft.need === 'want' ? 'on' : ''}">想要（可以不花）</button></div>
+    <div class="fields"><input data-f="note" placeholder="备注：买了什么" maxlength="40" value="${esc(draft.note)}"><input type="date" data-f="d" value="${draft.d}" max="${today()}"></div>
+    <div class="pad">${keys.map(k => k === 'ok' ? '<button class="ok" data-act="save">完成</button>'
+      : `<button data-act="key" data-v="${k}">${k === 'del' ? '⌫' : k}</button>`).join('')}</div>`;
+  updateAmt(); openSheet('addSheet');
+}
+const evalAmt = s => s.split('+').reduce((a, x) => a + toCents(x), 0);
+function updateAmt(){
+  $('#amtv').textContent = fmt(evalAmt(draft.amt));
+  $('#amtv').style.opacity = draft.amt ? 1 : .35;
+  $('#expr').textContent = draft.amt.includes('+') ? draft.amt.replace(/\+/g, ' + ') : '';
+}
+function pressKey(k){
+  let s = draft.amt; const last = s.split('+').pop();
+  if (k === 'del') s = s.slice(0, -1);
+  else if (k === 'C') s = '';
+  else if (k === '+') { if (last && !last.endsWith('.')) s += '+'; }
+  else if (k === '.') { if (!last.includes('.')) s += last ? '.' : '0.'; }
+  else {
+    if (/\.\d{2}$/.test(last) || (!last.includes('.') && last.length >= 6)) return;
+    if (last === '0') s = s.slice(0, -1);
+    s += k;
+  }
+  draft.amt = s; updateAmt();
+}
+async function saveDraft(){
+  const amt = evalAmt(draft.amt);
+  if (amt <= 0) return toast('先输入金额', 'warn');
+  const isNew = !draft.id, st = S.settings;
+  if (isNew && !draft.wishId && st.big > 0 && amt >= st.big) {
+    const a = await ask('这是一笔大额支出', `${fmt(amt)} 超过了你设的大额提醒线 ${fmt(st.big)}。\n如果还没付钱，先放进冷静清单，${st.cooldown} 小时后还想要再买。`,
+      [{t:'还没付，先冷静一下', v:'wish', primary:true}, {t:'已经付了，记账', v:'ok'}, {t:'取消', v:null}]);
+    if (!a) return;
+    if (a === 'wish') {
+      S.wishes.push({id:uid(), name:draft.note.trim() || catOf(draft.cat).name, price:amt, created:Date.now(), status:'wait'});
+      save(); closeSheet('addSheet'); go('restraint'); return toast('已放进冷静清单 🧊');
+    }
+  }
+  const rec = {id:draft.id || uid(), amt, cat:draft.cat, need:draft.need, note:draft.note.trim(), d:draft.d || today(), tm:draft.tm || hm(new Date()), ts:draft.ts || Date.now()};
+  if (isNew) S.records.push(rec); else S.records[S.records.findIndex(x => x.id === rec.id)] = rec;
+  if (draft.wishId) { const w = S.wishes.find(x => x.id === draft.wishId); if (w) Object.assign(w, {status:'bought', decided:Date.now(), price:amt}); }
+  S.lastCat = rec.cat; save(); closeSheet('addSheet'); render();
+  feedback(rec, isNew);
+}
+function feedback(rec, isNew){
+  if (!isNew) return toast('已修改');
+  const b = budgets(), t = today();
+  const cb = S.settings.catBudgets[rec.cat];
+  let catMsg = '';
+  if (cb) {
+    const now = new Date(), cs = sum(inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t).filter(r => r.cat === rec.cat));
+    if (cs > cb) catMsg = `；${catOf(rec.cat).name}本月已超 ${fmt(cs - cb)}`;
+  }
+  if (rec.d !== t) return toast('已记下' + catMsg, catMsg ? 'over' : 'none');
+  const tSum = sum(S.records.filter(r => r.d === t)), lv = budgetLevel(tSum, b.daily, dayProgress());
+  const msg = lv === 'over' ? `⚠️ 今天已花 ${fmt(tSum)}，超预算 ${fmt(tSum - b.daily)}`
+    : lv === 'warn' ? `今天已花 ${fmt(tSum)}，只剩 ${fmt(Math.max(0, b.daily - tSum))} 了，悠着点`
+    : `已记下，今天共花 ${fmt(tSum)}`;
+  toast(msg + catMsg, catMsg && lv !== 'over' ? 'over' : lv);
+}
+
+/* ---------- 设置 ---------- */
+function field(label, k){
+  return `<label class="fld"><span>${label}</span><input type="number" inputmode="decimal" placeholder="未设置" data-set="${k}" value="${S.settings[k] ? S.settings[k] / 100 : ''}"></label>`;
+}
+function renderSettings(){
+  const st = S.settings, catOpts = S.cats.map(c => `<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
+  $('#setSheet').innerHTML = `<div class="grab"></div>
+    <div class="sheet-h"><span style="width:40px"></span><b>设置</b><button class="link" data-act="close" data-v="setSheet">完成</button></div>
+    <h4>预算（元）</h4><div class="group">${field('每日预算', 'daily')}${field('每周预算', 'weekly')}${field('每月预算', 'monthly')}</div>
+    <p class="note">只填月预算也行：每日 = 月预算 ÷ 当月天数，每周 = 每日 × 7。建议先按过去一个月的实际花费打个八折来定。</p>
+    <h4>克制</h4><div class="group">${field('大额提醒线（单笔，元）', 'big')}
+      <label class="fld"><span>冷静期（小时）</span><input type="number" inputmode="numeric" data-set="cooldown" value="${st.cooldown}"></label></div>
+    <p class="note">单笔达到提醒线时会弹窗，让你选择先放进冷静清单。</p>
+    <h4>分类月预算（元）</h4><div class="group">${S.cats.map(c => `<label class="fld"><span>${c.emoji} ${esc(c.name)}</span><input type="number" inputmode="decimal" placeholder="不限" data-cb="${c.id}" value="${st.catBudgets[c.id] ? st.catBudgets[c.id] / 100 : ''}"></label>`).join('')}</div>
+    <h4>固定支出（每月自动记一笔）</h4><div class="group">${S.recurring.map(r => `<div class="fld"><span>每月${r.day}日 · ${catOf(r.cat).emoji} ${esc(r.name)}</span><span>${fmt(r.amt)}</span><button class="link danger" data-act="recDel" data-v="${r.id}">删除</button></div>`).join('')}
+      <div class="addrow"><input id="rName" placeholder="名称，如 话费" maxlength="12"><input id="rAmt" type="number" inputmode="decimal" placeholder="金额"><input id="rDay" type="number" inputmode="numeric" placeholder="每月几号"><select id="rCat">${catOpts}</select><button class="btn" data-act="recAdd">添加</button></div></div>
+    <h4>分类管理</h4><div class="group">${S.cats.map(c => `<div class="fld"><span>${c.emoji} ${esc(c.name)}</span>${c.id === 'other' ? '' : `<button class="link danger" data-act="catDel" data-v="${c.id}">删除</button>`}</div>`).join('')}
+      <div class="addrow"><input id="cEmoji" placeholder="图标😀" maxlength="4" style="flex:0 0 90px"><input id="cName" placeholder="新分类名称" maxlength="6"><button class="btn" data-act="catAdd">添加</button></div></div>
+    <h4>提醒</h4><div class="group"><div class="fld"><span>App 图标角标显示今日已花（元）</span><input type="checkbox" class="switch" id="badgeT" ${st.badge ? 'checked' : ''}></div></div>
+    <p class="note">角标在每次打开 App 时更新，需要先添加到主屏幕并允许通知。<br><br>
+      <b>每天定时提醒记账</b>（推荐）：打开 iPhone「快捷指令」→ 底部「自动化」→ 右上角 ＋ →「特定时间」，设为每天 21:00、选「立即运行」→ 添加操作「打开 App」选 Self restraint（或「打开 URL」填这个网页的地址）。之后每晚它会自动弹出来提醒你对账。</p>
+    <h4>数据</h4><div class="group"><button class="rowbtn" data-act="exportCsv">导出 Excel 表格（CSV）</button><button class="rowbtn" data-act="backup">备份全部数据（JSON）</button>
+      <button class="rowbtn" data-act="restore">从备份恢复</button><button class="rowbtn danger" data-act="reset">清空所有数据</button></div>
+    <p class="note">数据只保存在这台手机的这个 App 里，不上传任何服务器。建议每月备份一次存到「文件」，换手机时用「从备份恢复」。</p>
+    <p class="note center">Self restraint · 共 ${S.records.length} 笔记录</p>`;
+}
+async function shareFile(name, text, type){
+  const file = new File([text], name, {type});
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try { await navigator.share({files:[file]}); return; } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+async function importFile(file){
+  let data; try { data = JSON.parse(await file.text()); } catch (e) { data = null; }
+  if (!data || !Array.isArray(data.records)) return toast('这不是 Self restraint 的备份文件', 'over');
+  const ok = await ask('从备份恢复', `备份里有 ${data.records.length} 笔记录。恢复会覆盖现在的全部数据，确定吗？`, [{t:'覆盖恢复', v:1, danger:true}, {t:'取消', v:0}]);
+  if (!ok) return;
+  S = merge(data); S.settings.lastOpen = today(); save(); renderSettings(); render(); toast('已恢复 ✅', 'ok');
+}
+async function toggleBadge(on){
+  if (on) {
+    const fail = m => { toast(m, 'warn'); $('#badgeT').checked = false; };
+    if (!('setAppBadge' in navigator) || !('Notification' in window)) return fail('需要先添加到主屏幕再打开（iOS 16.4 以上）');
+    if (await Notification.requestPermission() !== 'granted') return fail('需要允许通知，角标才能显示');
+  } else if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
+  S.settings.badge = on; save(); updateBadge();
+}
+function updateBadge(){
+  if (!S.settings.badge || !navigator.setAppBadge) return;
+  const v = Math.round(sum(S.records.filter(r => r.d === today())) / 100);
+  (v ? navigator.setAppBadge(v) : navigator.clearAppBadge()).catch(() => {});
+}
+
+/* ---------- 固定支出 & 每日回顾 ---------- */
+function runRecurring(){
+  const t = today(), cur = monthKey(new Date()); let changed = false;
+  for (const r of S.recurring) {
+    for (let k = nextMonthKey(r.last); k <= cur; k = nextMonthKey(k)) {
+      const [y, m] = k.split('-').map(Number), d = `${k}-${pad(Math.min(r.day, new Date(y, m, 0).getDate()))}`;
+      if (d > t) break;
+      S.records.push({id:uid(), amt:r.amt, cat:r.cat, need:'need', note:r.name + '（固定）', d, tm:'00:00', ts:Date.now()});
+      r.last = k; changed = true;
+    }
+  }
+  if (changed) save();
+}
+function dailyReview(){
+  const t = today(), st = S.settings;
+  if (st.lastOpen === t) return;
+  const first = !st.lastOpen; st.lastOpen = t; save();
+  if (first || !S.records.length) return;
+  const y = ymd(addDays(new Date(), -1)), ys = sum(S.records.filter(r => r.d === y)), b = budgets();
+  let msg = ys ? `昨天一共花了 ${fmt(ys)}` : '昨天一分钱没花（还是忘了记账？）';
+  if (b.daily && ys) msg += ys > b.daily ? `，超出日预算 ${fmt(ys - b.daily)}。今天收着点 💪` : '，守住了预算 👍';
+  const now = new Date(), wSum = sum(inRange(ymd(startOfWeek(now)), y));
+  if (now.getDay() !== 1) msg += `\n本周到昨天为止：${fmt(wSum)}${b.weekly ? ` / 预算 ${fmt(b.weekly)}` : ''}`;
+  ask('📒 昨日回顾', msg, [{t:'知道了', v:1, primary:true}]);
+}
+
+/* ---------- 路由与事件 ---------- */
+let tab = 'home';
+function go(t){
+  tab = t;
+  $$('.page').forEach(p => p.classList.toggle('on', p.id === t));
+  $$('nav.tabs [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === t));
+  render(); scrollTo(0, 0);
+}
+function render(){ ({home:renderHome, list:renderList, stats:renderStats, restraint:renderRestraint})[tab](); updateBadge(); }
+
+const actions = {
+  go, add: () => openAdd(),
+  edit: id => { const r = S.records.find(x => x.id === id); if (r) openAdd(r); },
+  close: id => closeSheet(id),
+  key: pressKey, save: saveDraft,
+  cat: v => { draft.cat = v; $$('#addSheet .catb').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  need: v => { draft.need = v; $$('#addSheet .seg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  delRec: async () => {
+    if (!await ask('删除这笔记录？', '删除后不能恢复。', [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
+    S.records = S.records.filter(r => r.id !== draft.id); save(); closeSheet('addSheet'); render(); toast('已删除');
+  },
+  settings: () => { renderSettings(); openSheet('setSheet'); },
+  listNav: v => { listMonth = Math.min(0, listMonth + +v); renderList(); },
+  listCat: v => { listCat = v; renderList(); },
+  stat: v => { statKind = v; statOff = 0; renderStats(); },
+  statNav: v => { statOff = Math.min(0, statOff + +v); renderStats(); },
+  catJump: v => { listCat = v; listMonth = statOff; listQ = ''; $('#q').value = ''; go('list'); },
+  tip: v => toast(v),
+  wishAdd: () => {
+    const name = $('#wName').value.trim(), price = toCents($('#wPrice').value);
+    if (!name || price <= 0) return toast('填上名称和价格', 'warn');
+    S.wishes.push({id:uid(), name, price, created:Date.now(), status:'wait'}); save(); renderRestraint();
+    toast(`已放进冷静清单，${S.settings.cooldown} 小时后再决定 🧊`);
+  },
+  wishBuy: id => { const w = S.wishes.find(x => x.id === id); openAdd(null, {amt:String(w.price / 100), note:w.name, need:'want', cat:'shop', wishId:id}); },
+  wishSkip: id => { const w = S.wishes.find(x => x.id === id); Object.assign(w, {status:'skip', decided:Date.now()}); save(); render(); toast(`忍住了！又省下 ${fmt(w.price)} 🎉`, 'ok'); },
+  wishDel: id => { S.wishes = S.wishes.filter(w => w.id !== id); save(); render(); },
+  recAdd: () => {
+    const name = $('#rName').value.trim(), amt = toCents($('#rAmt').value), day = parseInt($('#rDay').value);
+    if (!name || amt <= 0 || !(day >= 1 && day <= 31)) return toast('名称、金额、日期（1-31）都要填', 'warn');
+    const now = new Date();
+    // 本月扣款日已过就从下个月开始，避免和你手动记过的重复
+    const last = day < now.getDate() ? monthKey(now) : monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+    S.recurring.push({id:uid(), name, amt, day, cat:$('#rCat').value, last});
+    runRecurring(); save(); renderSettings(); render(); toast('已添加固定支出');
+  },
+  recDel: id => { S.recurring = S.recurring.filter(r => r.id !== id); save(); renderSettings(); },
+  catAdd: () => {
+    const name = $('#cName').value.trim(); if (!name) return toast('填上分类名称', 'warn');
+    S.cats.splice(S.cats.length - 1, 0, {id:'c' + uid(), name, emoji:$('#cEmoji').value.trim() || '🏷️', color:PALETTE[S.cats.length % PALETTE.length]});
+    save(); renderSettings(); toast('已添加分类');
+  },
+  catDel: async id => {
+    const c = catOf(id);
+    if (!await ask(`删除「${c.name}」？`, '这个分类下的记录会移到「其他」。', [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
+    S.records.forEach(r => { if (r.cat === id) r.cat = 'other'; });
+    S.recurring.forEach(r => { if (r.cat === id) r.cat = 'other'; });
+    S.cats = S.cats.filter(x => x.id !== id); delete S.settings.catBudgets[id];
+    save(); renderSettings(); render();
+  },
+  exportCsv: () => {
+    const rows = [['日期','时间','分类','金额','必要/想要','备注']].concat(sorted(S.records).map(r => [r.d, r.tm || '', catOf(r.cat).name, (r.amt / 100).toFixed(2), r.need === 'want' ? '想要' : '必要', r.note || '']));
+    shareFile(`SelfRestraint-${today()}.csv`, '﻿' + rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n'), 'text/csv');
+  },
+  backup: () => shareFile(`SelfRestraint-backup-${today()}.json`, JSON.stringify(S), 'application/json'),
+  restore: () => $('#fileIn').click(),
+  reset: async () => {
+    if (!await ask('清空所有数据？', '所有记录、预算、清单都会被删除，没有备份就找不回来。', [{t:'全部清空', v:1, danger:true}, {t:'取消', v:0}])) return;
+    S = fresh(); S.settings.lastOpen = today(); save(); renderSettings(); render(); toast('已清空');
+  },
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const fn = actions[el.dataset.act]; if (fn) fn(el.dataset.v);
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.f && draft) draft[el.dataset.f] = el.value;
+  else if (el.id === 'q') { listQ = el.value; renderList(); }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.set) {
+    const k = el.dataset.set;
+    S.settings[k] = k === 'cooldown' ? Math.max(0, parseInt(el.value) || 0) : Math.max(0, toCents(el.value));
+    save(); render();
+  } else if (el.dataset.cb) {
+    const v = toCents(el.value);
+    if (v > 0) S.settings.catBudgets[el.dataset.cb] = v; else delete S.settings.catBudgets[el.dataset.cb];
+    save(); render();
+  } else if (el.id === 'badgeT') toggleBadge(el.checked);
+  else if (el.id === 'fileIn' && el.files[0]) { importFile(el.files[0]); el.value = ''; }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { runRecurring(); render(); dailyReview(); }
+});
+
+runRecurring();
+go('home');
+dailyReview();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
