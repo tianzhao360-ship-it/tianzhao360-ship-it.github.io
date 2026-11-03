@@ -96,8 +96,10 @@ svg.chart{width:100%;height:auto;display:block;margin-top:8px}
 .group{background:var(--card);border-radius:14px;padding:0 14px}
 .fld{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:.5px solid var(--line);font-size:15px;min-height:46px}
 .fld:last-child{border-bottom:0}
-.fld>span:first-child{flex:1}
+.fld>span:first-child{flex:1;min-width:6.5em}
 .fld input{max-width:120px;text-align:right}
+.fld input[type=date]{max-width:150px}
+.fld select{width:auto;max-width:170px;flex:none}
 .addrow{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0}
 .addrow input,.addrow select{flex:1 1 30%}
 .rowbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:13px 0;border-bottom:.5px solid var(--line);color:var(--accent);font-size:15px}
@@ -142,6 +144,15 @@ html.lock,html.lock body{overflow:hidden}
 .accts{display:flex;gap:6px;align-items:center;overflow-x:auto;margin:10px -16px 0;padding:0 16px;scrollbar-width:none}
 .accts::-webkit-scrollbar{display:none}
 .accts .muted{flex:none}
+.calc{background:var(--fill);border-radius:12px;padding:10px 12px;margin:10px 0 6px;display:grid;gap:4px;font-size:15px}
+.calc .big-line{border-top:.5px solid var(--line);padding-top:6px;margin-top:2px;font-size:17px}
+.calc .big-line b{font-size:22px;color:var(--accent);font-variant-numeric:tabular-nums}
+.bill{border-left:3px solid var(--lv);padding:8px 0 8px 10px;margin-top:10px;display:grid;gap:3px}
+.btn2.sm{flex:none;padding:6px 12px;font-size:14px}
+.warnline .btn2.sm{margin-top:6px;display:block}
+.fld.sub{min-height:36px;padding-left:12px;font-size:14px}
+.smokebtn{border:0;border-radius:22px;background:var(--text);color:var(--bg);font-weight:700;font-size:17px;padding:10px 18px;flex:none}
+.smokebtn:active{transform:scale(.95)}
 .amt{text-align:right;padding:6px 4px 10px}
 .amt .expr{display:block;color:var(--sub);font-size:14px;min-height:20px}
 .amt .amtv{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -206,7 +217,7 @@ html.lock,html.lock body{overflow:hidden}
 <script>
 'use strict';
 const KEY = 'selfrestraint.v1';
-const APP_VERSION = 'v1.2';
+const APP_VERSION = 'v1.3';
 const DEFAULT_CATS = [
   {id:'food',   name:'餐饮',   emoji:'🍜', color:'#ff9f0a'},
   {id:'snack',  name:'零食饮料', emoji:'🧋', color:'#ff6482'},
@@ -220,6 +231,7 @@ const DEFAULT_CATS = [
   {id:'social', name:'人情社交', emoji:'🎁', color:'#ff453a'},
   {id:'dress',  name:'服饰美妆', emoji:'👕', color:'#ffd60a'},
   {id:'health', name:'医疗',   emoji:'💊', color:'#66d4cf'},
+  {id:'smoke',  name:'香烟',   emoji:'🚬', color:'#a2845e'},
   {id:'other',  name:'其他',   emoji:'📦', color:'#8e8e93'},
 ];
 const PALETTE = ['#ff9f0a','#ff6482','#0a84ff','#bf5af2','#30d158','#ffd60a','#64d2ff','#ff453a','#5e5ce6','#ac8e68'];
@@ -229,14 +241,30 @@ const DAY_NAMES = ['日','一','二','三','四','五','六'];
 function fresh(){
   // accounts: 账户余额（分）。花呗/信用卡 type:'credit'，余额记成负数（欠多少）
   // flows: 收入 in / 转账还款 move / 校准 fix，支出仍在 records 里（带 acct 字段）
+  // plans: 分期 {acct 挂在哪个花呗/白条, name, per 每期金额, left 剩余期数}；smokes: 每根烟的时间戳
+  // income: 生活费周期 mode none/month/interval，genUntil 之前的到账日已经处理过
   return {v:1, records:[], cats:DEFAULT_CATS.map(c=>({...c})), recurring:[], wishes:[], lastCat:'food',
-    accounts:[], flows:[], lastAcct:'',
+    accounts:[], flows:[], lastAcct:'', plans:[], smokes:[],
     settings:{daily:0, weekly:0, monthly:0, big:20000, cooldown:72, catBudgets:{}, badge:false, lastOpen:'', lastBackup:0,
-      reserve:0, lowBal:10000, payday:0, balanceGuard:true}};
+      reserve:0, lowBal:10000, balanceGuard:true,
+      income:{mode:'none', day:1, every:15, last:'', amt:0, acct:'', auto:true, genUntil:''},
+      smokeOn:true, smokeGoal:0, packPrice:0, packSize:20}};
 }
-function merge(s){ const f = fresh(); return Object.assign(f, s, {settings:Object.assign(f.settings, s.settings)}); }
+function merge(s){
+  const f = fresh(), m = Object.assign(f, s, {settings:Object.assign(f.settings, s.settings)});
+  m.settings.income = Object.assign(fresh().settings.income, m.settings.income);
+  // v1.2 只有「每月几号到账」，迁移过来
+  // 注意：merge 在启动时、日期工具函数定义之前就会运行，这里不能用 ymd()
+  const n = new Date(), td = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  if (m.settings.payday && m.settings.income.mode === 'none') Object.assign(m.settings.income, {mode:'month', day:m.settings.payday, genUntil:td});
+  delete m.settings.payday;
+  if (!m.cats.some(c => c.id === 'smoke')) m.cats.splice(Math.max(0, m.cats.findIndex(c => c.id === 'other')), 0, {...DEFAULT_CATS.find(c => c.id === 'smoke')});
+  return m;
+}
 function load(){
-  try { const raw = localStorage.getItem(KEY); if (raw) return merge(JSON.parse(raw)); } catch (e) {}
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); if (raw) return merge(JSON.parse(raw)); }
+  catch (e) { if (raw) try { localStorage.setItem(KEY + '.unreadable', raw); } catch (e2) {} } // 读不出来也先留一份原始数据，别被新数据覆盖掉
   return fresh();
 }
 function save(){
@@ -296,28 +324,76 @@ const acctOf = id => S.accounts.find(a => a.id === id);
 const isCredit = a => a && a.type === 'credit';
 function adjust(id, delta){ const a = acctOf(id); if (a) a.bal += delta; }
 function acctBalText(a){ return isCredit(a) ? (a.bal < 0 ? `待还 ${fmt(-a.bal)}` : '无欠款') : fmt(a.bal); }
-// 下一次到账：设置里的「生活费每月几号」和固定收入里最近的那天；都没有就按月底算
-function nextIncome(){
-  const now = new Date(), t = today();
-  const days = [S.settings.payday, ...S.recurring.filter(r => r.kind === 'in').map(r => r.day)].filter(Boolean);
-  const cands = days.map(day => {
-    for (let k = 0; k < 2; k++) {
-      const m = new Date(now.getFullYear(), now.getMonth() + k, 1), d = new Date(m.getFullYear(), m.getMonth(), Math.min(day, daysIn(m)));
-      if (ymd(d) > t) return d;
-    }
-  });
-  return cands.length ? {date: cands.sort((a, b) => a - b)[0], known: true} : {date: new Date(now.getFullYear(), now.getMonth() + 1, 1), known: false};
+const dayOfMonth = (y, m, day) => new Date(y, m, Math.min(day, daysIn(new Date(y, m, 1))));
+// 某一天之后（不含）的第一个到账日；生活费可以是「每月几号」或「每隔几天」，固定收入也算
+const monthlyAfter = (day, after) => {
+  const a = parse(after);
+  for (let k = 0; k < 3; k++) { const d = dayOfMonth(a.getFullYear(), a.getMonth() + k, day); if (ymd(d) > after) return d; }
+};
+// 生活费的下一个到账日（after 之后，不含当天）；没设就是 null
+function nextAllowance(after){
+  const inc = S.settings.income;
+  if (inc.mode === 'month' && inc.day) return monthlyAfter(inc.day, after);
+  if (inc.mode === 'interval' && inc.every > 0 && inc.last) {
+    let d = parse(inc.last); while (ymd(d) <= after) d = addDays(d, inc.every);
+    return d;
+  }
+  return null;
+}
+// 下一次有钱进账：生活费和固定收入里最近的那天；都没有就按月底算
+function nextIncome(after = today()){
+  const cands = [nextAllowance(after), ...S.recurring.filter(r => r.kind === 'in').map(r => monthlyAfter(r.day, after))].filter(Boolean);
+  const a = parse(after);
+  return cands.length ? {date: cands.sort((x, y) => x - y)[0], known: true} : {date: new Date(a.getFullYear(), a.getMonth() + 1, 1), known: false};
+}
+// 生活费到账日自动记一笔收入（只处理设置之后出现的到账日，之前的已经在你填的余额里了）
+function runIncome(){
+  const inc = S.settings.income, t = today();
+  if (!inc.auto || !inc.amt || !acctOf(inc.acct) || !inc.genUntil) return;
+  let changed = false;
+  for (let d = nextAllowance(inc.genUntil); d && ymd(d) <= t; d = nextAllowance(inc.genUntil)) {
+    S.flows.push({id:uid(), kind:'in', amt:inc.amt, acct:inc.acct, note:'生活费（自动）', d:ymd(d), tm:'00:00', ts:Date.now()});
+    adjust(inc.acct, inc.amt); inc.genUntil = ymd(d); changed = true;
+  }
+  if (changed) save();
+}
+
+/* 分期：花呗/白条的待还 = 各分期剩余（每期×剩余期数）+ 非分期部分；非分期部分按下一期账单全额算 */
+function creditDue(a){
+  const plans = S.plans.filter(p => p.acct === a.id && p.left > 0);
+  const inst = plans.reduce((s, p) => s + p.per, 0), instAll = plans.reduce((s, p) => s + p.per * p.left, 0);
+  const owed = Math.max(0, -a.bal), other = Math.max(0, owed - instAll), now = new Date();
+  let k = 0; if (a.paidMonth === monthKey(now)) k = 1; // 本月已经还过，看下个月
+  const date = dayOfMonth(now.getFullYear(), now.getMonth() + k, a.dueDay || 10);
+  return {date, amt: inst + other, inst, other, owed, instAll, plans, overdue: ymd(date) < today(), months: plans.reduce((m, p) => Math.max(m, p.left), 0)};
+}
+// [from, to) 之间要还多少：第一期用本期账单，之后几个月只算分期
+function duesBetween(a, from, to){
+  const cd = creditDue(a); let total = 0;
+  for (let k = 0; k < 3; k++) {
+    const d = ymd(dayOfMonth(cd.date.getFullYear(), cd.date.getMonth() + k, a.dueDay || 10));
+    if (d >= from && d < to) total += k === 0 ? cd.amt : cd.plans.filter(p => p.left > k).reduce((s, p) => s + p.per, 0);
+  }
+  return total;
 }
 function balanceInfo(){
   if (!S.accounts.length) return null;
-  const t = today(), st = S.settings;
-  const total = S.accounts.reduce((a, x) => a + x.bal, 0);
-  const owed = -S.accounts.filter(isCredit).reduce((a, x) => a + Math.min(0, x.bal), 0);
-  // 用「今天开始时」的余额来算每日额度，这样今天花钱不会让今天的额度跟着变
-  const spentToday = sum(S.records.filter(r => r.d === t && acctOf(r.acct)));
-  const avail = total + spentToday - st.reserve;
-  const next = nextIncome(), days = Math.max(1, dayDiff(t, ymd(next.date)));
-  return {total, owed, avail, availNow: total - st.reserve, next, days, perDay: Math.max(0, Math.floor(avail / days))};
+  const t = today(), st = S.settings, cash = S.accounts.filter(a => !isCredit(a)), credit = S.accounts.filter(isCredit);
+  const cashTotal = cash.reduce((s, a) => s + a.bal, 0), owed = credit.reduce((s, a) => s + Math.max(0, -a.bal), 0);
+  const next = nextIncome(), nd = ymd(next.date), days = Math.max(1, dayDiff(t, nd));
+  const bills = credit.map(a => ({a, ...creditDue(a)})).filter(b => b.amt > 0);
+  // 下次到账之前就要还的钱，先从余额里扣出来
+  const dueSoon = bills.filter(b => ymd(b.date) < nd).reduce((s, b) => s + b.amt, 0);
+  // 用「今天开始时」的余额来算每日额度，今天花钱不会让今天的额度跟着变
+  const spentToday = sum(S.records.filter(r => r.d === t && cash.some(a => a.id === r.acct)));
+  const avail = cashTotal + spentToday - st.reserve - dueSoon;
+  let cycle = null;
+  if (next.known && st.income.mode !== 'none' && st.income.amt) {
+    const end = nextIncome(nd), ed = ymd(end.date), dues = credit.reduce((s, a) => s + duesBetween(a, nd, ed), 0), len = Math.max(1, dayDiff(nd, ed));
+    cycle = {from: next.date, to: addDays(end.date, -1), len, dues, perDay: Math.max(0, Math.floor((st.income.amt - dues) / len))};
+  }
+  return {cashTotal, owed, total: cashTotal - owed, bills, dueSoon, avail, availNow: cashTotal - st.reserve - dueSoon, next, days, cycle,
+    perDay: Math.max(0, Math.floor(avail / days))};
 }
 
 // 根据「已花 / 预算」以及「这个周期已经过去了多少」判断状态，返回 'none' | 'ok' | 'warn' | 'over'
@@ -388,24 +464,103 @@ function streaks(){
 }
 const wishLeft = w => w.created + S.settings.cooldown * 3600e3 - Date.now();
 
+/* ---------- 抽烟 ---------- */
+function fmtDur(ms){ const m = Math.max(1, Math.round(ms / 60000)); return m < 60 ? `${m} 分钟` : `${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分` : ''}`; }
+function smokeInfo(){
+  const now = new Date(), t = today(), byDay = {};
+  S.smokes.forEach(ts => { const k = ymd(new Date(ts)); byDay[k] = (byDay[k] || 0) + 1; });
+  const first = S.smokes.length ? ymd(new Date(Math.min(...S.smokes))) : t, y = ymd(addDays(now, -1));
+  const past = [];
+  for (let i = 1; i <= 7; i++) { const d = ymd(addDays(now, -i)); if (d >= first) past.push(byDay[d] || 0); }
+  const avg7 = past.length ? past.reduce((a, b) => a + b, 0) / past.length : null;
+  // 自动目标：最近 7 天日均再少 1 根；手动设了就用手动的
+  const goal = S.settings.smokeGoal || (avg7 !== null ? Math.max(0, Math.ceil(avg7) - 1) : null);
+  const last = S.smokes.length ? Math.max(...S.smokes) : 0;
+  const ySame = S.smokes.filter(ts => ymd(new Date(ts)) === y && ts + 864e5 <= Date.now()).length;
+  const recent = S.smokes.filter(ts => ts > Date.now() - 7 * 864e5).sort((a, b) => a - b), gaps = [];
+  for (let i = 1; i < recent.length; i++) if (ymd(new Date(recent[i])) === ymd(new Date(recent[i - 1]))) gaps.push(recent[i] - recent[i - 1]);
+  const avgGap = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
+  let streak = 0;
+  if (goal !== null) for (let i = 1; i < 400; i++) { const d = ymd(addDays(now, -i)); if (d < first || (byDay[d] || 0) > goal) break; streak++; }
+  const per = S.settings.packPrice ? S.settings.packPrice / S.settings.packSize : 0, mk = monthKey(now);
+  const month = S.smokes.filter(ts => monthKey(new Date(ts)) === mk).length;
+  const n = byDay[t] || 0;
+  return {n, y: byDay[y] || 0, ySame, avg7, goal, last, avgGap, streak, per, month, monthCost: Math.round(month * per), byDay,
+    todayTs: S.smokes.filter(ts => ymd(new Date(ts)) === t).sort((a, b) => a - b),
+    lv: goal === null ? 'none' : n < goal ? 'ok' : n === goal ? 'warn' : 'over'};
+}
+function smokeMsg(si){
+  if (!S.smokes.length) return '每抽一根就点一下「+1 根」。先看清楚自己一天抽多少，再一点点往下减。';
+  const gap = Date.now() - si.last, parts = [];
+  parts.push(gap >= 3600e3 ? `已经 ${fmtDur(gap)} 没抽了${gap >= 6 * 3600e3 ? '，非常厉害 🏆' : gap >= 3 * 3600e3 ? '，继续保持 💪' : ''}` : `上一根在 ${fmtDur(gap)} 前`);
+  if (si.goal !== null) parts.push(si.n < si.goal ? `今天最多还能抽 ${si.goal - si.n} 根，能少就少` : si.n === si.goal ? '今天的量到了，后面忍一忍 🙏' : `超过目标 ${si.n - si.goal} 根了，后面一根都别再抽`);
+  if (si.ySame > si.n) parts.push(`比昨天这个时候少 ${si.ySame - si.n} 根 👍`);
+  if (si.avgGap && si.n && si.lv !== 'over') { const at = si.last + si.avgGap * 1.2; if (at > Date.now()) parts.push(`下一根试着等到 ${hm(new Date(at))} 以后`); }
+  return parts.join(' · ');
+}
+function smokeCard(){
+  const si = smokeInfo(), undo = si.last && Date.now() - si.last < 10 * 60e3 && si.n;
+  return `<div class="card lv-${si.lv}"><div class="split"><div><div class="muted">🚬 今天抽了</div>
+      <div class="num">${si.n} 根${si.goal !== null ? ` <span class="muted" style="font-size:15px;font-weight:400">/ 目标 ${si.goal} 根</span>` : ''}</div></div>
+      <button class="smokebtn" data-act="smoke">+1 根</button></div>
+    ${si.goal !== null ? `<div class="bar sm"><i style="width:${si.goal ? pct(si.n, si.goal) : si.n ? 100 : 0}%"></i></div>` : ''}
+    <div class="tip">${smokeMsg(si)}</div>
+    ${undo ? '<button class="link" data-act="smokeUndo">点错了，撤销刚才那根</button>' : ''}</div>`;
+}
+function smokeSection(){
+  const si = smokeInfo(), now = new Date(), vals = [], labels = [];
+  for (let i = 13; i >= 0; i--) { const d = addDays(now, -i); vals.push(si.byDay[ymd(d)] || 0); labels.push(i ? md(d) : '今天'); }
+  let h = `<div class="card"><div class="split"><b>🚬 抽烟记录</b><button class="smokebtn" data-act="smoke">+1 根</button></div>
+    <div class="stat3"><div><span class="muted">今天</span><b>${si.n} 根</b></div><div><span class="muted">昨天</span><b>${si.y} 根</b></div><div><span class="muted">近 7 天日均</span><b>${si.avg7 === null ? '—' : si.avg7.toFixed(1) + ' 根'}</b></div></div>
+    <div class="stat3" style="margin-top:8px"><div><span class="muted">每天目标</span><b>${si.goal === null ? '—' : si.goal + ' 根'}</b></div><div><span class="muted">连续没超标</span><b>${si.streak} 天</b></div><div><span class="muted">本月抽烟花了</span><b>${si.per ? fmt(si.monthCost) : '—'}</b></div></div>
+    ${S.smokes.length ? barChart(vals, labels, si.goal || 0, v => v + ' 根', '目标') : ''}
+    ${si.todayTs.length ? `<p class="muted xs">今天的时间：${si.todayTs.map(ts => hm(new Date(ts))).join('、')}</p>` : ''}
+    <div class="tip lv-${si.lv}">${smokeMsg(si)}</div>`;
+  if (si.goal && si.streak >= 7) h += `<div class="warnline lv-ok">🎉 已经连续 ${si.streak} 天没超过 ${si.goal} 根了！要不要把目标降到 ${si.goal - 1} 根？
+    <button class="btn2 sm" data-act="smokeGoalSet" data-v="${si.goal - 1}">降到 ${si.goal - 1} 根</button></div>`;
+  h += si.per ? `<p class="muted">每天少抽 1 根，一个月能省 ${fmt(Math.round(si.per * 30))}，一年省 ${fmt(Math.round(si.per * 365))}。</p>`
+    : '<p class="muted xs">在设置里填一包烟多少钱，就能看到抽烟一共花了多少。</p>';
+  return h + '</div>';
+}
+
 function balanceCard(){
   const bi = balanceInfo();
-  if (!bi) return `<div class="card"><b>💰 我的余额</b><p class="muted">填上微信和支付宝里现在有多少钱。之后每记一笔都会从对应账户扣掉，并告诉你这些钱每天最多能花多少。</p>
+  if (!bi) return `<div class="card"><b>💰 我的余额</b><p class="muted">填上微信和支付宝里现在有多少钱。之后每记一笔都会从对应账户扣掉，并按「离下次生活费到账还有几天」告诉你每天最多能花多少。</p>
     <div class="form2"><label>💚 微信余额<input id="bWx" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label>
-    <label>🔷 支付宝余额<input id="bAli" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label>
-    <label>🧾 花呗待还（没有就空着）<input id="bHb" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label></div>
-    <button class="btn wide" data-act="balSetup">开始用余额管钱</button><p class="muted xs">银行卡、现金、校园卡可以之后在设置里添加。</p></div>`;
+    <label>🔷 支付宝余额<input id="bAli" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label></div>
+    <button class="btn wide" data-act="balSetup">开始用余额管钱</button><p class="muted xs">花呗、京东白条的分期，以及生活费周期，在设置里添加。</p></div>`;
   const st = S.settings, lowLv = bi.availNow <= 0 ? 'over' : bi.availNow < st.lowBal ? 'warn' : '';
   const set = st.daily || (st.monthly ? Math.floor(st.monthly / daysIn(new Date())) : 0);
-  return `<div class="card"><div class="split"><div><div class="muted">余额合计${st.reserve ? `（已留出 ${fmt(st.reserve)} 不动）` : ''}</div>
-      <div class="big2 ${bi.total < 0 ? 'red' : ''}">${fmt(bi.total)}</div></div>
-      ${bi.owed ? `<div class="right"><div class="muted">花呗/信用卡待还</div><b class="red">${fmt(bi.owed)}</b></div>` : ''}</div>
-    <div class="acctrow">${S.accounts.map(a => `<button class="acct" data-act="fix" data-v="${a.id}"><span class="muted">${a.emoji} ${esc(a.name)}</span><b class="${isCredit(a) && a.bal < 0 || a.bal < 0 ? 'red' : ''}">${acctBalText(a)}</b></button>`).join('')}</div>
-    <p>距离${bi.next.known ? ` ${md(bi.next.date)} 到账` : '月底'}还有 <b>${bi.days}</b> 天，按余额每天最多花 <b>${fmt(bi.perDay)}</b>。</p>
-    ${lowLv ? `<div class="warnline lv-${lowLv}">${bi.availNow <= 0 ? `🛑 能动用的钱已经花完了${bi.owed ? '，还欠着花呗' : ''}，接下来只能花必要的钱。` : `⚠️ 能动用的余额只剩 ${fmt(bi.availNow)}，请只花必要的钱。`}</div>` : ''}
+  const cash = S.accounts.filter(a => !isCredit(a)), credit = S.accounts.filter(isCredit);
+  const nextTxt = bi.next.known ? `${md(bi.next.date)} 生活费到账` : '月底';
+  let h = `<div class="card"><div class="split"><div><div class="muted">现在手里的钱${st.reserve ? `（含留着不动的 ${fmt(st.reserve)}）` : ''}</div>
+      <div class="big2 ${bi.cashTotal < 0 ? 'red' : ''}">${fmt(bi.cashTotal)}</div></div>
+      ${bi.owed ? `<div class="right"><div class="muted">分期/欠款共</div><b class="red">${fmt(bi.owed)}</b></div>` : ''}</div>
+    <div class="acctrow">${cash.map(a => `<button class="acct" data-act="fix" data-v="${a.id}"><span class="muted">${a.emoji} ${esc(a.name)}</span><b class="${a.bal < 0 ? 'red' : ''}">${fmt(a.bal)}</b></button>`).join('')}</div>
+    <div class="calc"><div class="split"><span>离 ${nextTxt}</span><b>还有 ${bi.days} 天</b></div>
+      ${bi.dueSoon ? `<div class="split"><span>到账前要还</span><b class="red">−${fmt(bi.dueSoon)}</b></div>` : ''}
+      ${st.reserve ? `<div class="split"><span>留着不动</span><b>−${fmt(st.reserve)}</b></div>` : ''}
+      <div class="split big-line"><span>每天最多花</span><b>${fmt(bi.perDay)}</b></div>
+      <div class="muted xs">（余额${bi.dueSoon ? ' − 要还的' : ''}${st.reserve ? ' − 留着的' : ''}）÷ ${bi.days} 天${bi.next.known ? '' : '。在设置里填生活费周期，会算得更准'}</div></div>
+    ${bi.cycle ? `<p class="muted">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：生活费 ${fmt(st.income.amt)}${bi.cycle.dues ? ` − 期间要还 ${fmt(bi.cycle.dues)}` : ''}，平均每天约 <b>${fmt(bi.cycle.perDay)}</b>。</p>` : ''}
+    ${lowLv ? `<div class="warnline lv-${lowLv}">${bi.availNow <= 0 ? `🛑 扣掉要还的钱，手里已经没有能花的了，${bi.next.known ? `撑到 ${md(bi.next.date)}` : '接下来'}只能花必要的钱。` : `⚠️ 扣掉要还的钱，能动用的只剩 ${fmt(bi.availNow)}，请只花必要的钱。`}</div>` : ''}
     ${set && bi.perDay < set ? `<div class="warnline lv-warn">你的日预算 ${fmt(set)} 比余额撑得住的 ${fmt(bi.perDay)} 高，${st.balanceGuard ? '今天已按余额收紧' : '照这样花撑不到下次到账'}。</div>` : ''}
-    <div class="btnrow"><button class="btn2" data-act="flow" data-v="in">＋ 记收入</button><button class="btn2" data-act="flow" data-v="move">⇄ 转账 / 还款</button></div>
+    <div class="btnrow"><button class="btn2" data-act="flow" data-v="in">＋ 记收入</button><button class="btn2" data-act="flow" data-v="move">⇄ 转账</button></div>
     <p class="muted xs">点账户可以校准成 App 里显示的真实余额。</p></div>`;
+  if (credit.length) {
+    const monthly = credit.reduce((s, a) => s + creditDue(a).inst, 0), months = credit.reduce((m, a) => Math.max(m, creditDue(a).months), 0);
+    h += `<div class="card"><div class="split"><b>💳 分期与还款</b><span class="muted">共欠 ${fmt(bi.owed)}</span></div>
+      ${monthly ? `<p class="muted">分期每月固定要还 ${fmt(monthly)}，最长还要还 ${months} 个月。</p>` : ''}
+      ${credit.map(a => { const cd = creditDue(a), soon = ymd(cd.date) < ymd(bi.next.date);
+        return `<div class="bill ${cd.overdue && cd.amt ? 'lv-over' : soon && cd.amt ? 'lv-warn' : 'lv-none'}">
+          <div class="split"><b>${a.emoji} ${esc(a.name)}</b><span>${cd.amt ? `${md(cd.date)} 应还 <b class="${cd.overdue ? 'red' : ''}">${fmt(cd.amt)}</b>` : '<span class="green">本期不用还</span>'}</span></div>
+          ${cd.overdue && cd.amt ? '<div class="red xs">⚠️ 已经过了还款日，尽快还，避免逾期影响信用</div>' : soon && cd.amt ? `<div class="muted xs">在 ${md(bi.next.date)} 到账之前，已从每天能花的钱里预留</div>` : ''}
+          ${cd.plans.map(p => `<div class="split muted xs"><span>· ${esc(p.name)}</span><span>${fmt(p.per)}/期 · 还剩 ${p.left} 期</span></div>`).join('')}
+          ${cd.other ? `<div class="split muted xs"><span>· 没分期的消费</span><span>${fmt(cd.other)}</span></div>` : ''}
+          <div class="split" style="margin-top:6px"><span class="muted xs">总共还欠 ${fmt(cd.owed)}</span>${cd.amt ? `<button class="btn2 sm" data-act="bill" data-v="${a.id}">还这期</button>` : ''}</div></div>`; }).join('')}
+      <p class="muted xs">在设置 →「花呗 / 白条 / 分期」里添加或修改分期。</p></div>`;
+  }
+  return h;
 }
 function renderHome(){
   const now = new Date(), t = today(), b = budgets(true);
@@ -427,6 +582,7 @@ function renderHome(){
     <div class="tip">${tips[lv]}</div>
     ${b.daily ? '' : `<div class="setup"><input id="quickBudget" type="number" inputmode="decimal" enterkeyhint="done" placeholder="每月预算，例如 1500"><button class="btn" data-act="quickBudget">设好了</button></div>`}</div>`;
   h += balanceCard();
+  if (S.settings.smokeOn) h += smokeCard();
   const lastB = S.settings.lastBackup, ref = lastB || S.records.reduce((m, r) => Math.min(m, r.ts || m), Date.now());
   if (S.records.length >= 10 && Date.now() - ref > 30 * 864e5)
     h += `<div class="card notice" data-act="backup">📦 ${lastB ? `距离上次备份已经 ${Math.floor((Date.now() - lastB) / 864e5)} 天` : '记录只存在这台手机上，还没有备份过'}，点这里备份一份到「文件」→</div>`;
@@ -483,17 +639,17 @@ function period(kind, off){
   else { e = addDays(n, off*30); s = addDays(e, -29); label = off === 0 ? '近30天' : `${md(s)} – ${md(e)}`; }
   return {s, e, from: ymd(s), to: ymd(e), label};
 }
-function barChart(vals, labels, line){
+function barChart(vals, labels, line, f = fmt, lineName = '预算'){
   const W = 340, H = 150, top = 14, bot = 18, n = vals.length, max = Math.max(line || 0, ...vals, 1), bw = W / n, every = Math.ceil(n / 8);
   const y = v => H - bot - v / max * (H - top - bot);
   let g = '';
   vals.forEach((v, i) => {
     const x = i * bw, h = H - bot - y(v);
     if (v) g += `<rect x="${x + bw*.18}" y="${y(v)}" width="${bw*.64}" height="${Math.max(h, 1)}" rx="${Math.min(3, bw*.2)}" class="${line && v > line ? 'b1' : 'b0'}"/>`;
-    g += `<rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent" data-act="tip" data-v="${labels[i]}：${fmt(v)}"/>`;
+    g += `<rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent" data-act="tip" data-v="${labels[i]}：${f(v)}"/>`;
     if (i % every === 0) g += `<text x="${i ? x + bw/2 : 1}" y="${H - 4}" class="ax"${i ? '' : ' style="text-anchor:start"'}>${labels[i]}</text>`;
   });
-  if (line) g += `<line x1="0" x2="${W}" y1="${y(line)}" y2="${y(line)}" class="bl"/><text x="${W - 2}" y="${y(line) - 3}" class="ax" style="text-anchor:end">预算 ${fmt(line)}</text>`;
+  if (line) g += `<line x1="0" x2="${W}" y1="${y(line)}" y2="${y(line)}" class="bl"/><text x="${W - 2}" y="${y(line) - 3}" class="ax" style="text-anchor:end">${lineName} ${f(line)}</text>`;
   return `<svg class="chart" viewBox="0 0 ${W} ${H}">${g}</svg>`;
 }
 function donut(items, total){
@@ -568,7 +724,7 @@ function renderRestraint(){
   const waiting = S.wishes.filter(w => w.status === 'wait').sort((a, b) => a.created - b.created);
   const done = S.wishes.filter(w => w.status !== 'wait').sort((a, b) => b.decided - a.decided).slice(0, 8);
   const mRs = inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t), mSum = sum(mRs), want = sum(mRs.filter(r => r.need === 'want'));
-  let h = `<header class="top"><h1>克制</h1></header>
+  let h = `<header class="top"><h1>克制</h1></header>${S.settings.smokeOn ? smokeSection() : ''}
     <div class="card"><div class="muted">靠冷静期忍住没买，一共省下</div><div class="big green">${fmt(savedSum)}</div><div class="muted">忍住了 ${saved.length} 次</div></div>
     <div class="card"><b>🧊 冷静清单</b><p class="muted">想买但还没付钱的东西先放这里，等 ${S.settings.cooldown} 小时后还想要再买。大多数冲动会自己消失。</p>
     <div class="wishform"><input id="wName" placeholder="想买什么" maxlength="30"><input id="wPrice" type="number" inputmode="decimal" placeholder="价格"><button class="btn" data-act="wishAdd">放进去</button></div>
@@ -705,9 +861,19 @@ function flowRow(f){
     <b class="${f.kind === 'in' ? 'green' : ''}">${amt}</b><button class="link danger" data-act="flowDel" data-v="${f.id}">×</button></div>`;
 }
 function renderFlow(){
-  const m = flowMode, a = acctOf(fixAcct), title = {in:'记收入', move:'转账 / 还款', fix:`校准${a ? a.name : ''}`}[m];
+  const m = flowMode, a = acctOf(fixAcct), title = {in:'记收入', move:'转账 / 还款', fix:`校准${a ? a.name : ''}`, bill:`还${a ? a.name : ''}`}[m];
   let body = '';
-  if (m === 'fix') {
+  if (m === 'bill') {
+    const cd = creditDue(a), cash = S.accounts.filter(x => !isCredit(x));
+    body = `<p>${md(cd.date)} 应还 <b>${fmt(cd.amt)}</b>${cd.overdue ? ' <span class="red">已过还款日</span>' : ''}</p>
+      <div class="card" style="padding:8px 14px">${cd.plans.map(p => `<div class="split muted"><span>${esc(p.name)}（还剩 ${p.left} 期）</span><span>${fmt(p.per)}</span></div>`).join('')}
+        ${cd.other ? `<div class="split muted"><span>没分期的消费</span><span>${fmt(cd.other)}</span></div>` : ''}</div>
+      <div class="form"><label>还多少<input id="fAmt" type="number" inputmode="decimal" enterkeyhint="done" value="${cd.amt / 100}"></label>
+      <label>用哪个账户的钱还<select id="fFrom">${acctOpts(cash[0]?.id, cash)}</select></label>
+      <label>日期<input id="fDate" type="date" value="${today()}" max="${today()}"></label>
+      <button class="btn wide" data-act="billSave">确认已还款</button>
+      <p class="muted xs">按应还金额全额还时，每个分期自动减少一期；少还的话只减少欠款，分期期数不变。</p></div>`;
+  } else if (m === 'fix') {
     const cr = isCredit(a);
     body = `<p class="muted">打开${esc(a.name)}看一眼${cr ? '现在欠多少（待还金额）' : '现在的真实余额'}，照着填进来。</p>
       <div class="form"><label>记录里的${cr ? '待还' : '余额'}<input disabled value="${cr ? yuan(Math.max(0, -a.bal)) : yuan(a.bal)}"></label>
@@ -756,6 +922,25 @@ async function saveFix(){
 }
 function undoFlow(f){
   if (f.kind === 'move') { adjust(f.acct, f.amt); adjust(f.to, -f.amt); } else adjust(f.acct, -f.amt);
+  if (f.bill) { // 撤销「还这期」：分期期数加回去，还款月份恢复
+    f.bill.plans.forEach(id => { const p = S.plans.find(x => x.id === id); if (p) p.left++; });
+    const a = acctOf(f.to); if (a) a.paidMonth = f.bill.prevPaid;
+  }
+}
+function saveBill(){
+  const a = acctOf(fixAcct), cd = creditDue(a), amt = toCents($('#fAmt').value), from = $('#fFrom').value;
+  if (amt <= 0) return toast('先填金额', 'warn');
+  if (!acctOf(from)) return toast('先在设置里添加微信或支付宝账户', 'warn');
+  const f = {id:uid(), kind:'move', amt, acct:from, to:a.id, note:`还${a.name}`, d:$('#fDate').value || today(), tm:hm(new Date()), ts:Date.now()};
+  const full = amt >= cd.amt;
+  if (full) {
+    f.note += `（${cd.date.getMonth() + 1}月账单）`;
+    f.bill = {plans: cd.plans.map(p => p.id), prevPaid: a.paidMonth || ''};
+    cd.plans.forEach(p => p.left--); a.paidMonth = monthKey(cd.date);
+  }
+  adjust(from, -amt); adjust(a.id, amt);
+  S.flows.push(f); save(); closeSheet('flowSheet'); refresh();
+  toast(full ? `已还 ${fmt(amt)}，${a.name}还欠 ${fmt(Math.max(0, -a.bal))}` : `已还 ${fmt(amt)}，本期还差 ${fmt(cd.amt - amt)}`, full ? 'ok' : 'warn');
 }
 
 /* ---------- 设置 ---------- */
@@ -763,19 +948,41 @@ function field(label, k){
   return `<label class="fld"><span>${label}</span><input type="number" inputmode="decimal" placeholder="未设置" data-set="${k}" value="${S.settings[k] ? S.settings[k] / 100 : ''}"></label>`;
 }
 function renderSettings(){
-  const st = S.settings, catOpts = S.cats.map(c => `<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
+  const st = S.settings, inc = st.income, catOpts = S.cats.map(c => `<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
   $('#setSheet').innerHTML = `<div class="sheet-top"><div class="grab"></div>
     <div class="sheet-h"><span style="width:40px"></span><b>设置</b><button class="link" data-act="close" data-v="setSheet"><b>完成</b></button></div></div>
     <h4>预算（元）</h4><div class="group">${field('每日预算', 'daily')}${field('每周预算', 'weekly')}${field('每月预算', 'monthly')}</div>
     <p class="note">只填月预算也行：每日 = 月预算 ÷ 当月天数，每周 = 每日 × 7。建议先按过去一个月的实际花费打个八折来定。</p>
-    <h4>账户与余额</h4><div class="group">${S.accounts.map(a => `<div class="fld"><span>${a.emoji} ${esc(a.name)}<br><span class="muted xs">${isCredit(a) ? '花呗 / 信用卡' : '余额账户'}</span></span><span>${acctBalText(a)}</span>
+    <h4>生活费</h4><div class="group">
+      <label class="fld"><span>多久发一次</span><select data-inc="mode"><option value="none" ${inc.mode === 'none' ? 'selected' : ''}>不固定</option><option value="interval" ${inc.mode === 'interval' ? 'selected' : ''}>每隔几天</option><option value="month" ${inc.mode === 'month' ? 'selected' : ''}>每月固定几号</option></select></label>
+      ${inc.mode === 'interval' ? `<label class="fld"><span>每隔几天发一次</span><input type="number" inputmode="numeric" data-inc="every" value="${inc.every || ''}" placeholder="15"></label>
+        <label class="fld"><span>上一次是哪天发的</span><input type="date" data-inc="last" value="${inc.last}" max="${today()}"></label>` : ''}
+      ${inc.mode === 'month' ? `<label class="fld"><span>每月几号</span><input type="number" inputmode="numeric" data-inc="day" value="${inc.day || ''}"></label>` : ''}
+      ${inc.mode === 'none' ? '' : `<label class="fld"><span>每次发多少（元）</span><input type="number" inputmode="decimal" data-inc="amt" value="${inc.amt ? inc.amt / 100 : ''}" placeholder="可不填"></label>
+        ${S.accounts.some(a => !isCredit(a)) ? `<label class="fld"><span>发到哪个账户</span><select data-inc="acct"><option value="">不自动记</option>${acctOpts(inc.acct, S.accounts.filter(a => !isCredit(a)))}</select></label>
+        <div class="fld"><span>到账那天自动记一笔收入</span><input type="checkbox" class="switch" data-inc="auto" ${inc.auto ? 'checked' : ''}></div>` : ''}`}</div>
+    <p class="note">${inc.mode === 'none' ? '设好之后，「每天最多花多少」会按离下次发生活费的天数来算，而不是到月底。' : nextAllowance(today()) ? `下次发生活费：<b>${md(nextAllowance(today()))}</b>，还有 ${dayDiff(today(), ymd(nextAllowance(today())))} 天。` : '把上面的信息填完整就能算出下次哪天发。'}</p>
+    <h4>账户余额</h4><div class="group">${S.accounts.filter(a => !isCredit(a)).map(a => `<div class="fld"><span>${a.emoji} ${esc(a.name)}</span><span>${fmt(a.bal)}</span>
         <button class="link" data-act="fix" data-v="${a.id}">校准</button><button class="link danger" data-act="acctDel" data-v="${a.id}">删除</button></div>`).join('')}
-      <div class="addrow"><input id="aEmoji" placeholder="图标💳" maxlength="4" style="flex:0 0 80px"><input id="aName" placeholder="名称，如 银行卡" maxlength="8">
-        <select id="aType"><option value="cash">余额账户</option><option value="credit">花呗 / 信用卡</option></select><input id="aBal" type="number" inputmode="decimal" placeholder="余额 / 待还"><button class="btn" data-act="acctAdd">添加</button></div>
-      ${field('保留不动的钱（元）', 'reserve')}${field('余额提醒线（元）', 'lowBal')}
-      <label class="fld"><span>生活费每月几号到账</span><input type="number" inputmode="numeric" placeholder="未设置" data-set="payday" value="${st.payday || ''}"></label>
+      <div class="addrow"><input id="aEmoji" placeholder="图标💳" maxlength="4" style="flex:0 0 80px"><input id="aName" placeholder="名称，如 银行卡 / 饭卡" maxlength="8"><input id="aBal" type="number" inputmode="decimal" placeholder="现在余额"><button class="btn" data-act="acctAdd" data-v="cash">添加</button></div>
+      ${field('留着不动的钱（元）', 'reserve')}${field('余额提醒线（元）', 'lowBal')}
       <div class="fld"><span>余额不够时，自动收紧日预算</span><input type="checkbox" class="switch" id="guardT" ${st.balanceGuard ? 'checked' : ''}></div></div>
-    <p class="note">每天能花多少 =（余额 − 保留不动的钱）÷ 离下次到账的天数。花呗欠款会从余额里扣掉，因为迟早要还。没设到账日就按月底算。</p>
+    <p class="note">每天最多花 =（手里的钱 − 下次生活费到账前要还的分期 − 留着不动的钱）÷ 离到账的天数。</p>
+    <h4>花呗 / 白条 / 分期</h4><div class="group">${S.accounts.filter(isCredit).map(a => { const cd = creditDue(a);
+        return `<div class="fld"><span>${a.emoji} ${esc(a.name)}<br><span class="muted xs">共欠 ${fmt(cd.owed)}，下期 ${md(cd.date)} 还 ${fmt(cd.amt)}</span></span>
+          <label class="muted xs" style="display:grid;gap:2px;text-align:right">还款日<input type="number" inputmode="numeric" data-due="${a.id}" value="${a.dueDay || 10}" style="max-width:64px"></label>
+          <button class="link" data-act="fix" data-v="${a.id}">校准</button><button class="link danger" data-act="acctDel" data-v="${a.id}">删除</button></div>
+          ${cd.plans.map(p => `<div class="fld sub"><span>└ ${esc(p.name)}</span><span>${fmt(p.per)}/期 · 剩 ${p.left} 期</span><button class="link danger" data-act="planDel" data-v="${p.id}">删除</button></div>`).join('')}`; }).join('')}
+      ${S.accounts.some(isCredit) ? `<div class="addrow"><span class="muted xs" style="flex-basis:100%">添加一笔分期（在花呗/白条 App 的分期账单里能看到每期金额和剩余期数）</span>
+        <select id="pAcct">${acctOpts('', S.accounts.filter(isCredit))}</select><input id="pName" placeholder="买的什么，如 手机" maxlength="12"><input id="pPer" type="number" inputmode="decimal" placeholder="每期还多少"><input id="pLeft" type="number" inputmode="numeric" placeholder="还剩几期"><button class="btn" data-act="planAdd">添加分期</button></div>` : ''}
+      <div class="addrow"><span class="muted xs" style="flex-basis:100%">添加平台</span>${[['花呗','🧾'],['京东白条','🐶'],['信用卡','💳'],['抖音月付','🎵']].filter(([n]) => !S.accounts.some(a => a.name === n)).map(([n, e]) => `<button class="chip" data-act="creditPreset" data-v="${n}|${e}">＋ ${e} ${n}</button>`).join('')}</div></div>
+    <p class="note">分期每期的钱会在还款日前自动从「每天能花」里预留。还了钱就点首页的「还这期」，剩余期数会自动减一。</p>
+    <h4>抽烟记录</h4><div class="group">
+      <div class="fld"><span>在首页显示抽烟卡片</span><input type="checkbox" class="switch" id="smokeT" ${st.smokeOn ? 'checked' : ''}></div>
+      <label class="fld"><span>每天最多几根（空着 = 自动）</span><input type="number" inputmode="numeric" data-set="smokeGoal" value="${st.smokeGoal || ''}" placeholder="自动"></label>
+      ${field('一包烟多少钱（元）', 'packPrice')}
+      <label class="fld"><span>一包几根</span><input type="number" inputmode="numeric" data-set="packSize" value="${st.packSize}"></label></div>
+    <p class="note">自动目标 = 最近 7 天平均每天抽的根数再少 1 根，抽得越少目标越低，一点点往下减。</p>
     <h4>克制</h4><div class="group">${field('大额提醒线（单笔，元）', 'big')}
       <label class="fld"><span>冷静期（小时）</span><input type="number" inputmode="numeric" data-set="cooldown" value="${st.cooldown}"></label></div>
     <p class="note">单笔达到提醒线时会弹窗，让你选择先放进冷静清单。</p>
@@ -859,7 +1066,11 @@ function dailyReview(){
     msg += `\n${pm.getMonth() + 1}月一共花了 ${fmt(ls)}${mb ? (ls > mb ? `，超出月预算 ${fmt(ls - mb)}` : '，守住了月预算 🎉') : ''}`;
   }
   const bi = balanceInfo();
-  if (bi) msg += `\n现在余额 ${fmt(bi.total)}，离${bi.next.known ? '下次到账' : '月底'}还有 ${bi.days} 天，今天最多花 ${fmt(bi.perDay)}`;
+  if (bi) msg += `\n手里还有 ${fmt(bi.cashTotal)}${bi.dueSoon ? `（到账前要还 ${fmt(bi.dueSoon)}）` : ''}，离${bi.next.known ? '下次生活费' : '月底'}还有 ${bi.days} 天，今天最多花 ${fmt(bi.perDay)}`;
+  if (S.settings.smokeOn && S.smokes.length) {
+    const si = smokeInfo(), ys = si.byDay[y] || 0, yy = si.byDay[ymd(addDays(new Date(), -2))] || 0;
+    msg += `\n昨天抽了 ${ys} 根烟${ys < yy ? `，比前天少 ${yy - ys} 根，很棒 👏` : ys > yy ? `，比前天多 ${ys - yy} 根，今天争取少一点` : ''}`;
+  }
   ask('📒 昨日回顾', msg, [{t:'知道了', v:1, primary:true}]);
 }
 
@@ -978,28 +1189,75 @@ const actions = {
     undoFlow(f); S.flows = S.flows.filter(x => x.id !== id); save(); renderFlow(); refresh(); toast('已删除');
   },
   balSetup: () => {
-    const v = id => $(id).value.trim(), wx = v('#bWx'), ali = v('#bAli'), hb = v('#bHb');
+    const v = id => $(id).value.trim(), wx = v('#bWx'), ali = v('#bAli');
     if (!wx && !ali) return toast('至少填一个余额，没有就填 0', 'warn');
     if (wx) S.accounts.push({id:'wx', name:'微信', emoji:'💚', type:'cash', bal:toCents(wx)});
     if (ali) S.accounts.push({id:'ali', name:'支付宝', emoji:'🔷', type:'cash', bal:toCents(ali)});
-    if (hb) S.accounts.push({id:'hb', name:'花呗', emoji:'🧾', type:'credit', bal:-toCents(hb)});
     S.lastAcct = S.accounts[0].id; save(); render();
-    const bi = balanceInfo();
-    toast(`设好了！按余额，每天最多花 ${fmt(bi.perDay)}`, 'ok');
+    toast(`设好了！别忘了在设置里填生活费周期`, 'ok');
   },
   acctAdd: () => {
-    const name = $('#aName').value.trim(), type = $('#aType').value, v = toCents($('#aBal').value);
+    const name = $('#aName').value.trim(), v = toCents($('#aBal').value);
     if (!name) return toast('填上账户名称', 'warn');
-    S.accounts.push({id:'a' + uid(), name, emoji:$('#aEmoji').value.trim() || (type === 'credit' ? '🧾' : '💳'), type, bal:type === 'credit' ? -Math.abs(v) : v});
+    S.accounts.push({id:'a' + uid(), name, emoji:$('#aEmoji').value.trim() || '💳', type:'cash', bal:v});
     save(); refresh(); toast(`已添加${name}`);
   },
+  creditPreset: v => {
+    const [name, emoji] = v.split('|');
+    S.accounts.push({id:'c' + uid(), name, emoji, type:'credit', bal:0, dueDay:10, paidMonth:''});
+    save(); refresh(); toast(`已添加${name}，接着在上面添加它的分期，再核对一下还款日`, 'ok');
+  },
+  planAdd: async () => {
+    const acct = $('#pAcct').value, name = $('#pName').value.trim() || '分期', per = toCents($('#pPer').value), left = parseInt($('#pLeft').value);
+    if (per <= 0 || !(left >= 1 && left <= 60)) return toast('填上每期金额和剩余期数（1-60）', 'warn');
+    const a = acctOf(acct), cd = creditDue(a), add = per * left;
+    // 如果之前校准过一个总欠款，这笔分期可能已经包含在里面了，问一下避免重复
+    let mode = 'add';
+    if (cd.other >= add) {
+      mode = await ask('这笔分期已经算在欠款里了吗？', `「${name}」还剩 ${left} 期，共 ${fmt(add)}。\n${a.name}现在记录的欠款里，有 ${fmt(cd.other)} 还没分到具体分期。`,
+        [{t:'已经算在里面了', v:'in', primary:true}, {t:'没有，加到欠款里', v:'add'}, {t:'取消', v:null}]);
+      if (!mode) return;
+    }
+    if (mode === 'add') adjust(acct, -add);
+    S.plans.push({id:uid(), acct, name, per, left}); save(); refresh();
+    toast(`已添加：${name} ${fmt(per)}/期，还剩 ${left} 期`, 'ok');
+  },
+  planDel: async id => {
+    const p = S.plans.find(x => x.id === id);
+    const c = await ask(`删除「${p.name}」？`, `还剩 ${p.left} 期，共 ${fmt(p.per * p.left)}。`,
+      [{t:'已经提前还清了（欠款一起减掉）', v:'paid', primary:true}, {t:'只删除这条分期', v:'only'}, {t:'取消', v:null}]);
+    if (!c) return;
+    if (c === 'paid') adjust(p.acct, p.per * p.left);
+    S.plans = S.plans.filter(x => x.id !== id); save(); refresh();
+  },
+  bill: id => openFlow('bill', id),
+  billSave: saveBill,
   acctDel: async id => {
     const a = acctOf(id);
-    if (!await ask(`删除「${a.name}」？`, '它的余额不再算进合计。已经记过的账不会被删除。', [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
+    if (!await ask(`删除「${a.name}」？`, `${isCredit(a) ? '它的欠款和分期' : '它的余额'}不再算进来。已经记过的账不会被删除。`, [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
     S.accounts = S.accounts.filter(x => x.id !== id);
+    S.plans = S.plans.filter(p => p.acct !== id);
     S.recurring.forEach(r => { if (r.acct === id) r.acct = ''; });
+    if (S.settings.income.acct === id) S.settings.income.acct = '';
     save(); refresh();
   },
+  smoke: () => {
+    const prev = S.smokes.length ? Math.max(...S.smokes) : 0, now = Date.now();
+    const before = smokeInfo(); // 加这一根之前的平均间隔，用来判断这次忍得够不够久
+    S.smokes.push(now); save(); render();
+    const si = smokeInfo(), gap = prev ? now - prev : 0;
+    let msg = `今天第 ${si.n} 根`;
+    if (si.goal !== null && si.n > si.goal) msg += '，已经超过目标了。下一根试着再推迟 30 分钟？';
+    else if (si.goal !== null && si.n === si.goal) msg += '，今天的目标量到了，后面就别抽了 💪';
+    else if (si.ySame > si.n) msg += `，比昨天这个时候少 ${si.ySame - si.n} 根 👍`;
+    if (gap && before.avgGap && gap > before.avgGap * 1.2) msg += `。这次忍了 ${fmtDur(gap)}，比平时久 👏`;
+    toast(msg, si.lv === 'none' ? 'none' : si.lv);
+  },
+  smokeUndo: () => {
+    const last = Math.max(...S.smokes);
+    S.smokes = S.smokes.filter(ts => ts !== last); save(); render(); toast('已撤销');
+  },
+  smokeGoalSet: v => { S.settings.smokeGoal = Math.max(0, +v); save(); render(); toast(`目标改成每天最多 ${v} 根，加油 💪`, 'ok'); },
   restore: () => $('#fileIn').click(),
   reset: async () => {
     if (!await ask('清空所有数据？', '所有记录、预算、清单都会被删除，没有备份就找不回来。', [{t:'全部清空', v:1, danger:true}, {t:'取消', v:0}])) return;
@@ -1020,16 +1278,27 @@ document.addEventListener('change', e => {
   const el = e.target;
   if (el.dataset.set) {
     const k = el.dataset.set;
-    S.settings[k] = k === 'cooldown' ? Math.max(0, parseInt(el.value) || 0)
-      : k === 'payday' ? Math.min(31, Math.max(0, parseInt(el.value) || 0))
+    S.settings[k] = ['cooldown', 'smokeGoal'].includes(k) ? Math.max(0, parseInt(el.value) || 0)
+      : k === 'packSize' ? Math.max(1, parseInt(el.value) || 20)
       : Math.max(0, toCents(el.value));
     save(); render();
+  } else if (el.dataset.inc) {
+    const k = el.dataset.inc, inc = S.settings.income;
+    inc[k] = k === 'auto' ? el.checked : k === 'amt' ? Math.max(0, toCents(el.value))
+      : ['day', 'every'].includes(k) ? Math.min(k === 'day' ? 31 : 90, Math.max(0, parseInt(el.value) || 0)) : el.value;
+    // 改了周期就从今天开始自动记，今天以前的到账已经在你填的余额里了
+    if (['mode', 'day', 'every', 'last', 'acct', 'auto'].includes(k)) inc.genUntil = today();
+    save(); renderSettings(); render();
+  } else if (el.dataset.due) {
+    const a = acctOf(el.dataset.due); a.dueDay = Math.min(31, Math.max(1, parseInt(el.value) || 10));
+    save(); renderSettings(); render();
   } else if (el.dataset.cb) {
     const v = toCents(el.value);
     if (v > 0) S.settings.catBudgets[el.dataset.cb] = v; else delete S.settings.catBudgets[el.dataset.cb];
     save(); render();
   } else if (el.id === 'badgeT') toggleBadge(el.checked);
   else if (el.id === 'guardT') { S.settings.balanceGuard = el.checked; save(); render(); }
+  else if (el.id === 'smokeT') { S.settings.smokeOn = el.checked; save(); render(); }
   else if (el.id === 'fileIn' && el.files[0]) { importFile(el.files[0]); el.value = ''; }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
@@ -1053,10 +1322,11 @@ const endDrag = () => {
 document.addEventListener('touchend', endDrag);
 document.addEventListener('touchcancel', endDrag);
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') { runRecurring(); render(); dailyReview(); }
+  if (document.visibilityState === 'visible') { runRecurring(); runIncome(); render(); dailyReview(); }
 });
 
 runRecurring();
+runIncome();
 go('home');
 dailyReview();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js', {scope: '/'});
