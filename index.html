@@ -116,10 +116,17 @@ nav.tabs .add{flex:none;width:54px;height:54px;border-radius:50%;background:var(
 nav.tabs .add svg{width:28px;height:28px}
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.38);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
 .mask.on{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;max-height:94vh;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);z-index:21;padding:6px 16px calc(14px + env(safe-area-inset-bottom))}
+/* 弹层顶部必须避开状态栏/灵动岛：iOS 会吞掉状态栏区域的点击（用来"回到顶部"） */
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;max-height:90vh;max-height:calc(100dvh - env(safe-area-inset-top) - 12px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--bg);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);z-index:21;padding:0 16px calc(14px + env(safe-area-inset-bottom))}
 .sheet.on{transform:none}
+.sheet-top{position:sticky;top:0;z-index:2;background:var(--bg);margin:0 -16px 4px;padding:6px 16px 2px;touch-action:none}
 .grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 4px}
-.sheet-h{display:flex;justify-content:space-between;align-items:center;min-height:40px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;min-height:44px}
+.sheet-h .link{padding:10px 6px;font-size:16px}
+html.lock,html.lock body{overflow:hidden}
+.quick{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 10px;padding:0 16px;scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.setup{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
 .amt{text-align:right;padding:6px 4px 10px}
 .amt .expr{display:block;color:var(--sub);font-size:14px;min-height:20px}
 .amt .amtv{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -183,6 +190,7 @@ nav.tabs .add svg{width:28px;height:28px}
 <script>
 'use strict';
 const KEY = 'selfrestraint.v1';
+const APP_VERSION = 'v1.1';
 const DEFAULT_CATS = [
   {id:'food',   name:'餐饮',   emoji:'🍜', color:'#ff9f0a'},
   {id:'snack',  name:'零食饮料', emoji:'🧋', color:'#ff6482'},
@@ -204,7 +212,7 @@ const DAY_NAMES = ['日','一','二','三','四','五','六'];
 /* ---------- 数据 ---------- */
 function fresh(){
   return {v:1, records:[], cats:DEFAULT_CATS.map(c=>({...c})), recurring:[], wishes:[], lastCat:'food',
-    settings:{daily:0, weekly:0, monthly:0, big:20000, cooldown:72, catBudgets:{}, badge:false, lastOpen:''}};
+    settings:{daily:0, weekly:0, monthly:0, big:20000, cooldown:72, catBudgets:{}, badge:false, lastOpen:'', lastBackup:0}};
 }
 function merge(s){ const f = fresh(); return Object.assign(f, s, {settings:Object.assign(f.settings, s.settings)}); }
 function load(){
@@ -273,12 +281,15 @@ function budgetLevel(spent, budget, progress = 1) {
 
 /* ---------- 弹层 ---------- */
 const openStack = [];
-function openSheet(id){ $('#'+id).classList.add('on'); openStack.push(id); $('#mask').classList.add('on'); }
+function openSheet(id){
+  const sh = $('#'+id); sh.scrollTop = 0; sh.classList.add('on');
+  openStack.push(id); $('#mask').classList.add('on'); document.documentElement.classList.add('lock');
+}
 function closeSheet(id){
   id = id || openStack[openStack.length-1]; if (!id) return;
   $('#'+id).classList.remove('on');
   const i = openStack.indexOf(id); if (i >= 0) openStack.splice(i, 1);
-  if (!openStack.length) $('#mask').classList.remove('on');
+  if (!openStack.length) { $('#mask').classList.remove('on'); document.documentElement.classList.remove('lock'); }
 }
 function ask(title, msg, btns){
   return new Promise(res => {
@@ -331,17 +342,21 @@ function renderHome(){
   const mSum = sum(inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t));
   const s7 = sum(inRange(ymd(addDays(now, -6)), t)), s30 = sum(inRange(ymd(addDays(now, -29)), t));
   const lv = budgetLevel(tSum, b.daily, dayProgress());
-  const tips = {none:'点这里设置预算，之后会提醒你今天还能花多少 →', ok:'节奏不错，继续保持 👍', warn:'花得有点快了，接下来悠着点 ⚠️', over:'今天已经超预算了，剩下的时间尽量别再花钱 🛑'};
+  const tips = {none:'先定一个每月最多花多少，之后每天都会告诉你今天还能花多少：', ok:'节奏不错，继续保持 👍', warn:'花得有点快了，接下来悠着点 ⚠️', over:'今天已经超预算了，剩下的时间尽量别再花钱 🛑'};
   let h = `<header class="top"><div><div class="muted">${now.getMonth()+1}月${now.getDate()}日 周${DAY_NAMES[now.getDay()]}</div><h1>Self restraint</h1></div>
     <button class="icon" data-act="settings" aria-label="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button></header>`;
   if (!navigator.standalone && /iPhone|iPad/.test(navigator.userAgent))
     h += `<div class="card notice">📲 先把我放到主屏幕：点 Safari 的「分享」按钮 →「添加到主屏幕」。从主屏幕打开，数据保存更稳定。</div>`;
-  h += `<div class="card hero lv-${lv}" ${b.daily ? '' : 'data-act="settings"'}>
+  h += `<div class="card hero lv-${lv}">
     <div class="muted">今日已花</div><div class="big">${fmt(tSum)}</div>
     ${b.daily ? `<div class="bar"><i style="width:${pct(tSum, b.daily)}%"></i></div>
       <div class="split"><span>${tSum <= b.daily ? `还能花 <b>${fmt(b.daily - tSum)}</b>` : `已超支 <b class="red">${fmt(tSum - b.daily)}</b>`}</span>
       <span class="muted">日预算 ${fmt(b.daily)}${b.dailyDerived ? '（按月折算）' : ''}</span></div>` : ''}
-    <div class="tip">${tips[lv]}</div></div>`;
+    <div class="tip">${tips[lv]}</div>
+    ${b.daily ? '' : `<div class="setup"><input id="quickBudget" type="number" inputmode="decimal" enterkeyhint="done" placeholder="每月预算，例如 1500"><button class="btn" data-act="quickBudget">设好了</button></div>`}</div>`;
+  const lastB = S.settings.lastBackup, ref = lastB || S.records.reduce((m, r) => Math.min(m, r.ts || m), Date.now());
+  if (S.records.length >= 10 && Date.now() - ref > 30 * 864e5)
+    h += `<div class="card notice" data-act="backup">📦 ${lastB ? `距离上次备份已经 ${Math.floor((Date.now() - lastB) / 864e5)} 天` : '记录只存在这台手机上，还没有备份过'}，点这里备份一份到「文件」→</div>`;
   const mini = (label, v, budget, prog, sub) => `<div class="mini lv-${budgetLevel(v, budget, prog)}"><span class="muted">${label}</span><b>${fmt(v)}</b>
     ${budget ? `<div class="bar sm"><i style="width:${pct(v, budget)}%"></i></div><span class="muted xs">预算 ${fmt(budget)}</span>` : `<span class="muted xs">${sub || ''}</span>`}</div>`;
   h += `<div class="grid2">${mini('本周', wSum, b.weekly, weekProgress())}${mini('本月', mSum, b.monthly, monthProgress())}
@@ -510,15 +525,27 @@ function openAdd(r, preset){
             : {id:null, amt:'', cat:S.lastCat || 'food', need:'need', note:'', d:today(), ...preset};
   if (!S.cats.some(c => c.id === draft.cat)) draft.cat = S.cats[0].id;
   const keys = ['1','2','3','del','4','5','6','+','7','8','9','ok','.','0','C'];
-  $('#addSheet').innerHTML = `<div class="grab"></div>
-    <div class="sheet-h"><button class="link" data-act="close" data-v="addSheet">取消</button><b>${draft.id ? '编辑支出' : '记一笔'}</b>${draft.id ? '<button class="link danger" data-act="delRec">删除</button>' : '<span style="width:40px"></span>'}</div>
+  const quick = r || preset ? [] : frequent();
+  $('#addSheet').innerHTML = `<div class="sheet-top"><div class="grab"></div>
+    <div class="sheet-h"><button class="link" data-act="close" data-v="addSheet">取消</button><b>${draft.id ? '编辑支出' : '记一笔'}</b>${draft.id ? '<button class="link danger" data-act="delRec">删除</button>' : '<span style="width:40px"></span>'}</div></div>
     <div class="amt"><span class="expr" id="expr"></span><span class="amtv" id="amtv"></span></div>
+    ${quick.length ? `<div class="quick">${quick.map(q => `<button class="chip" data-act="quick" data-v="${q.id}">${catOf(q.cat).emoji} ${esc(q.note)} ${yuan(q.amt)}</button>`).join('')}</div>` : ''}
     <div class="cats">${S.cats.map(c => `<button class="catb ${c.id === draft.cat ? 'on' : ''}" data-act="cat" data-v="${c.id}"><span>${c.emoji}</span>${esc(c.name)}</button>`).join('')}</div>
     <div class="seg"><button data-act="need" data-v="need" class="${draft.need === 'need' ? 'on' : ''}">必要（不花不行）</button><button data-act="need" data-v="want" class="${draft.need === 'want' ? 'on' : ''}">想要（可以不花）</button></div>
-    <div class="fields"><input data-f="note" placeholder="备注：买了什么" maxlength="40" value="${esc(draft.note)}"><input type="date" data-f="d" value="${draft.d}" max="${today()}"></div>
+    <div class="fields"><input data-f="note" placeholder="备注：买了什么" maxlength="40" enterkeyhint="done" value="${esc(draft.note)}"><input type="date" data-f="d" value="${draft.d}" max="${today()}"></div>
     <div class="pad">${keys.map(k => k === 'ok' ? '<button class="ok" data-act="save">完成</button>'
       : `<button data-act="key" data-v="${k}">${k === 'del' ? '⌫' : k}</button>`).join('')}</div>`;
   updateAmt(); openSheet('addSheet');
+}
+// 常记的（同分类+同备注+同金额出现 2 次以上），按次数排序，点一下就填好
+function frequent(){
+  const m = {};
+  for (const r of S.records) {
+    if (!r.note || r.note.endsWith('（固定）')) continue;
+    const x = m[r.cat + '|' + r.note + '|' + r.amt] ||= {r, n:0};
+    x.n++; if (r.d >= x.r.d) x.r = r;
+  }
+  return Object.values(m).filter(x => x.n >= 2).sort((a, b) => b.n - a.n || b.r.d.localeCompare(a.r.d)).slice(0, 8).map(x => x.r);
 }
 const evalAmt = s => s.split('+').reduce((a, x) => a + toCents(x), 0);
 function updateAmt(){
@@ -581,8 +608,8 @@ function field(label, k){
 }
 function renderSettings(){
   const st = S.settings, catOpts = S.cats.map(c => `<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
-  $('#setSheet').innerHTML = `<div class="grab"></div>
-    <div class="sheet-h"><span style="width:40px"></span><b>设置</b><button class="link" data-act="close" data-v="setSheet">完成</button></div>
+  $('#setSheet').innerHTML = `<div class="sheet-top"><div class="grab"></div>
+    <div class="sheet-h"><span style="width:40px"></span><b>设置</b><button class="link" data-act="close" data-v="setSheet"><b>完成</b></button></div></div>
     <h4>预算（元）</h4><div class="group">${field('每日预算', 'daily')}${field('每周预算', 'weekly')}${field('每月预算', 'monthly')}</div>
     <p class="note">只填月预算也行：每日 = 月预算 ÷ 当月天数，每周 = 每日 × 7。建议先按过去一个月的实际花费打个八折来定。</p>
     <h4>克制</h4><div class="group">${field('大额提醒线（单笔，元）', 'big')}
@@ -599,15 +626,16 @@ function renderSettings(){
     <h4>数据</h4><div class="group"><button class="rowbtn" data-act="exportCsv">导出 Excel 表格（CSV）</button><button class="rowbtn" data-act="backup">备份全部数据（JSON）</button>
       <button class="rowbtn" data-act="restore">从备份恢复</button><button class="rowbtn danger" data-act="reset">清空所有数据</button></div>
     <p class="note">数据只保存在这台手机的这个 App 里，不上传任何服务器。建议每月备份一次存到「文件」，换手机时用「从备份恢复」。</p>
-    <p class="note center">Self restraint · 共 ${S.records.length} 笔记录</p>`;
+    <p class="note center">Self restraint ${APP_VERSION} · 共 ${S.records.length} 笔记录${st.lastBackup ? ` · 上次备份 ${ymd(new Date(st.lastBackup))}` : ''}</p>`;
 }
 async function shareFile(name, text, type){
   const file = new File([text], name, {type});
   if (navigator.canShare && navigator.canShare({files:[file]})) {
-    try { await navigator.share({files:[file]}); return; } catch (e) { if (e.name === 'AbortError') return; }
+    try { await navigator.share({files:[file]}); return true; } catch (e) { if (e.name === 'AbortError') return false; }
   }
   const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return true;
 }
 async function importFile(file){
   let data; try { data = JSON.parse(await file.text()); } catch (e) { data = null; }
@@ -654,6 +682,14 @@ function dailyReview(){
   if (b.daily && ys) msg += ys > b.daily ? `，超出日预算 ${fmt(ys - b.daily)}。今天收着点 💪` : '，守住了预算 👍';
   const now = new Date(), wSum = sum(inRange(ymd(startOfWeek(now)), y));
   if (now.getDay() !== 1) msg += `\n本周到昨天为止：${fmt(wSum)}${b.weekly ? ` / 预算 ${fmt(b.weekly)}` : ''}`;
+  else {
+    const ws = startOfWeek(now), lw = sum(inRange(ymd(addDays(ws, -7)), ymd(addDays(ws, -1))));
+    msg += `\n上周一共花了 ${fmt(lw)}${b.weekly ? (lw > b.weekly ? `，超出周预算 ${fmt(lw - b.weekly)}` : '，守住了周预算 👍') : ''}`;
+  }
+  if (now.getDate() === 1) {
+    const pm = new Date(now.getFullYear(), now.getMonth() - 1, 1), ls = sum(inRange(ymd(pm), y)), mb = S.settings.monthly;
+    msg += `\n${pm.getMonth() + 1}月一共花了 ${fmt(ls)}${mb ? (ls > mb ? `，超出月预算 ${fmt(ls - mb)}` : '，守住了月预算 🎉') : ''}`;
+  }
   ask('📒 昨日回顾', msg, [{t:'知道了', v:1, primary:true}]);
 }
 
@@ -721,7 +757,23 @@ const actions = {
     const rows = [['日期','时间','分类','金额','必要/想要','备注']].concat(sorted(S.records).map(r => [r.d, r.tm || '', catOf(r.cat).name, (r.amt / 100).toFixed(2), r.need === 'want' ? '想要' : '必要', r.note || '']));
     shareFile(`SelfRestraint-${today()}.csv`, '﻿' + rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n'), 'text/csv');
   },
-  backup: () => shareFile(`SelfRestraint-backup-${today()}.json`, JSON.stringify(S), 'application/json'),
+  backup: async () => {
+    if (!await shareFile(`SelfRestraint-backup-${today()}.json`, JSON.stringify(S), 'application/json')) return;
+    S.settings.lastBackup = Date.now(); save(); render(); toast('已备份 ✅ 记得选「存储到文件」', 'ok');
+  },
+  quickBudget: () => {
+    const v = toCents($('#quickBudget').value);
+    if (v <= 0) return toast('填一个大于 0 的金额', 'warn');
+    S.settings.monthly = v; save(); render();
+    toast(`月预算 ${fmt(v)}，平均每天 ${fmt(budgets().daily)}`, 'ok');
+  },
+  quick: id => {
+    const r = S.records.find(x => x.id === id); if (!r) return;
+    Object.assign(draft, {amt:String(r.amt / 100), cat:r.cat, need:r.need || 'need', note:r.note});
+    $$('#addSheet .catb').forEach(b => b.classList.toggle('on', b.dataset.v === r.cat));
+    $$('#addSheet .seg button').forEach(b => b.classList.toggle('on', b.dataset.v === draft.need));
+    $('#addSheet [data-f=note]').value = r.note; updateAmt();
+  },
   restore: () => $('#fileIn').click(),
   reset: async () => {
     if (!await ask('清空所有数据？', '所有记录、预算、清单都会被删除，没有备份就找不回来。', [{t:'全部清空', v:1, danger:true}, {t:'取消', v:0}])) return;
@@ -750,6 +802,26 @@ document.addEventListener('change', e => {
   } else if (el.id === 'badgeT') toggleBadge(el.checked);
   else if (el.id === 'fileIn' && el.files[0]) { importFile(el.files[0]); el.value = ''; }
 });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
+// 按住弹层顶部往下拖可以关闭，和系统弹窗手感一致
+let drag = null;
+document.addEventListener('touchstart', e => {
+  const top = e.target.closest('.sheet-top');
+  if (top) drag = {sh: top.parentElement, y: e.touches[0].clientY, dy: 0};
+}, {passive: true});
+document.addEventListener('touchmove', e => {
+  if (!drag) return;
+  drag.dy = Math.max(0, e.touches[0].clientY - drag.y);
+  if (drag.dy > 6) { drag.sh.style.transition = 'none'; drag.sh.style.transform = `translateY(${drag.dy}px)`; }
+}, {passive: true});
+const endDrag = () => {
+  if (!drag) return;
+  const {sh, dy} = drag; drag = null;
+  sh.style.transition = ''; sh.style.transform = '';
+  if (dy > 80) closeSheet(sh.id);
+};
+document.addEventListener('touchend', endDrag);
+document.addEventListener('touchcancel', endDrag);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') { runRecurring(); render(); dailyReview(); }
 });
@@ -758,6 +830,8 @@ runRecurring();
 go('home');
 dailyReview();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js', {scope: '/'});
+// 申请"持久存储"，降低系统在空间紧张时清掉记账数据的可能
+navigator.storage?.persist?.().catch(() => {});
 </script>
 </body>
 </html>
