@@ -148,7 +148,7 @@ html.lock,html.lock body{overflow:hidden}
 <script>
 'use strict';
 const KEY = 'pingan.v1';
-const VERSION = 'v1.0';
+const VERSION = 'v1.1';
 // 三种账：车费收入 / 车子花钱 / 家里花钱。「其他收入」不算进车子挣的钱
 const TYPES = {
   in:   {name:'车费收入', emoji:'💰', tags:['车费','包车','捎货','其他收入']},
@@ -359,7 +359,7 @@ function renderMore(){
         <button class="btn wide" data-act="remAdd">添加提醒</button></div></div>
     <div class="card"><h2>🔠 字的大小</h2><div class="seg" style="margin:0">${['标准', '大', '特大'].map((l, i) => `<button data-act="font" data-v="${i}" class="${S.settings.font === i ? 'on' : ''}">${l}</button>`).join('')}</div></div>
     <div class="card"><h2>📦 备份</h2><div class="sub">账只存在这台手机里。建议一个月备份一次，存到「文件」或发到微信「文件传输助手」。</div>
-      <button class="rowbtn" data-act="backup">备份全部账本</button><button class="rowbtn" data-act="restore">从备份恢复</button>
+      <button class="rowbtn" data-act="backup">备份全部账本</button><button class="rowbtn" data-act="restore">从文件导入 / 恢复</button>
       <button class="rowbtn" data-act="exportCsv">导出成表格（电脑上用 Excel 打开）</button>
       ${S.settings.lastBackup ? `<div class="sub">上次备份：${md(ymd(new Date(S.settings.lastBackup)))}</div>` : ''}</div>
     <div class="card"><h2>💡 怎么用</h2><div class="sub" style="font-size:.95rem;line-height:1.7">
@@ -426,9 +426,22 @@ async function shareFile(name, text, type){
 async function importFile(file){
   let data; try { data = JSON.parse(await file.text()); } catch (e) { data = null; }
   if (!data || !Array.isArray(data.recs)) return toast('这不是平安账本的备份文件', 'bad');
-  if (!await ask('从备份恢复', `备份里有 ${data.recs.length} 笔账。恢复后，现在手机里的账会被换掉，确定吗？`, [{t:'确定恢复', v:1, danger:true}, {t:'不了', v:0}])) return;
-  const f = fresh(); S = Object.assign(f, data, {settings:Object.assign(f.settings, data.settings)});
-  save(); applyFont(); render(); toast('恢复好了 ✓');
+  // 合并：只加手机里还没有的账（按编号判断），已有的一笔不动，同一个文件导两次也不会重复
+  const have = new Set(S.recs.map(r => r.id)), add = data.recs.filter(r => !have.has(r.id));
+  const addSum = add.reduce((s, r) => s + (r.type === 'in' ? r.amt : 0), 0);
+  const c = await ask('从文件导入', `文件里有 ${data.recs.length} 笔账，其中 ${add.length} 笔是手机里还没有的${addSum ? `（收入共 ${fmt(addSum)}）` : ''}。`,
+    [{t:`把这 ${add.length} 笔加进来（推荐）`, v:'merge', primary:true}, {t:'整个换成文件里的账', v:'replace', danger:true}, {t:'不了', v:null}]);
+  if (c === 'merge') {
+    if (!add.length) return toast('没有新的账需要加');
+    S.recs.push(...add);
+    const haveRem = new Set(S.rems.map(r => r.id));
+    S.rems.push(...(data.rems || []).filter(r => !haveRem.has(r.id)));
+    save(); render(); toast(`加好了 ✓ 新增 ${add.length} 笔`);
+  } else if (c === 'replace') {
+    if (!await ask('再确认一次', '现在手机里的账会全部换掉，确定吗？', [{t:'确定换掉', v:1, danger:true}, {t:'不了', v:0, primary:true}])) return;
+    const f = fresh(); S = Object.assign(f, data, {settings:Object.assign(f.settings, data.settings)});
+    save(); applyFont(); render(); toast('恢复好了 ✓');
+  }
 }
 
 /* ---------- 页面切换与操作 ---------- */

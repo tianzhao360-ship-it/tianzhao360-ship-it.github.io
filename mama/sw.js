@@ -1,5 +1,5 @@
 // 网络优先：有网时拿最新版本并更新缓存，没网时用缓存，保证随时能打开记账
-const CACHE = 'pingan-v1';
+const CACHE = 'pingan-v2';
 const FILES = ['/mama/', '/mama/index.html', '/mama/manifest.webmanifest', '/mama/icon-180.png', '/mama/icon-512.png'];
 
 self.addEventListener('install', e => {
