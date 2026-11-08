@@ -1,0 +1,15 @@
+{
+  "name": "平安账本",
+  "short_name": "平安账本",
+  "id": "/mama/",
+  "start_url": "/mama/",
+  "scope": "/mama/",
+  "display": "standalone",
+  "background_color": "#f7f3ee",
+  "theme_color": "#c8501e",
+  "lang": "zh-CN",
+  "icons": [
+    {"src": "/mama/icon-180.png", "sizes": "180x180", "type": "image/png"},
+    {"src": "/mama/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
