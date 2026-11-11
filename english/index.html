@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="背词日记">
+<meta name="theme-color" content="#f3f6f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1214" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="/english/icon-180.png">
+<link rel="manifest" href="/english/manifest.webmanifest">
+<title>背词日记</title>
+<style>
+:root{--bg:#f3f6f6;--card:#fff;--text:#152022;--sub:#6b7a7d;--line:#e2e9ea;--fill:#e8eeef;--accent:#0f8f7e;--word:#2f6fdb;--time:#e2731b;--good:#1f9d55;--bad:#d93a2b}
+@media (prefers-color-scheme: dark){:root{--bg:#0d1214;--card:#1a2124;--text:#eef4f4;--sub:#93a3a6;--line:#2a3336;--fill:#253033;--accent:#2fc2ad;--word:#7aa7ff;--time:#ff9a4d;--good:#3ccf7a;--bad:#ff6b5c}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:17px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;-webkit-text-size-adjust:100%}
+body{padding-top:env(safe-area-inset-top);overscroll-behavior-y:none}
+main{max-width:560px;margin:0 auto;padding:4px 16px calc(84px + env(safe-area-inset-bottom))}
+.page{display:none}.page.on{display:block}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;font-size:16px;color:var(--text);background:var(--fill);border:0;border-radius:10px;padding:10px 12px;width:100%;min-width:0;outline:none;-webkit-appearance:none;appearance:none}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 0 14px}
+h1{margin:0;font-size:28px;font-weight:800}
+h2{margin:0 0 8px;font-size:17px}
+.sub{color:var(--sub);font-size:14px}
+.xs{font-size:12px}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+.word{color:var(--word)}.time{color:var(--time)}.good{color:var(--good)}.bad{color:var(--bad)}
+b{font-variant-numeric:tabular-nums}
+.pill{background:color-mix(in srgb,var(--accent) 14%,var(--card));color:var(--accent);border-radius:20px;padding:5px 11px;font-size:14px;font-weight:600;white-space:nowrap}
+.rings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ring{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ring svg{width:120px;height:120px}
+.ring .t1{font-size:26px;font-weight:800;fill:var(--text);text-anchor:middle}
+.ring .t2{font-size:12px;fill:var(--sub);text-anchor:middle}
+.trk{stroke:var(--fill)}
+.msg{margin-top:12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 12%,transparent);font-size:15px}
+.streak{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}
+.streak b{display:block;font-size:22px}
+.timer{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.clock{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.btn{border:0;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;padding:12px 18px;white-space:nowrap}
+.btn.stop{background:var(--bad)}
+.btn.wide{width:100%;padding:14px;font-size:18px}
+.btn.ghost{background:var(--fill);color:var(--text)}
+.add{display:block;width:100%;border:0;border-radius:16px;background:var(--accent);color:#fff;font-size:19px;font-weight:800;padding:16px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--fill);flex:none}
+.mid{flex:1;min-width:0}.mid>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{color:var(--sub);text-align:center;padding:18px 8px}
+.dayh{display:flex;justify-content:space-between;color:var(--sub);font-size:13px;margin:14px 4px 6px}
+.seg{display:flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:8px 4px;border-radius:8px;font-size:15px}
+.seg button.on{background:var(--card);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.nav button{width:38px;height:38px;border:0;border-radius:50%;background:var(--card);font-size:20px}
+.nav button:disabled{opacity:.3}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat3 b{display:block;font-size:20px}
+.cmp{font-size:13px;margin-top:2px}
+svg.chart{width:100%;height:auto;display:block;margin-top:6px}
+.ax{fill:var(--sub);font-size:9px;text-anchor:middle}
+.bw{fill:var(--word)}.bt{fill:var(--time)}.gl{stroke:var(--good);stroke-dasharray:4 3}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}
+.heat div{aspect-ratio:1;border-radius:7px;background:var(--fill);font-size:11px;display:grid;place-items:center}
+.heat .hd{background:none;aspect-ratio:auto;color:var(--sub)}
+.heat .p0{background:none}
+.heat .today{outline:2px solid var(--accent)}
+.kindrow{padding:6px 0}.kindrow .s{display:flex;justify-content:space-between}
+.bar{height:7px;border-radius:4px;background:var(--fill);overflow:hidden;margin-top:3px}.bar i{display:block;height:100%;background:var(--time)}
+.fld{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);min-height:48px}
+.fld:last-child{border-bottom:0}
+.fld input{max-width:150px;text-align:right}
+.rowbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:13px 0;border-bottom:1px solid var(--line);color:var(--accent)}
+.rowbtn:last-child{border-bottom:0}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:color-mix(in srgb,var(--card) 88%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:5px 4px calc(5px + env(safe-area-inset-bottom))}
+nav.tabs button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--sub);padding:3px 0}
+nav.tabs button span{font-size:22px;line-height:1.2;filter:grayscale(1);opacity:.55}
+nav.tabs button.on{color:var(--accent);font-weight:700}nav.tabs button.on span{filter:none;opacity:1}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+.mask.on{opacity:1;pointer-events:auto}
+/* 弹层顶部避开状态栏/灵动岛：那块区域的点击会被 iOS 拿去「回到顶部」 */
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;max-height:92vh;max-height:calc(100dvh - env(safe-area-inset-top) - 10px);overflow-y:auto;overscroll-behavior:contain;background:var(--bg);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:21;padding:0 16px calc(14px + env(safe-area-inset-bottom))}
+.sheet.on{transform:none}
+.sheet-top{position:sticky;top:0;z-index:2;background:var(--bg);margin:0 -16px 4px;padding:6px 16px 2px;touch-action:none}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 4px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;min-height:44px}
+.link{border:0;background:none;color:var(--accent);padding:8px 6px;font-size:16px}
+.link.danger{color:var(--bad)}
+html.lock,html.lock body{overflow:hidden}
+.blk{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.blk label{font-size:14px;color:var(--sub)}
+.stepper{display:flex;align-items:center;gap:8px;margin:6px 0}
+.stepper input{text-align:center;font-size:26px;font-weight:800;padding:6px}
+.stepper button{width:46px;height:46px;flex:none;border:0;border-radius:12px;background:var(--fill);font-size:24px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid transparent;background:var(--fill);border-radius:20px;padding:6px 12px;font-size:15px}
+.chip.on{border-color:var(--accent);color:var(--accent);font-weight:700;background:color-mix(in srgb,var(--accent) 10%,var(--card))}
+.dialog{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:24px}
+.dialog.on{display:flex}
+.dlg{background:var(--card);border-radius:18px;padding:20px 18px 12px;max-width:340px;width:100%}
+.dlg h3{margin:0 0 6px}.dlg p{margin:0;color:var(--sub)}
+.dbtns{display:grid;gap:6px;margin-top:14px}
+.dbtns button{border:0;border-radius:12px;padding:12px;background:var(--fill)}
+.dbtns .primary{background:var(--accent);color:#fff;font-weight:700}.dbtns .danger{background:var(--bad);color:#fff}
+.toast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translate(-50%,-160%);z-index:50;background:var(--card);padding:10px 16px;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.2);max-width:92vw;transition:transform .3s;border-left:4px solid var(--accent)}
+.toast.on{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<main>
+  <section class="page" id="today"></section>
+  <section class="page" id="log"></section>
+  <section class="page" id="stats"></section>
+  <section class="page" id="set"></section>
+</main>
+<nav class="tabs">
+  <button data-act="go" data-v="today"><span>📖</span>今天</button>
+  <button data-act="go" data-v="log"><span>🗒️</span>记录</button>
+  <button data-act="go" data-v="stats"><span>📊</span>统计</button>
+  <button data-act="go" data-v="set"><span>⚙️</span>设置</button>
+</nav>
+<div class="mask" id="mask" data-act="close"></div>
+<div class="sheet" id="entry"></div>
+<div class="dialog" id="dialog"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" hidden>
+
+<script>
+'use strict';
+const KEY = 'wordlog.v1';
+const VERSION = 'v1.0';
+const KINDS = [['词','背单词'],['听','听力'],['读','阅读'],['说','口语'],['写','写作'],['题','做题'],['课','网课']];
+const KIND_EMOJI = {词:'🔤', 听:'🎧', 读:'📰', 说:'🗣️', 写:'✍️', 题:'📝', 课:'💻'};
+const WD = ['日','一','二','三','四','五','六'];
+
+/* ---------- 数据 ---------- */
+// logs: 每次学习 {id, d 日期, words 单词数, mins 分钟, kind 类型, note}；timer: 正在计时的开始时间，关掉 App 也不丢
+function fresh(){ return {v:1, logs:[], timer:null, settings:{wordGoal:50, minGoal:60, exam:'', examDate:'', lastBackup:0, lastKind:'词'}}; }
+function load(){
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); if (raw) { const s = JSON.parse(raw), f = fresh(); return Object.assign(f, s, {settings:Object.assign(f.settings, s.settings)}); } }
+  catch (e) { if (raw) try { localStorage.setItem(KEY + '.unreadable', raw); } catch (e2) {} }
+  return fresh();
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败，手机空间可能不够了'); } }
+let S = load();
+
+/* ---------- 工具 ---------- */
+const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; };
+const startOfWeek = d => addDays(d, -((d.getDay() + 6) % 7));
+const daysIn = d => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+const dayDiff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const today = () => ymd(new Date());
+const md = s => { const d = parse(s); return `${d.getMonth() + 1}月${d.getDate()}日`; };
+const dur = m => m >= 60 ? `${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分` : ''}` : `${m} 分钟`;
+const hrs = m => m >= 60 ? `${+(m / 60).toFixed(1)} 小时` : `${m} 分`; // 窄格子里用的短写法
+const inRange = (f, t) => S.logs.filter(l => l.d >= f && l.d <= t);
+const sumOf = (ls, k) => ls.reduce((s, l) => s + (l[k] || 0), 0);
+const dayMap = ls => ls.reduce((m, l) => { const x = m[l.d] ||= {words:0, mins:0}; x.words += l.words || 0; x.mins += l.mins || 0; return m; }, {});
+const sorted = ls => [...ls].sort((a, b) => b.d.localeCompare(a.d) || b.ts - a.ts);
+const studied = x => x && (x.words > 0 || x.mins > 0);
+const goalMet = x => x && x.words >= S.settings.wordGoal && x.mins >= S.settings.minGoal;
+
+// 连续打卡：从今天（今天还没学就从昨天）往前数，有学习记录的天连在一起
+function streakInfo(){
+  const map = dayMap(S.logs), now = new Date();
+  let cur = 0, i = studied(map[today()]) ? 0 : 1;
+  while (studied(map[ymd(addDays(now, -i))])) { cur++; i++; }
+  const days = Object.keys(map).filter(d => studied(map[d])).sort();
+  let best = 0, run = 0, prev = null;
+  for (const d of days) { run = prev && dayDiff(prev, d) === 1 ? run + 1 : 1; best = Math.max(best, run); prev = d; }
+  return {cur, best, days: days.length};
+}
+
+/* ---------- 弹层 / 对话框 / 提示 ---------- */
+function openSheet(){ const s = $('#entry'); s.scrollTop = 0; s.classList.add('on'); $('#mask').classList.add('on'); document.documentElement.classList.add('lock'); }
+function closeSheet(){ $('#entry').classList.remove('on'); $('#mask').classList.remove('on'); document.documentElement.classList.remove('lock'); }
+function ask(title, msg, btns){
+  return new Promise(res => {
+    const box = $('#dialog');
+    box.innerHTML = `<div class="dlg"><h3>${esc(title)}</h3><p>${esc(msg).replace(/\n/g, '<br>')}</p><div class="dbtns">${btns.map((b, i) => `<button data-i="${i}" class="${b.primary ? 'primary' : ''}${b.danger ? ' danger' : ''}">${esc(b.t)}</button>`).join('')}</div></div>`;
+    box.classList.add('on');
+    box.onclick = e => { const b = e.target.closest('button[data-i]'); if (!b) return; box.classList.remove('on'); box.onclick = null; res(btns[+b.dataset.i].v); };
+  });
+}
+let toastTimer;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3000); }
+
+/* ---------- 今天 ---------- */
+function ring(val, goal, color, unit){
+  const p = goal ? Math.min(1, val / goal) : 0, c = 2 * Math.PI * 50;
+  return `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" class="trk" stroke-width="11"/>
+    <circle cx="60" cy="60" r="50" fill="none" stroke="var(--${color})" stroke-width="11" stroke-linecap="round" stroke-dasharray="${c * p} ${c}" transform="rotate(-90 60 60)"/>
+    <text x="60" y="62" class="t1">${val}</text><text x="60" y="82" class="t2">目标 ${goal}${unit}</text></svg>`;
+}
+function cheer(t, sk){
+  const st = S.settings, w = t.words, m = t.mins, h = new Date().getHours();
+  if (goalMet(t)) return `🎉 今天的目标全部完成！${sk.cur >= 3 ? `已经连续 ${sk.cur} 天，` : ''}给自己点个赞。`;
+  if (!w && !m) return h < 12 ? '☀️ 新的一天，先背 10 个词热热身吧。' : h < 20 ? '📖 今天还没开始，花 15 分钟也比不学强。' : `🌙 今天还没学，睡前背 ${Math.min(20, st.wordGoal)} 个词${sk.cur ? `，别断了 ${sk.cur} 天的连续打卡` : ''}。`;
+  const parts = [];
+  if (w < st.wordGoal) parts.push(`单词还差 ${st.wordGoal - w} 个`);
+  if (m < st.minGoal) parts.push(`时长还差 ${st.minGoal - m} 分钟`);
+  return `💪 不错，已经在学了！${parts.join('，')}。`;
+}
+function rowHTML(l){
+  return `<div class="row" data-act="edit" data-v="${l.id}"><span class="ico">${KIND_EMOJI[l.kind] || '📖'}</span>
+    <div class="mid"><div>${esc((KINDS.find(k => k[0] === l.kind) || ['', '学习'])[1])}${l.note ? ` <span class="sub">${esc(l.note)}</span>` : ''}</div></div>
+    <span>${l.words ? `<b class="word">${l.words} 词</b>` : ''}${l.words && l.mins ? ' · ' : ''}${l.mins ? `<b class="time">${dur(l.mins)}</b>` : ''}</span></div>`;
+}
+function timerText(){ const s = Math.floor((Date.now() - S.timer.start) / 1000); return `${Math.floor(s / 3600) ? Math.floor(s / 3600) + ':' : ''}${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`; }
+function renderToday(){
+  const now = new Date(), t = dayMap(S.logs.filter(l => l.d === today()))[today()] || {words:0, mins:0}, sk = streakInfo(), st = S.settings;
+  const exam = st.exam && st.examDate ? dayDiff(today(), st.examDate) : null;
+  let h = `<header class="top"><div><div class="sub">${now.getMonth() + 1}月${now.getDate()}日 星期${WD[now.getDay()]}</div><h1>背词日记</h1></div>
+    ${exam !== null && exam >= 0 ? `<span class="pill">${esc(st.exam)} 还有 ${exam} 天</span>` : ''}</header>
+    <div class="card"><div class="rings"><div class="ring">${ring(t.words, st.wordGoal, 'word', ' 词')}<span class="sub">今天背的单词</span></div>
+      <div class="ring">${ring(t.mins, st.minGoal, 'time', ' 分')}<span class="sub">今天学习分钟</span></div></div>
+      <div class="msg">${cheer(t, sk)}</div></div>
+    <div class="card streak"><div><span class="sub">连续打卡</span><b>🔥 ${sk.cur} 天</b></div><div><span class="sub">最长纪录</span><b>${sk.best} 天</b></div><div><span class="sub">学习天数</span><b>${sk.days} 天</b></div></div>
+    <div class="card timer">${S.timer ? `<div><div class="sub">正在计时 · ${esc((KINDS.find(k => k[0] === S.timer.kind) || ['', '学习'])[1])}</div><div class="clock" id="clock">${timerText()}</div></div><button class="btn stop" data-act="timerStop">结束并记录</button>`
+      : `<div><div class="sub">开始学之前点一下，结束时自动算时长</div><div class="clock" style="color:var(--sub)">00:00</div></div><button class="btn" data-act="timerStart">▶ 开始计时</button>`}</div>
+    <button class="add" data-act="add">＋ 记一次学习</button>`;
+  const tl = sorted(S.logs.filter(l => l.d === today()));
+  h += `<div class="card"><h2>今天的记录</h2>${tl.length ? tl.map(rowHTML).join('') + '<div class="sub xs" style="margin-top:6px">点一条可以修改或删除</div>' : '<div class="empty">还没有记录</div>'}</div>`;
+  const wk = inRange(ymd(startOfWeek(now)), today());
+  h += `<div class="card"><h2>这周到今天</h2><div class="stat3"><div><span class="sub">单词</span><b class="word">${sumOf(wk, 'words')}</b></div><div><span class="sub">时长</span><b class="time">${hrs(sumOf(wk, 'mins'))}</b></div><div><span class="sub">学了</span><b>${new Set(wk.map(l => l.d)).size} 天</b></div></div></div>`;
+  if (S.logs.length >= 20 && Date.now() - (st.lastBackup || S.logs[0].ts) > 30 * 864e5) h += `<div class="card" data-act="backup">📦 记录只存在这台手机里，一个月备份一次更放心。点这里备份 →</div>`;
+  $('#today').innerHTML = h;
+}
+
+/* ---------- 记录 ---------- */
+let logMonth = 0;
+function renderLog(){
+  const n = new Date(), s = new Date(n.getFullYear(), n.getMonth() + logMonth, 1), e = new Date(s.getFullYear(), s.getMonth() + 1, 0);
+  const ls = inRange(ymd(s), ymd(e)), groups = {};
+  sorted(ls).forEach(l => (groups[l.d] ||= []).push(l));
+  let h = `<header class="top"><h1>记录</h1></header>
+    <div class="nav"><button data-act="logNav" data-v="-1">‹</button><b>${s.getFullYear()}年${s.getMonth() + 1}月</b><button data-act="logNav" data-v="1" ${logMonth >= 0 ? 'disabled' : ''}>›</button></div>
+    <div class="card stat3"><div><span class="sub">单词</span><b class="word">${sumOf(ls, 'words')}</b></div><div><span class="sub">时长</span><b class="time">${hrs(sumOf(ls, 'mins'))}</b></div><div><span class="sub">学了</span><b>${Object.keys(groups).length} 天</b></div></div>`;
+  h += Object.keys(groups).map(d => { const t = dayMap(groups[d])[d];
+    return `<div class="dayh"><span>${md(d)} 星期${WD[parse(d).getDay()]}${goalMet(t) ? ' ✅' : ''}</span><span>${t.words} 词 · ${dur(t.mins)}</span></div><div class="card" style="padding:4px 16px">${groups[d].map(rowHTML).join('')}</div>`;
+  }).join('') || '<div class="empty">这个月还没有记录</div>';
+  $('#log').innerHTML = h;
+}
+
+/* ---------- 统计 ---------- */
+let stKind = 'week', stOff = 0, stMetric = 'words';
+function period(kind, off){
+  const n = new Date(); let s, e, label;
+  if (kind === 'week') { s = addDays(startOfWeek(n), off * 7); e = addDays(s, 6); label = off === 0 ? '这周' : off === -1 ? '上周' : `${s.getMonth() + 1}/${s.getDate()} – ${e.getMonth() + 1}/${e.getDate()}`; }
+  else { s = new Date(n.getFullYear(), n.getMonth() + off, 1); e = new Date(s.getFullYear(), s.getMonth() + 1, 0); label = off === 0 ? '这个月' : `${s.getFullYear()}年${s.getMonth() + 1}月`; }
+  return {s, e, from: ymd(s), to: ymd(e), label};
+}
+function barChart(vals, labels, goal, cls, unit){
+  const W = 340, H = 140, top = 12, bot = 18, n = vals.length, max = Math.max(goal, 1, ...vals), bw = W / n, every = Math.ceil(n / 8);
+  const y = v => H - bot - v / max * (H - top - bot);
+  let g = '';
+  vals.forEach((v, i) => {
+    const x = i * bw;
+    if (v) g += `<rect x="${x + bw * .18}" y="${y(v)}" width="${bw * .64}" height="${Math.max(1, H - bot - y(v))}" rx="${Math.min(3, bw * .2)}" class="${cls}"/>`;
+    g += `<rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent" data-act="tip" data-v="${labels[i]}：${v} ${unit}"/>`;
+    if (i % every === 0) g += `<text x="${i ? x + bw / 2 : 1}" y="${H - 4}" class="ax"${i ? '' : ' style="text-anchor:start"'}>${labels[i]}</text>`;
+  });
+  if (goal) g += `<line x1="0" x2="${W}" y1="${y(goal)}" y2="${y(goal)}" class="gl"/><text x="${W - 2}" y="${y(goal) - 3}" class="ax" style="text-anchor:end">目标 ${goal}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function renderStats(){
+  const p = period(stKind, stOff), pp = period(stKind, stOff - 1), t = today(), end = p.to < t ? p.to : t;
+  const ls = p.from > t ? [] : inRange(p.from, end), map = dayMap(ls);
+  const elapsed = p.from > t ? 0 : dayDiff(p.from, end) + 1;
+  // 这周/这个月没过完，就和上一期同样天数比
+  let cmpTo = stOff === 0 ? ymd(addDays(pp.s, elapsed - 1)) : pp.to; if (cmpTo > pp.to) cmpTo = pp.to;
+  const prev = inRange(pp.from, cmpTo), pn = (stKind === 'week' ? '上周' : '上个月') + (stOff === 0 ? '同期' : '');
+  const cmp = (a, b, u) => !b ? '' : `<div class="cmp ${a >= b ? 'good' : 'bad'}">${a >= b ? '↑ 多' : '↓ 少'} ${u === '分' ? hrs(Math.abs(a - b)) : Math.abs(a - b) + u}</div>`;
+  const w = sumOf(ls, 'words'), m = sumOf(ls, 'mins'), days = Object.keys(map).length, met = Object.values(map).filter(goalMet).length;
+  let h = `<header class="top"><h1>统计</h1></header>
+    <div class="seg">${[['week', '周'], ['month', '月']].map(([k, l]) => `<button data-act="stKind" data-v="${k}" class="${stKind === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div class="nav"><button data-act="stNav" data-v="-1">‹</button><b>${p.label}</b><button data-act="stNav" data-v="1" ${stOff >= 0 ? 'disabled' : ''}>›</button></div>
+    <div class="card"><div class="stat3"><div><span class="sub">单词</span><b class="word">${w}</b>${cmp(w, sumOf(prev, 'words'), ' 个')}</div>
+      <div><span class="sub">时长</span><b class="time">${hrs(m)}</b>${cmp(m, sumOf(prev, 'mins'), '分')}</div>
+      <div><span class="sub">学了</span><b>${days} 天</b><div class="cmp sub">达标 ${met} 天</div></div></div>
+      ${sumOf(prev, 'words') || sumOf(prev, 'mins') ? `<div class="sub xs" style="margin-top:4px">↑↓ 是和${pn}比</div>` : ''}
+      ${days ? `<p class="sub" style="margin:10px 0 0">学习的日子里，平均每天 ${Math.round(w / days)} 个词、${dur(Math.round(m / days))}。</p>` : ''}</div>`;
+  if (ls.length) {
+    const vals = [], labels = [];
+    for (let d = p.s; ymd(d) <= p.to; d = addDays(d, 1)) { vals.push((map[ymd(d)] || {})[stMetric] || 0); labels.push(stKind === 'week' ? '周' + WD[d.getDay()] : String(d.getDate())); }
+    h += `<div class="card"><div class="seg" style="margin-bottom:4px"><button data-act="stMetric" data-v="words" class="${stMetric === 'words' ? 'on' : ''}">单词</button><button data-act="stMetric" data-v="mins" class="${stMetric === 'mins' ? 'on' : ''}">时长</button></div>
+      ${barChart(vals, labels, stMetric === 'words' ? S.settings.wordGoal : S.settings.minGoal, stMetric === 'words' ? 'bw' : 'bt', stMetric === 'words' ? '个词' : '分钟')}</div>`;
+    const km = {}; ls.forEach(l => { if (l.mins) km[l.kind] = (km[l.kind] || 0) + l.mins; });
+    const kl = Object.entries(km).sort((a, b) => b[1] - a[1]);
+    if (kl.length) h += `<div class="card"><h2>时间花在哪</h2>${kl.map(([k, v]) => `<div class="kindrow"><div class="s"><span>${KIND_EMOJI[k] || '📖'} ${(KINDS.find(x => x[0] === k) || ['', '其他'])[1]}</span><b>${dur(v)}</b></div><div class="bar"><i style="width:${v / kl[0][1] * 100}%"></i></div></div>`).join('')}</div>`;
+  }
+  // 本月打卡日历：颜色越深学得越久，打勾是两个目标都完成
+  const n = new Date(), ms = stKind === 'month' ? p.s : new Date(n.getFullYear(), n.getMonth(), 1), mmap = dayMap(inRange(ymd(ms), ymd(new Date(ms.getFullYear(), ms.getMonth() + 1, 0))));
+  const maxM = Math.max(30, ...Object.values(mmap).map(x => x.mins));
+  let cal = ['一', '二', '三', '四', '五', '六', '日'].map(x => `<div class="hd">${x}</div>`).join('') + '<div class="p0"></div>'.repeat((ms.getDay() + 6) % 7);
+  for (let i = 1; i <= daysIn(ms); i++) {
+    const d = ymd(new Date(ms.getFullYear(), ms.getMonth(), i)), x = mmap[d];
+    cal += `<div class="${d === today() ? 'today' : ''}" style="${studied(x) ? `background:color-mix(in srgb,var(--accent) ${Math.round(25 + 60 * Math.min(1, (x.mins || 15) / maxM))}%,var(--card));color:#fff` : ''}" data-act="tip" data-v="${md(d)}：${x ? `${x.words} 词，${dur(x.mins)}` : '没学'}">${goalMet(x) ? '✓' : i}</div>`;
+  }
+  h += `<div class="card"><h2>${ms.getMonth() + 1}月打卡日历</h2><div class="heat">${cal}</div><div class="sub xs" style="margin-top:6px">颜色越深学得越久，✓ 是单词和时长都达标</div></div>`;
+  const sk = streakInfo();
+  h += `<div class="card"><h2>一共</h2><div class="stat3"><div><span class="sub">单词</span><b class="word">${sumOf(S.logs, 'words')}</b></div><div><span class="sub">时长</span><b class="time">${hrs(sumOf(S.logs, 'mins'))}</b></div><div><span class="sub">最长连续</span><b>${sk.best} 天</b></div></div></div>`;
+  $('#stats').innerHTML = h;
+}
+
+/* ---------- 设置 ---------- */
+function renderSet(){
+  const st = S.settings;
+  $('#set').innerHTML = `<header class="top"><h1>设置</h1></header>
+    <div class="card"><h2>每天的目标</h2>
+      <label class="fld"><span>背多少个单词</span><input type="number" inputmode="numeric" data-set="wordGoal" value="${st.wordGoal}"></label>
+      <label class="fld"><span>学多少分钟</span><input type="number" inputmode="numeric" data-set="minGoal" value="${st.minGoal}"></label></div>
+    <div class="card"><h2>考试倒计时</h2><div class="sub">填上之后，首页右上角会显示还剩几天。</div>
+      <label class="fld"><span>考什么</span><input data-set="exam" value="${esc(st.exam)}" placeholder="如 四级 / 六级 / 考研" maxlength="8"></label>
+      <label class="fld"><span>考试日期</span><input type="date" data-set="examDate" value="${st.examDate}"></label></div>
+    <div class="card"><h2>备份</h2><div class="sub">记录只存在这台手机里，建议一个月备份一次。</div>
+      <button class="rowbtn" data-act="backup">备份全部记录</button><button class="rowbtn" data-act="restore">从文件导入 / 恢复</button><button class="rowbtn" data-act="exportCsv">导出成表格</button>
+      ${st.lastBackup ? `<div class="sub xs">上次备份：${md(ymd(new Date(st.lastBackup)))}</div>` : ''}</div>
+    <div class="card"><button class="rowbtn" data-act="reset" style="color:var(--bad)">清空所有记录</button></div>
+    <div class="sub" style="text-align:center">背词日记 ${VERSION} · 共 ${S.logs.length} 条记录</div>`;
+}
+
+/* ---------- 记一次学习 ---------- */
+let draft = null;
+function openEntry(l, preset){
+  draft = l ? {...l} : {id:null, words:0, mins:0, kind:S.settings.lastKind || '词', note:'', d:today(), ...preset};
+  const t = today(), y = ymd(addDays(new Date(), -1));
+  $('#entry').innerHTML = `<div class="sheet-top"><div class="grab"></div><div class="sheet-h"><button class="link" data-act="close">取消</button><b>${draft.id ? '修改记录' : '记一次学习'}</b>${draft.id ? '<button class="link danger" data-act="del">删除</button>' : '<span style="width:40px"></span>'}</div></div>
+    <div class="blk"><label>学了什么</label><div class="chips" style="margin-top:6px">${KINDS.map(([k, n]) => `<button class="chip ${draft.kind === k ? 'on' : ''}" data-act="kind" data-v="${k}">${KIND_EMOJI[k]} ${n}</button>`).join('')}</div></div>
+    <div class="blk"><label class="word">背了多少个单词（新词 + 复习都算）</label>
+      <div class="stepper"><button data-act="step" data-v="words|-10">−</button><input id="fWords" type="number" inputmode="numeric" value="${draft.words || ''}" placeholder="0"><button data-act="step" data-v="words|10">＋</button></div>
+      <div class="chips">${[10, 20, 30, 50, 100].map(n => `<button class="chip" data-act="set" data-v="words|${n}">${n}</button>`).join('')}</div></div>
+    <div class="blk"><label class="time">学了多少分钟</label>
+      <div class="stepper"><button data-act="step" data-v="mins|-5">−</button><input id="fMins" type="number" inputmode="numeric" value="${draft.mins || ''}" placeholder="0"><button data-act="step" data-v="mins|5">＋</button></div>
+      <div class="chips">${[15, 30, 45, 60, 90].map(n => `<button class="chip" data-act="set" data-v="mins|${n}">${n}</button>`).join('')}</div></div>
+    <div class="blk"><label>哪天</label><div class="chips" style="margin:6px 0 8px"><button class="chip ${draft.d === t ? 'on' : ''}" data-act="day" data-v="${t}">今天</button><button class="chip ${draft.d === y ? 'on' : ''}" data-act="day" data-v="${y}">昨天</button></div>
+      <input type="date" id="fDate" value="${draft.d}" max="${t}"></div>
+    <input id="fNote" placeholder="备注，如 不背单词 List 3（可不填）" maxlength="30" enterkeyhint="done" value="${esc(draft.note)}" style="background:var(--card);margin-bottom:10px">
+    <button class="btn wide" data-act="save">✓ 记好了</button>`;
+  openSheet();
+}
+async function saveEntry(){
+  const words = Math.max(0, parseInt($('#fWords').value) || 0), mins = Math.max(0, parseInt($('#fMins').value) || 0);
+  if (!words && !mins) return toast('单词数和分钟至少填一个');
+  if ((words > 1000 || mins > 600) && !await ask('确认一下', `${words} 个词、${mins} 分钟，对吗？`, [{t:'对，记上', v:1, primary:true}, {t:'我再看看', v:0}])) return;
+  const before = dayMap(S.logs.filter(l => l.d === today()))[today()];
+  const rec = {id:draft.id || uid(), d:$('#fDate').value || today(), words, mins, kind:draft.kind, note:$('#fNote').value.trim(), ts:draft.ts || Date.now()};
+  if (draft.id) S.logs[S.logs.findIndex(l => l.id === rec.id)] = rec; else S.logs.push(rec);
+  S.settings.lastKind = rec.kind; save(); closeSheet(); render();
+  if (draft.id) return toast('改好了 ✓');
+  const after = dayMap(S.logs.filter(l => l.d === today()))[today()];
+  if (rec.d === today() && goalMet(after) && !goalMet(before)) toast(`🎉 今天的目标完成了！连续打卡 ${streakInfo().cur} 天`);
+  else if (rec.d === today()) toast(`记好了 ✓ 今天共 ${after.words} 词、${dur(after.mins)}`);
+  else toast(`记好了 ✓ ${md(rec.d)}`);
+}
+
+/* ---------- 备份 ---------- */
+async function shareFile(name, text, type){
+  const file = new File([text], name, {type});
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try { await navigator.share({files:[file]}); return true; } catch (e) { if (e.name === 'AbortError') return false; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return true;
+}
+async function importFile(file){
+  let data; try { data = JSON.parse(await file.text()); } catch (e) { data = null; }
+  if (!data || !Array.isArray(data.logs)) return toast('这不是背词日记的备份文件');
+  // 合并：只加手机里还没有的记录（按编号判断），导两次也不会重复
+  const have = new Set(S.logs.map(l => l.id)), add = data.logs.filter(l => !have.has(l.id));
+  const c = await ask('从文件导入', `文件里有 ${data.logs.length} 条记录，其中 ${add.length} 条是手机里还没有的。`, [{t:`把这 ${add.length} 条加进来（推荐）`, v:'merge', primary:true}, {t:'整个换成文件里的', v:'replace', danger:true}, {t:'不了', v:null}]);
+  if (c === 'merge') { S.logs.push(...add); save(); render(); toast(`加好了 ✓ 新增 ${add.length} 条`); }
+  else if (c === 'replace' && await ask('再确认一次', '现在手机里的记录会全部换掉。', [{t:'确定换掉', v:1, danger:true}, {t:'不了', v:0, primary:true}])) {
+    const f = fresh(); S = Object.assign(f, data, {settings:Object.assign(f.settings, data.settings)}); save(); render(); toast('恢复好了 ✓');
+  }
+}
+
+/* ---------- 页面与操作 ---------- */
+let tab = 'today', tick = null;
+function go(t){ tab = t; $$('.page').forEach(p => p.classList.toggle('on', p.id === t)); $$('nav.tabs [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === t)); render(); scrollTo(0, 0); }
+function render(){
+  ({today:renderToday, log:renderLog, stats:renderStats, set:renderSet})[tab]();
+  clearInterval(tick);
+  if (S.timer && tab === 'today') tick = setInterval(() => { const c = $('#clock'); if (c) c.textContent = timerText(); }, 1000);
+}
+const actions = {
+  go, add: () => openEntry(), close: closeSheet, save: saveEntry,
+  edit: id => { const l = S.logs.find(x => x.id === id); if (l) openEntry(l); },
+  kind: v => { draft.kind = v; $$('#entry .chip[data-act=kind]').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  step: v => { const [k, n] = v.split('|'), el = $(k === 'words' ? '#fWords' : '#fMins'); el.value = Math.max(0, (parseInt(el.value) || 0) + +n) || ''; },
+  set: v => { const [k, n] = v.split('|'); $(k === 'words' ? '#fWords' : '#fMins').value = n; },
+  day: v => { $('#fDate').value = v; $$('#entry .chip[data-act=day]').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  del: async () => {
+    if (!await ask('删掉这条记录？', '删了就找不回来了。', [{t:'删掉', v:1, danger:true}, {t:'不删', v:0}])) return;
+    S.logs = S.logs.filter(l => l.id !== draft.id); save(); closeSheet(); render(); toast('删掉了');
+  },
+  timerStart: () => { S.timer = {start:Date.now(), kind:S.settings.lastKind || '词'}; save(); render(); toast('开始计时，关掉 App 也会继续算'); },
+  timerStop: async () => {
+    const mins = Math.round((Date.now() - S.timer.start) / 60000), kind = S.timer.kind;
+    if (mins < 1) {
+      if (!await ask('不到 1 分钟', '要放弃这次计时吗？', [{t:'放弃', v:1}, {t:'继续计时', v:0, primary:true}])) return;
+      S.timer = null; save(); return render();
+    }
+    S.timer = null; save(); render();
+    openEntry(null, {mins, kind});
+    toast(`这次学了 ${dur(mins)}，填上单词数就能记好`);
+  },
+  logNav: v => { logMonth = Math.min(0, logMonth + +v); renderLog(); },
+  stKind: v => { stKind = v; stOff = 0; renderStats(); },
+  stNav: v => { stOff = Math.min(0, stOff + +v); renderStats(); },
+  stMetric: v => { stMetric = v; renderStats(); },
+  tip: v => toast(v),
+  backup: async () => {
+    if (!await shareFile(`背词日记备份-${today()}.json`, JSON.stringify(S), 'application/json')) return;
+    S.settings.lastBackup = Date.now(); save(); render(); toast('备份好了 ✓ 记得选「存储到文件」');
+  },
+  restore: () => $('#fileIn').click(),
+  exportCsv: () => {
+    const rows = [['日期', '学了什么', '单词数', '分钟', '备注']].concat(sorted(S.logs).map(l => [l.d, (KINDS.find(k => k[0] === l.kind) || ['', ''])[1], l.words, l.mins, l.note || '']));
+    shareFile(`背词日记-${today()}.csv`, '﻿' + rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n'), 'text/csv');
+  },
+  reset: async () => {
+    if (!await ask('清空所有记录？', '没有备份就找不回来了。', [{t:'全部清空', v:1, danger:true}, {t:'不清空', v:0, primary:true}])) return;
+    S = fresh(); save(); render(); toast('已清空');
+  },
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (!el) return; const fn = actions[el.dataset.act]; if (fn) fn(el.dataset.v); });
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.set) {
+    const k = el.dataset.set;
+    S.settings[k] = ['wordGoal', 'minGoal'].includes(k) ? Math.max(1, parseInt(el.value) || 1) : el.value.trim();
+    save(); toast('已保存');
+  } else if (el.id === 'fDate' && el.value) { const v = el.value > today() ? today() : el.value; actions.day(v); }
+  else if (el.id === 'fileIn' && el.files[0]) { importFile(el.files[0]); el.value = ''; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
+// 按住弹层顶部往下拖可以关掉
+let drag = null;
+document.addEventListener('touchstart', e => { if (e.target.closest('.sheet-top')) drag = {y:e.touches[0].clientY, dy:0}; }, {passive:true});
+document.addEventListener('touchmove', e => { if (!drag) return; drag.dy = Math.max(0, e.touches[0].clientY - drag.y); if (drag.dy > 6) { const s = $('#entry'); s.style.transition = 'none'; s.style.transform = `translateY(${drag.dy}px)`; } }, {passive:true});
+const endDrag = () => { if (!drag) return; const dy = drag.dy; drag = null; const s = $('#entry'); s.style.transition = ''; s.style.transform = ''; if (dy > 80) closeSheet(); };
+document.addEventListener('touchend', endDrag); document.addEventListener('touchcancel', endDrag);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') render(); });
+
+go('today');
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/english/sw.js', {scope:'/english/'});
+navigator.storage?.persist?.().catch(() => {});
+</script>
+</body>
+</html>
