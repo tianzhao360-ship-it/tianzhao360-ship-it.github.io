@@ -74,7 +74,7 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 <div id="toast"></div>
 <script src="/cet6/data.js"></script>
 <script>
-const VERSION='v1.1', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const VERSION='v1.2', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
 const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true,online:true}};
 let S=load();
 function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
@@ -106,6 +106,7 @@ const GOOD=/Premium|Enhanced|高级|优化|Natural|Neural/i;
 function pickVoice(){if(!voices.length)loadVoices();return voices.find(v=>v.name===S.cfg.voice)||voices.find(v=>GOOD.test(v.name))||voices.find(v=>/Ava|Zoe|Evan|Samantha|Allison|Google US/i.test(v.name))||voices[0]||null}
 const AU=new Audio();AU.preload='auto';
 let warmAt=0;function warm(){if(!S.cfg.online||navigator.onLine===false||Date.now()-warmAt<60000)return;warmAt=Date.now();try{fetch('https://dict.youdao.com/dictvoice?type=2&audio=a',{mode:'no-cors',cache:'no-store'}).catch(()=>{})}catch(e){}}
+const sau=(v,u,i)=>'/cet6/audio/'+v+'-'+u+'-'+i+'.mp3';
 const isWord=t=>/^[A-Za-z][A-Za-z'’-]*$/.test(t)&&t.length<32;
 function tts(text,cb,my){
   if(!('speechSynthesis' in window)){toast('此浏览器不支持朗读');return}
@@ -114,18 +115,18 @@ function tts(text,cb,my){
   const go=()=>{if(my===spk)speechSynthesis.speak(u)};
   if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,90)}else go();
 }
-function speak(text,cb,chain){
+function speak(text,cb,chain,src){
   if(!chain&&playing){playing=0;updPlay()}
   const my=++spk;AU.onended=AU.onerror=AU.onplaying=null;AU.pause();clearTimeout(speak.t);
   if('speechSynthesis' in window&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();
-  if(S.cfg.online&&navigator.onLine!==false&&isWord(text)){
-    // 单词：有道词典美音真人发音；取不到（断网、超时、无此词）时退回系统语音
+  if(src||(S.cfg.online&&navigator.onLine!==false&&isWord(text))){
+    // 整句：播放预生成的自然语音文件；单词：有道词典美音真人发音。取不到时退回系统语音
     let dead=false;const fall=()=>{if(dead||my!==spk)return;dead=true;clearTimeout(speak.t);AU.onended=AU.onerror=AU.onplaying=null;AU.pause();tts(text,cb,my)};
-    AU.src='https://dict.youdao.com/dictvoice?type=2&audio='+encodeURIComponent(text.replace(/’/g,"'"));
-    AU.playbackRate=Math.max(0.75,Math.min(1.1,S.cfg.rate+0.1));
+    AU.src=src||'https://dict.youdao.com/dictvoice?type=2&audio='+encodeURIComponent(text.replace(/’/g,"'"));
+    AU.defaultPlaybackRate=AU.playbackRate=src?S.cfg.rate:Math.max(0.75,Math.min(1.1,S.cfg.rate+0.1));
     AU.onplaying=()=>clearTimeout(speak.t);
     AU.onended=()=>{if(!dead&&my===spk&&cb)cb()};AU.onerror=fall;
-    speak.t=setTimeout(fall,4000);
+    speak.t=setTimeout(fall,src?6000:4000);
     const p=AU.play();if(p&&p.catch)p.catch(fall);
     return;
   }
@@ -248,14 +249,14 @@ VIEW.me=()=>{const vs=voices.length?voices:[];
   <h2>发音</h2><div class="card">
   <div class="row"><span class="grow">单词用在线真人发音<div class="sub">有道词典美音，需联网；取不到时自动改用系统语音</div></span><button data-a="online" class="${S.cfg.online?'pri':''}">${S.cfg.online?'开':'关'}</button></div>
   <button class="full" data-a="spk" data-t="curriculum">试听单词 curriculum</button>
-  <div class="sub" style="margin-top:10px">整句和短文朗读用手机系统语音。带“Premium / Enhanced / 高级 / 优化”的更自然，会自动优先选用。</div><select id="voice" style="margin:6px 0 10px"><option value="">自动选择（优先高质量）</option>${vs.map(v=>`<option ${v.name===S.cfg.voice?'selected':''}>${esc(v.name)}</option>`).join('')}</select>
+  <div class="sub" style="margin-top:10px">短文里的整句和全文朗读播放预先生成的自然语音（美式女声），需联网，听过的会被浏览器暂存。下面的系统语音只在取不到音频时，以及朗读搭配短语时使用。</div><select id="voice" style="margin:6px 0 10px"><option value="">自动选择（优先高质量）</option>${vs.map(v=>`<option ${v.name===S.cfg.voice?'selected':''}>${esc(v.name)}</option>`).join('')}</select>
   <div class="row"><span class="grow">语速 <b id="rv">${S.cfg.rate}</b></span><input id="rate" type="range" min="0.5" max="1.2" step="0.1" value="${S.cfg.rate}" style="flex:2;padding:0"></div>
   <div class="row" style="margin-top:10px"><span class="grow">点单词时自动发音</span><button data-a="auto" class="${S.cfg.auto?'pri':''}">${S.cfg.auto?'开':'关'}</button></div>
   <button class="full" data-a="spk" data-t="Words are easier to retain when you meet them in context.">试听一句</button>
-  <div class="sub">想让整句朗读更像真人：iPhone 设置 → 辅助功能 → 朗读内容 → 声音 → 英语，下载 Ava、Zoe 或 Evan 的“高级/优化”版本，然后回到这里在上面的列表里选它（列表里没出现就说明系统没有把它开放给网页）。</div></div>
+  <div class="sub">备用系统语音想更自然：iPhone 设置 → 辅助功能 → 朗读内容 → 声音 → 英语，下载 Ava、Zoe 或 Evan 的“高级/优化”版本，再回到上面的列表里选它（列表里没出现就说明系统没有把它开放给网页）。</div></div>
   <h2>学习数据</h2><div class="card"><div class="sub">数据只保存在这部手机的浏览器里，换手机或清除数据前请先备份。</div>
   <button class="full" data-a="export">导出备份</button><button class="full" data-a="import">从备份恢复</button><button class="full bad" data-a="reset">清空全部学习记录</button></div>
-  <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考<br>单词发音来自有道词典在线接口</div>`};
+  <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考<br>单词发音来自有道词典在线接口，整句语音由微软神经网络语音预先生成</div>`};
 
 /* ---------- sheets ---------- */
 function sheet(html){const s=$('#sheet');s.innerHTML=`<div data-a="noop">${html}<button class="full ghost" data-a="closeSheet">关闭</button></div>`;s.classList.add('on')}
@@ -264,7 +265,7 @@ function wordSheet(i,form){const x=W[i];if(S.cfg.auto)speak(x.w);
   sheet(`<div class="row"><div class="grow"><h3>${esc(x.w)}</h3><span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}" style="font-size:26px">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}" style="font-size:26px">${S.star[x.w]?'★':'☆'}</button></div>
   ${form&&form.toLowerCase()!==x.w.toLowerCase()?`<div class="sub">文中形式：<span class="en">${esc(form)}</span></div>`:''}
   <p style="font-size:18px;margin:10px 0 6px">${esc(x.m)}</p>
-  <div class="row"><div class="grow"><span class="en">${esc(x.c)}</span> <span class="sub">${esc(x.cz)}</span></div><button class="ic" data-a="spk" data-t="${esc(x.c)}">🔊</button></div>
+  <div class="row"><div class="grow"><span class="en">${esc(x.c)}</span> <span class="sub">${esc(x.cz)}</span></div><button class="ic" data-a="spk" data-t="${esc(x.c)}" data-s="/cet6/audio/c-${esc(x.w.toLowerCase())}.mp3">🔊</button></div>
   ${x.h?`<p class="sub">💡 ${esc(x.h)}</p>`:''}
   <div class="sub">第${CN[x.v+1]}册 · 第 ${x.u+1} 天 · ${esc(VOLS[x.v][x.u].t)}</div>
   ${view.name==='unit'&&view.v===x.v&&view.u===x.u?'':`<button class="full" data-a="open" data-v="${x.v}" data-u="${x.u}">去这个单元看短文</button>`}`)}
@@ -280,16 +281,16 @@ const A={
   tab:d=>go({name:d.t}),noop:()=>{},closeSheet:closeSheet,back:back,
   open:d=>{closeSheet();warm();const v={name:'unit',v:+d.v,u:+d.u};if(view.name==='unit')go(v,false);else{view.y=window.scrollY;go(v,true)}},
   vol:d=>{view.v=+d.v;render()},
-  spk:d=>speak(d.t),
+  spk:d=>speak(d.t,null,false,d.s),
   word:(d,el)=>{if(el.classList.contains('mk')){el.classList.remove('mk');el.textContent=d.f;return}wordSheet(+d.i,d.f)},
   tok:d=>tokSheet(d.t),
   showw:(d,el)=>{if(view.hide)el.classList.toggle('show')},
   star:(d,el)=>{const w=W[+d.i].w;if(S.star[w])delete S.star[w];else S.star[w]=1;save();el.classList.toggle('on',!!S.star[w]);el.textContent=S.star[w]?'★':'☆';toast(S.star[w]?'已收藏':'已取消收藏')},
-  say:d=>{const p=VOLS[view.v][view.u].s[+d.si];speak(p[0].replace(/[\[\]]/g,''))},
+  say:d=>{const p=VOLS[view.v][view.u].s[+d.si];speak(p[0].replace(/[\[\]]/g,''),null,false,sau(view.v,view.u,+d.si))},
   tr:d=>$('#t'+d.si).classList.toggle('on'),
   zh:()=>{view.zh=!view.zh;render()},cloze:()=>{view.cloze=!view.cloze;render()},hide:()=>{view.hide=!view.hide;render()},
   rate:()=>{const r=[0.7,0.8,0.9,1,1.1];S.cfg.rate=r[(r.indexOf(S.cfg.rate)+1)%r.length]||0.9;save();render()},
-  read:()=>{if(playing===1)return stopAll();stopAll();playing=1;updPlay();const U=VOLS[view.v][view.u];let i=0;const nx=()=>{document.querySelectorAll('.sen.hl').forEach(e=>e.classList.remove('hl'));if(playing!==1||i>=U.s.length){if(playing===1)stopAll();return}const e=$('#s'+i);if(e){e.classList.add('hl');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(U.s[i][0].replace(/[\[\]]/g,''),()=>{i++;nx()},true)};nx()},
+  read:()=>{if(playing===1)return stopAll();stopAll();playing=1;updPlay();const U=VOLS[view.v][view.u];let i=0;const nx=()=>{document.querySelectorAll('.sen.hl').forEach(e=>e.classList.remove('hl'));if(playing!==1||i>=U.s.length){if(playing===1)stopAll();return}const e=$('#s'+i);if(e){e.classList.add('hl');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(U.s[i][0].replace(/[\[\]]/g,''),()=>{i++;setTimeout(nx,350)},true,sau(view.v,view.u,i))};nx()},
   loop:()=>{if(playing===2)return stopAll();stopAll();playing=2;updPlay();const L=unitWords(view.v,view.u);let i=0,rep=0;const nx=()=>{document.querySelectorAll('.w.on').forEach(e=>e.classList.remove('on'));if(playing!==2||i>=L.length){if(playing===2)stopAll();return}const e=$('#w'+L[i]);if(e){e.classList.add('on');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(W[L[i]].w,()=>setTimeout(()=>{if(playing!==2)return;if(++rep>=2){rep=0;i++}nx()},rep?1400:600),true)};nx()},
   learn:()=>{const k=key(view.v,view.u);if(S.learned[k]){if(!confirm('取消“已学”会清除这个单元的复习进度，确定吗？'))return;delete S.learned[k];delete S.rev[k]}else{S.learned[k]=today();logStudy(VOLS[view.v][view.u].w.length);toast('已加入复习计划：明天第一次复习')}save();render()},
   pracUnit:()=>{view.y=window.scrollY;startPractice(unitWords(view.v,view.u),'mix')},
