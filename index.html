@@ -6,302 +6,1332 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="六级词汇">
-<meta name="theme-color" content="#f4f6fa" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="/cet6/icon-180.png">
-<link rel="manifest" href="/cet6/manifest.webmanifest">
-<title>六级语境词汇</title>
+<meta name="apple-mobile-web-app-title" content="Self restraint">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<title>Self restraint</title>
 <style>
-:root{--bg:#f4f6fa;--card:#fff;--text:#1c2430;--soft:#6a7686;--line:#e3e8ef;--pri:#2f6fde;--prib:#e6efff;--red:#d6336c;--redb:#ffe6ef;--ok:#1f9d63;--okb:#e0f6ea;--warn:#e07a00;--warnb:#fff1dc}
-@media (prefers-color-scheme: dark){:root{--bg:#0f1318;--card:#1a2029;--text:#e8edf4;--soft:#93a0b2;--line:#2a323e;--pri:#6ea0ff;--prib:#1c2a44;--red:#ff7aa5;--redb:#3a1c28;--ok:#4fd39a;--okb:#143326;--warn:#ffb454;--warnb:#3a2a12}}
+:root{--bg:#f2f2f7;--card:#fff;--text:#1c1c1e;--sub:#8e8e93;--line:#e5e5ea;--fill:#e9e9ef;--accent:#5e5ce6;--ok:#34c759;--warn:#ff9f0a;--over:#ff3b30}
+@media (prefers-color-scheme: dark){:root{--bg:#000;--card:#1c1c1e;--text:#f2f2f7;--sub:#98989f;--line:#2c2c2e;--fill:#2c2c2e;--accent:#7d7aff;--ok:#30d158;--warn:#ff9f0a;--over:#ff453a}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-text-size-adjust:100%}
-body{padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 76px)}
-h1{font-size:24px;margin:6px 2px 12px}h2{font-size:17px;margin:18px 2px 8px}
-.card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.row{display:flex;align-items:center;gap:10px}.grow{flex:1;min-width:0}.sub{color:var(--soft);font-size:13px}
-.en{font-family:"Helvetica Neue",Arial,sans-serif}
-button,.btn{font:inherit;border:0;border-radius:11px;padding:10px 14px;background:var(--prib);color:var(--pri);font-weight:600;cursor:pointer}
-button.pri{background:var(--pri);color:#fff}button.ghost{background:transparent;color:var(--soft);padding:6px 8px}
-button.ok{background:var(--okb);color:var(--ok)}button.bad{background:var(--redb);color:var(--red)}
-button.full{display:block;width:100%;margin:8px 0;padding:13px}
-button:disabled{opacity:.45}
-input,select,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;width:100%}
-.bar{height:8px;background:var(--line);border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--pri);border-radius:5px}
-.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.stat b{display:block;font-size:22px}
-#tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px);z-index:5}
-#tabs a{flex:1;text-align:center;font-size:11px;color:var(--soft);padding:4px 0}#tabs a b{display:block;font-size:20px;font-weight:400;line-height:1.2}#tabs a.on{color:var(--pri)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px}.chips button{white-space:nowrap;padding:7px 13px;background:var(--card);color:var(--soft)}.chips button.on{background:var(--pri);color:#fff}
-.ul{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}.ul:last-child{border:0}
-.tag{font-size:11px;border-radius:20px;padding:2px 8px;background:var(--line);color:var(--soft);white-space:nowrap}.tag.ok{background:var(--okb);color:var(--ok)}.tag.due{background:var(--warnb);color:var(--warn)}
-.story{font-family:"Helvetica Neue",Arial,sans-serif;font-size:18px;line-height:1.95}
-.story .tg{color:var(--red);background:var(--redb);border-radius:5px;padding:1px 4px;font-weight:700}
-.story .tg.mk{letter-spacing:1px}
-.story .sen.hl{background:var(--prib);border-radius:6px}
-.story .chip{font-style:normal;font-size:12px;color:var(--pri);background:var(--prib);border-radius:9px;padding:2px 6px;margin-left:4px;font-family:-apple-system,"PingFang SC",sans-serif;white-space:nowrap}
-.story .tr{display:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:14.5px;line-height:1.6;color:var(--soft);border-left:3px solid var(--pri);padding-left:9px;margin:4px 0 8px}
-.story .tr.on{display:block}
-.gl{font-size:13.5px;color:var(--soft);line-height:1.9}.gl b{color:var(--text);font-family:"Helvetica Neue",Arial,sans-serif;font-weight:600}
-.w{padding:11px 0;border-bottom:1px solid var(--line)}.w:last-child{border:0}.w.on{background:var(--prib);border-radius:10px;padding-left:8px;padding-right:8px}
-.w .hw{font-family:"Helvetica Neue",Arial,sans-serif;font-size:18px;font-weight:700;color:var(--pri)}
-.ipa{font-family:"Lucida Sans Unicode","Helvetica Neue",Arial,sans-serif;color:var(--soft);font-size:14px}
-.w .m{font-size:15px;margin-top:2px}.w .c{font-size:14px;color:var(--soft);margin-top:2px}.w .c span{font-family:"Helvetica Neue",Arial,sans-serif;color:var(--text)}
-.hide .w .m,.hide .w .c{filter:blur(6px)}.hide .w.show .m,.hide .w.show .c{filter:none}
-.ic{background:transparent;color:var(--pri);padding:6px 8px;font-size:18px}
-.star{background:transparent;padding:6px 8px;font-size:20px;color:var(--soft)}.star.on{color:var(--warn)}
-.tools{display:flex;gap:8px;flex-wrap:wrap}.tools button{padding:8px 12px;font-size:14px}
-.tools button.on{background:var(--pri);color:#fff}
-.sheet{position:fixed;left:0;right:0;bottom:0;top:0;background:rgba(0,0,0,.35);display:none;z-index:20;align-items:flex-end}
-.sheet.on{display:flex}
-.sheet>div{background:var(--card);width:100%;max-height:calc(100% - env(safe-area-inset-top) - 60px);overflow:auto;border-radius:18px 18px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px)}
-.sheet h3{font-family:"Helvetica Neue",Arial,sans-serif;font-size:26px;margin:0}
-.q{text-align:center;padding:22px 6px}.q .big{font-family:"Helvetica Neue",Arial,sans-serif;font-size:32px;font-weight:700}.q .zhq{font-size:21px;font-weight:600}
-.opt{display:block;width:100%;text-align:left;margin:9px 0;padding:14px;background:var(--card);color:var(--text);font-weight:500;border:1px solid var(--line)}
-.opt.r{background:var(--okb);color:var(--ok);border-color:var(--ok)}.opt.x{background:var(--redb);color:var(--red);border-color:var(--red)}
-.fb{border-radius:12px;padding:12px;margin:10px 0;background:var(--okb)}.fb.x{background:var(--redb)}
-#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);background:rgba(20,25,32,.92);color:#fff;border-radius:20px;padding:8px 16px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;white-space:nowrap}
-#toast.on{opacity:1}
-.back{background:transparent;color:var(--pri);padding:6px 2px;font-weight:600}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-text-size-adjust:100%}
+body{padding-top:env(safe-area-inset-top);overscroll-behavior-y:none}
+main{padding:4px 16px calc(100px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;padding:10px 0 14px}
+h1{font-size:30px;margin:0;font-weight:800;letter-spacing:-.5px}
+h4{margin:22px 4px 6px;font-size:13px;font-weight:500;color:var(--sub)}
+p{margin:8px 0}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+.muted{color:var(--sub);font-size:13px}.xs{font-size:11px}
+.big{font-size:42px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1.15;margin:2px 0 10px}
+.big2{font-size:26px;font-weight:700;margin:4px 0 8px;font-variant-numeric:tabular-nums}
+.num{font-size:24px;font-weight:700}
+.red{color:var(--over)}.green{color:var(--ok)}
+.split{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.right{text-align:right}
+.lv-ok{--lv:var(--ok)}.lv-warn{--lv:var(--warn)}.lv-over{--lv:var(--over)}.lv-none{--lv:var(--accent)}
+.bar{height:10px;border-radius:5px;background:var(--fill);overflow:hidden;margin:6px 0}
+.bar.sm{height:6px}
+.bar>i{display:block;height:100%;border-radius:inherit;background:var(--lv,var(--accent));transition:width .4s}
+.hero.lv-over .big{color:var(--over)}
+.tip{margin-top:10px;padding:8px 10px;border-radius:10px;font-size:14px;background:color-mix(in srgb,var(--lv) 14%,transparent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mini{background:var(--card);border-radius:14px;padding:12px}
+.mini b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.notice{background:color-mix(in srgb,var(--accent) 14%,var(--card));font-size:15px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line)}
+.row:last-child{border-bottom:0}
+.ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none}
+.mid{flex:1;min-width:0}
+.mid>div:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row>b{font-variant-numeric:tabular-nums}
+.tag{color:var(--warn)}
+.empty{color:var(--sub);text-align:center;padding:22px 8px;font-size:14px}
+.alert{display:grid;grid-template-columns:1fr auto;padding-top:10px;font-size:14px}
+.alert .bar{grid-column:1/-1}
+.dayh{display:flex;justify-content:space-between;color:var(--sub);font-size:13px;margin:16px 4px 6px}
+button{font:inherit;color:inherit;cursor:pointer}
+.icon{width:38px;height:38px;border:0;border-radius:50%;background:var(--card);display:grid;place-items:center;color:var(--text);font-size:22px}
+.icon:disabled{opacity:.3}
+.icon svg{width:20px;height:20px}
+.link{border:0;background:none;color:var(--accent);padding:6px 4px;font-size:15px}
+.link.danger,.danger{color:var(--over)}.link.green{color:var(--ok)}
+.btn{border:0;border-radius:10px;background:var(--accent);color:#fff;padding:10px 14px;font-weight:600;white-space:nowrap}
+input,select{font:inherit;font-size:16px;color:var(--text);background:var(--fill);border:0;border-radius:10px;padding:10px 12px;width:100%;min-width:0;outline:none;-webkit-appearance:none;appearance:none}
+input[type=search]{background:var(--card);margin-bottom:10px}
+.seg{display:flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:7px 4px;border-radius:8px;font-size:14px}
+.seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.monthnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:0 -16px 4px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;background:var(--card);border-radius:16px;padding:6px 12px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.stat3 b{display:block;font-size:17px}
+svg.chart{width:100%;height:auto;display:block;margin-top:8px}
+.ax{fill:var(--sub);font-size:9px;text-anchor:middle}
+.b0{fill:var(--accent)}.b1{fill:var(--over)}.bl{stroke:var(--warn);stroke-dasharray:4 3;stroke-width:1}
+.donutwrap{display:flex;justify-content:center;margin:6px 0}
+.donut{width:180px;height:180px}
+.donut .track{stroke:var(--fill)}
+.dt1{font-size:3px;fill:var(--sub);text-anchor:middle}.dt2{font-size:4.4px;fill:var(--text);font-weight:700;text-anchor:middle}
+.catrow{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;padding:8px 0}
+.catrow .bar{grid-column:2/-1;margin:0}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.heat div{aspect-ratio:1;border-radius:8px;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--fill);line-height:1.1}
+.heat div small{font-size:8px;opacity:.85}
+.heat .hd{background:none;aspect-ratio:auto;color:var(--sub)}
+.heat .pad0{background:none}
+.heat .today{outline:2px solid var(--accent)}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--sub);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;background:var(--lv);vertical-align:-1px}
+.wishform{display:grid;grid-template-columns:1fr 90px auto;gap:6px;margin:10px 0}
+.wish{display:flex;align-items:center;gap:6px;padding:10px 0;border-bottom:.5px solid var(--line)}
+.wish:last-child{border-bottom:0}
+.group{background:var(--card);border-radius:14px;padding:0 14px}
+.fld{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:.5px solid var(--line);font-size:15px;min-height:46px}
+.fld:last-child{border-bottom:0}
+.fld>span:first-child{flex:1;min-width:6.5em}
+.fld input{max-width:120px;text-align:right}
+.fld input[type=date]{max-width:150px}
+.fld select{width:auto;max-width:170px;flex:none}
+.addrow{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0}
+.addrow input,.addrow select{flex:1 1 30%}
+.rowbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:13px 0;border-bottom:.5px solid var(--line);color:var(--accent);font-size:15px}
+.rowbtn:last-child{border-bottom:0}
+.note{font-size:13px;color:var(--sub);margin:6px 4px}
+.center{text-align:center}
+.switch{width:50px;height:30px;flex:none;border-radius:15px;background:var(--fill);position:relative;transition:.2s}
+.switch:checked{background:var(--ok)}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.2s}
+.switch:checked::after{left:22px}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:space-around;align-items:center;background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:.5px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav.tabs button{flex:1;background:none;border:0;color:var(--sub);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0}
+nav.tabs button.on{color:var(--accent)}
+nav.tabs svg{width:24px;height:24px}
+nav.tabs .add{flex:none;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;margin:-22px 8px 0;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 45%,transparent);justify-content:center}
+nav.tabs .add svg{width:28px;height:28px}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.38);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+.mask.on{opacity:1;pointer-events:auto}
+/* 弹层顶部必须避开状态栏/灵动岛：iOS 会吞掉状态栏区域的点击（用来"回到顶部"） */
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;max-height:90vh;max-height:calc(100dvh - env(safe-area-inset-top) - 12px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--bg);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);z-index:21;padding:0 16px calc(14px + env(safe-area-inset-bottom))}
+.sheet.on{transform:none}
+.sheet-top{position:sticky;top:0;z-index:2;background:var(--bg);margin:0 -16px 4px;padding:6px 16px 2px;touch-action:none}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 4px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;min-height:44px}
+.sheet-h .link{padding:10px 6px;font-size:16px}
+html.lock,html.lock body{overflow:hidden}
+.quick{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 10px;padding:0 16px;scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.setup{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.form,.form2{display:grid;gap:10px;margin:8px 0 10px}
+.form label,.form2 label{display:grid;gap:4px;font-size:13px;color:var(--sub)}
+.form input,.form select{background:var(--card)}
+.form input:disabled{opacity:.7}
+.btn.wide{width:100%;padding:13px;font-size:16px}
+.diff{font-size:14px;padding:10px 12px;border-radius:10px;background:var(--card)}
+.acctrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:10px 0 4px}
+.acct{border:0;background:var(--fill);border-radius:12px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:2px;min-width:0}
+.acct b{font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btnrow{display:flex;gap:8px;margin-top:10px}
+.btn2{flex:1;border:0;border-radius:10px;background:color-mix(in srgb,var(--accent) 14%,var(--card));color:var(--accent);padding:11px;font-weight:600}
+.warnline{font-size:14px;padding:8px 10px;border-radius:10px;margin-top:8px;background:color-mix(in srgb,var(--lv) 16%,transparent)}
+.accts{display:flex;gap:6px;align-items:center;overflow-x:auto;margin:10px -16px 0;padding:0 16px;scrollbar-width:none}
+.accts::-webkit-scrollbar{display:none}
+.accts .muted{flex:none}
+.calc{background:var(--fill);border-radius:12px;padding:10px 12px;margin:10px 0 6px;display:grid;gap:4px;font-size:15px}
+.calc .big-line{border-top:.5px solid var(--line);padding-top:6px;margin-top:2px;font-size:17px}
+.calc .big-line b{font-size:22px;color:var(--accent);font-variant-numeric:tabular-nums}
+.bill{border-left:3px solid var(--lv);padding:8px 0 8px 10px;margin-top:10px;display:grid;gap:3px}
+.btn2.sm{flex:none;padding:6px 12px;font-size:14px}
+.warnline .btn2.sm{margin-top:6px;display:block}
+.fld.sub{min-height:36px;padding-left:12px;font-size:14px}
+.smokebtn{border:0;border-radius:22px;background:var(--text);color:var(--bg);font-weight:700;font-size:17px;padding:10px 18px;flex:none}
+.smokebtn:active{transform:scale(.95)}
+.amt{text-align:right;padding:6px 4px 10px}
+.amt .expr{display:block;color:var(--sub);font-size:14px;min-height:20px}
+.amt .amtv{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums}
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.catb{border:1.5px solid transparent;background:var(--card);border-radius:12px;padding:6px 2px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.catb span{font-size:22px}
+.catb.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--card))}
+.fields{display:grid;grid-template-columns:1fr 140px;gap:8px;margin-top:10px}
+.fields input{background:var(--card)}
+.sheet .seg{margin:10px 0 0}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.pad button{height:50px;border:0;border-radius:12px;background:var(--card);font-size:22px}
+.pad button:active{opacity:.6}
+.pad .ok{grid-row:span 2;height:auto;background:var(--accent);color:#fff;font-size:18px;font-weight:600}
+.dialog{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);padding:24px}
+.dialog.on{display:flex}
+.dlg{background:var(--card);border-radius:18px;padding:20px 18px 12px;max-width:340px;width:100%}
+.dlg h3{margin:0 0 6px;font-size:18px}
+.dlg p{color:var(--sub);font-size:15px}
+.dbtns{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.dbtns button{border:0;border-radius:12px;padding:12px;background:var(--fill);font-size:16px}
+.dbtns .primary{background:var(--accent);color:#fff;font-weight:600}
+.dbtns .danger{background:var(--over);color:#fff}
+.toast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translate(-50%,-150%);z-index:50;background:var(--card);color:var(--text);padding:10px 16px;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.18);font-size:15px;max-width:92vw;transition:transform .3s;border-left:4px solid var(--lv)}
+.toast.on{transform:translate(-50%,0)}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<nav id="tabs"></nav>
-<div id="sheet" class="sheet" data-a="closeSheet"></div>
-<div id="toast"></div>
-<script src="/cet6/data.js"></script>
+<main>
+  <section class="page" id="home"></section>
+  <section class="page" id="list">
+    <header class="top"><h1>明细</h1></header>
+    <div class="monthnav">
+      <button class="icon" data-act="listNav" data-v="-1" aria-label="上个月">‹</button>
+      <b id="listMonth"></b>
+      <button class="icon" id="listNext" data-act="listNav" data-v="1" aria-label="下个月">›</button>
+    </div>
+    <input id="q" type="search" placeholder="搜索备注、分类、金额">
+    <div class="chips" id="listChips"></div>
+    <div id="listBody"></div>
+  </section>
+  <section class="page" id="stats"></section>
+  <section class="page" id="restraint"></section>
+</main>
+
+<nav class="tabs">
+  <button data-act="go" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>首页</button>
+  <button data-act="go" data-v="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>明细</button>
+  <button class="add" data-act="add" aria-label="记一笔"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button data-act="go" data-v="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M6 17v-5M11 17V6M16 17v-8M21 17v-3"/></svg>统计</button>
+  <button data-act="go" data-v="restraint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>克制</button>
+</nav>
+
+<div class="mask" id="mask" data-act="close"></div>
+<div class="sheet" id="addSheet"></div>
+<div class="sheet" id="setSheet"></div>
+<div class="sheet" id="flowSheet"></div>
+<div class="dialog" id="dialog"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" accept="application/json,.json" hidden>
+
 <script>
-const VERSION='v1.0', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
-const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true}};
-let S=load();
-function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
-const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
-const W=[],IDX={},UB=[];
-VOLS.forEach((vu,v)=>{UB[v]=[];vu.forEach((u,ui)=>{UB[v][ui]=W.length;u.w.forEach(r=>{IDX[r[0].toLowerCase()]=W.length;W.push({w:r[0],ipa:r[1],m:r[2],c:r[3],cz:r[4],h:r[5],v,u:ui})})})});
-const NU=VOLS.reduce((a,v)=>a+v.length,0);
-const $=s=>document.querySelector(s);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const pad=n=>String(n).padStart(2,'0');
-const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-const today=()=>dstr(new Date());
-const addDays=(s,n)=>{const [y,m,d]=s.split('-').map(Number);return dstr(new Date(y,m-1,d+n))};
-const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-const key=(v,u)=>v+'-'+u;
-const unitWords=(v,u)=>VOLS[v][u].w.map((_,i)=>UB[v][u]+i);
-function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1600)}
-function logStudy(n){S.log[today()]=(S.log[today()]||0)+(n||1);save()}
-function streak(){let n=0,d=today();if(!S.log[d])d=addDays(d,-1);while(S.log[d]){n++;d=addDays(d,-1)}return n}
-function dueUnits(){const t=today(),out=[];for(const k in S.learned){const c=S.rev[k]||0;if(c<5&&t>=addDays(S.learned[k],OFF[c])){const [v,u]=k.split('-').map(Number);out.push({v,u,c})}}return out.sort((a,b)=>a.v-b.v||a.u-b.u)}
-function nextUnit(){for(let v=0;v<VOLS.length;v++)for(let u=0;u<VOLS[v].length;u++)if(!S.learned[key(v,u)])return{v,u};return null}
-const mastered=()=>W.filter(x=>(S.ok[x.w]||0)>=2&&!S.wrong[x.w]).length;
+'use strict';
+const KEY = 'selfrestraint.v1';
+const APP_VERSION = 'v1.3';
+const DEFAULT_CATS = [
+  {id:'food',   name:'餐饮',   emoji:'🍜', color:'#ff9f0a'},
+  {id:'snack',  name:'零食饮料', emoji:'🧋', color:'#ff6482'},
+  {id:'traffic',name:'交通',   emoji:'🚇', color:'#0a84ff'},
+  {id:'shop',   name:'购物',   emoji:'🛍️', color:'#bf5af2'},
+  {id:'fun',    name:'娱乐',   emoji:'🎮', color:'#5e5ce6'},
+  {id:'sub',    name:'充值订阅', emoji:'💳', color:'#ac8e68'},
+  {id:'daily',  name:'日用',   emoji:'🧴', color:'#64d2ff'},
+  {id:'study',  name:'学习',   emoji:'📚', color:'#30d158'},
+  {id:'phone',  name:'话费网络', emoji:'📱', color:'#5ac8fa'},
+  {id:'social', name:'人情社交', emoji:'🎁', color:'#ff453a'},
+  {id:'dress',  name:'服饰美妆', emoji:'👕', color:'#ffd60a'},
+  {id:'health', name:'医疗',   emoji:'💊', color:'#66d4cf'},
+  {id:'smoke',  name:'香烟',   emoji:'🚬', color:'#a2845e'},
+  {id:'other',  name:'其他',   emoji:'📦', color:'#8e8e93'},
+];
+const PALETTE = ['#ff9f0a','#ff6482','#0a84ff','#bf5af2','#30d158','#ffd60a','#64d2ff','#ff453a','#5e5ce6','#ac8e68'];
+const DAY_NAMES = ['日','一','二','三','四','五','六'];
 
-/* ---------- speech ---------- */
-let voices=[],spk=0,playing=0;
-function loadVoices(){if(!('speechSynthesis' in window))return;voices=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang))}
-if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
-function pickVoice(){if(!voices.length)loadVoices();return voices.find(v=>v.name===S.cfg.voice)||voices.find(v=>/Samantha|Ava|Allison|Google US/i.test(v.name))||voices[0]||null}
-function speak(text,cb,chain){
-  if(!('speechSynthesis' in window)){toast('此浏览器不支持朗读');return}
-  if(!chain&&playing){playing=0;updPlay()}
-  const my=++spk,u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=pickVoice();if(v)u.voice=v;u.rate=S.cfg.rate;
-  u.onend=()=>{if(my===spk&&cb)cb()};u.onerror=u.onend;
-  const go=()=>{if(my===spk)speechSynthesis.speak(u)};
-  if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,90)}else go();
+/* ---------- 数据 ---------- */
+function fresh(){
+  // accounts: 账户余额（分）。花呗/信用卡 type:'credit'，余额记成负数（欠多少）
+  // flows: 收入 in / 转账还款 move / 校准 fix，支出仍在 records 里（带 acct 字段）
+  // plans: 分期 {acct 挂在哪个花呗/白条, name, per 每期金额, left 剩余期数}；smokes: 每根烟的时间戳
+  // income: 生活费周期 mode none/month/interval，genUntil 之前的到账日已经处理过
+  return {v:1, records:[], cats:DEFAULT_CATS.map(c=>({...c})), recurring:[], wishes:[], lastCat:'food',
+    accounts:[], flows:[], lastAcct:'', plans:[], smokes:[],
+    settings:{daily:0, weekly:0, monthly:0, big:20000, cooldown:72, catBudgets:{}, badge:false, lastOpen:'', lastBackup:0,
+      reserve:0, lowBal:10000, balanceGuard:true,
+      income:{mode:'none', day:1, every:15, last:'', amt:0, acct:'', auto:true, genUntil:''},
+      smokeOn:true, smokeGoal:0, packPrice:0, packSize:20}};
 }
-function stopAll(){playing=0;spk++;if('speechSynthesis' in window)speechSynthesis.cancel();updPlay()}
-function updPlay(){const a=$('#btnRead'),b=$('#btnLoop');if(a)a.textContent=playing===1?'■ 停止':'▶ 朗读全文';if(b)b.textContent=playing===2?'■ 停止连播':'▶ 连播单词';if(!playing){document.querySelectorAll('.sen.hl,.w.on').forEach(e=>e.classList.remove('hl','on'))}}
+function merge(s){
+  const f = fresh(), m = Object.assign(f, s, {settings:Object.assign(f.settings, s.settings)});
+  m.settings.income = Object.assign(fresh().settings.income, m.settings.income);
+  // v1.2 只有「每月几号到账」，迁移过来
+  // 注意：merge 在启动时、日期工具函数定义之前就会运行，这里不能用 ymd()
+  const n = new Date(), td = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  if (m.settings.payday && m.settings.income.mode === 'none') Object.assign(m.settings.income, {mode:'month', day:m.settings.payday, genUntil:td});
+  delete m.settings.payday;
+  if (!m.cats.some(c => c.id === 'smoke')) m.cats.splice(Math.max(0, m.cats.findIndex(c => c.id === 'other')), 0, {...DEFAULT_CATS.find(c => c.id === 'smoke')});
+  return m;
+}
+function load(){
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); if (raw) return merge(JSON.parse(raw)); }
+  catch (e) { if (raw) try { localStorage.setItem(KEY + '.unreadable', raw); } catch (e2) {} } // 读不出来也先留一份原始数据，别被新数据覆盖掉
+  return fresh();
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：手机存储空间可能不足', 'over'); }
+}
+let S = load();
 
-/* ---------- views ---------- */
-let view={name:'home'},stack=[];
-function go(v,push){if(push)stack.push(view);else if(push===false){}else stack=[];stopAll();view=v;render();window.scrollTo(0,0)}
-function back(){stopAll();view=stack.pop()||{name:'home'};render();window.scrollTo(0,view.y||0)}
-const TABS=[['home','今日','◐'],['book','课本','▤'],['prac','练习','✎'],['words','生词本','☆'],['me','我的','☺']];
-function render(){
-  const root={home:'home',book:'book',unit:'book',prac:'prac',quiz:'prac',done:'prac',words:'words',me:'me'}[view.name];
-  $('#tabs').innerHTML=TABS.map(t=>`<a class="${t[0]===root?'on':''}" data-a="tab" data-t="${t[0]}"><b>${t[2]}</b>${t[1]}</a>`).join('');
-  $('#tabs').style.display=view.name==='quiz'?'none':'flex';
-  $('#app').innerHTML=VIEW[view.name]();
-  if(view.name==='quiz')afterQuiz();
-}
-const VIEW={};
-VIEW.home=()=>{
-  const lu=Object.keys(S.learned).length,ms=mastered(),due=dueUnits(),nx=nextUnit();
-  return `<h1>六级语境词汇</h1>
-  <div class="card"><div class="stat"><div><b>${streak()}</b><span class="sub">连续天数</span></div><div><b>${lu}<small class="sub">/${NU}</small></b><span class="sub">已学单元</span></div><div><b>${ms}<small class="sub">/${W.length}</small></b><span class="sub">已掌握词</span></div></div>
-  <div class="bar" style="margin-top:12px"><i style="width:${Math.round(lu/NU*100)}%"></i></div></div>
-  <h2>今日新学</h2>
-  ${nx?`<div class="card row"><div class="grow"><div><b>第${CN[nx.v+1]}册 · 第 ${nx.u+1} 天</b></div><div class="sub">${esc(VOLS[nx.v][nx.u].t)} · ${VOLS[nx.v][nx.u].w.length} 个词</div></div><button class="pri" data-a="open" data-v="${nx.v}" data-u="${nx.u}">开始</button></div>`:'<div class="card">七册全部学完了 🎉</div>'}
-  <h2>今日复习 <span class="sub">${due.length?due.length+' 个单元到期':'暂无到期'}</span></h2>
-  ${due.length?'<div class="card" style="padding:2px 0">'+due.map(d=>`<div class="ul"><div class="grow"><div>第${CN[d.v+1]}册 · ${esc(VOLS[d.v][d.u].t)}</div><div class="sub">第 ${d.c+1}/5 次复习</div></div><button data-a="review" data-v="${d.v}" data-u="${d.u}">复习</button></div>`).join('')+'</div>':'<div class="card sub">学完一个单元后，会在第 1、2、4、7、15 天自动出现在这里。</div>'}
-  <h2>快捷入口</h2>
-  <div class="grid2"><button data-a="tab" data-t="words">生词本 ${Object.keys(S.star).length+Object.keys(S.wrong).length}</button><button data-a="quick">随机抽 20 词</button></div>`;
+/* ---------- 工具 ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate()+n); return x; };
+const startOfWeek = d => addDays(d, -((d.getDay()+6) % 7));
+const daysIn = d => new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+const dayDiff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const monthKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+const nextMonthKey = k => { const [y,m] = k.split('-').map(Number); return monthKey(new Date(y, m, 1)); };
+const md = d => `${d.getMonth()+1}/${d.getDate()}`;
+const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const today = () => ymd(new Date());
+// 金额一律用「分」存整数，避免 0.1+0.2 这类浮点误差
+const yuan = c => (c/100).toLocaleString('zh-CN', {minimumFractionDigits: c%100 ? 2 : 0, maximumFractionDigits: 2});
+const fmt = c => '¥' + yuan(c);
+const toCents = v => Math.round(parseFloat(v || 0) * 100) || 0;
+const pct = (a, b) => b ? Math.min(100, Math.round(a / b * 100)) : 0;
+const sum = rs => rs.reduce((a, r) => a + r.amt, 0);
+const inRange = (from, to) => S.records.filter(r => r.d >= from && r.d <= to);
+const dayMap = rs => rs.reduce((m, r) => (m[r.d] = (m[r.d] || 0) + r.amt, m), {});
+const sorted = rs => [...rs].sort((a, b) => b.d.localeCompare(a.d) || (b.tm||'').localeCompare(a.tm||'') || b.ts - a.ts);
+const catOf = id => S.cats.find(c => c.id === id) || S.cats.find(c => c.id === 'other') || DEFAULT_CATS[DEFAULT_CATS.length-1];
+const groupCat = rs => {
+  const m = {}; rs.forEach(r => { (m[r.cat] ||= {v:0, n:0}); m[r.cat].v += r.amt; m[r.cat].n++; });
+  return Object.entries(m).map(([id, x]) => ({c:catOf(id), id, ...x})).sort((a, b) => b.v - a.v);
 };
-VIEW.book=()=>{
-  const v=view.v||0,q=(view.q||'').trim().toLowerCase();
-  let body;
-  if(q){const hit=W.map((x,i)=>[x,i]).filter(([x])=>x.w.toLowerCase().includes(q)||x.m.includes(q)).sort((a,b)=>(a[0].w.toLowerCase().startsWith(q)?0:1)-(b[0].w.toLowerCase().startsWith(q)?0:1)).slice(0,40);
-    body=hit.length?'<div class="card" style="padding:2px 14px">'+hit.map(([x,i])=>wordRow(i,true)).join('')+'</div>':'<div class="card sub">没有找到</div>'}
-  else body=`<div class="chips">${VOLS.map((_,i)=>`<button class="${i===v?'on':''}" data-a="vol" data-v="${i}">第${CN[i+1]}册</button>`).join('')}</div>
-  <div class="card" style="padding:2px 0">${VOLS[v].map((u,i)=>{const k=key(v,i),c=S.rev[k]||0,due=S.learned[k]&&c<5&&today()>=addDays(S.learned[k],OFF[c]);
-    return `<div class="ul" data-a="open" data-v="${v}" data-u="${i}"><div class="grow"><div>${i+1}. ${esc(u.t)} <span class="sub en">${esc(u.e)}</span></div><div class="sub">${u.w.length} 词</div></div>${S.learned[k]?(due?'<span class="tag due">待复习</span>':`<span class="tag ok">已学 · 复习 ${c}/5</span>`):'<span class="tag">未学</span>'}</div>`}).join('')}</div>`;
-  return `<h1>课本</h1><input id="q" placeholder="搜索 2100 个词（英文或中文）" value="${esc(view.q||'')}" autocapitalize="off" autocorrect="off" spellcheck="false">${body}`;
-};
-function wordRow(i,loc){const x=W[i];return `<div class="w" id="w${i}" data-a="showw"><div class="row"><div class="grow"><span class="hw" data-a="word" data-i="${i}">${esc(x.w)}</span> <span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}">${S.star[x.w]?'★':'☆'}</button></div>
-  <div class="m">${esc(x.m)}</div><div class="c"><span>${esc(x.c)}</span> ${esc(x.cz)}</div>${loc?`<div class="sub">第${CN[x.v+1]}册 · ${esc(VOLS[x.v][x.u].t)}${S.wrong[x.w]?' · 错 '+S.wrong[x.w]+' 次':''}</div>`:(x.h?`<div class="sub">${esc(x.h)}</div>`:'')}</div>`}
-function mask(t){return esc(t[0])+'＿＿＿'}
-VIEW.unit=()=>{
-  const {v,u}=view,U=VOLS[v][u],k=key(v,u);let n=0;
-  const sents=U.s.map((p,si)=>{const html=p[0].replace(/\[([^\]]+)\]|([A-Za-zé][A-Za-zé'’-]*)/g,(m,t,o)=>{if(t){const i=UB[v][u]+n++;return `<b class="tg${view.cloze?' mk':''}" data-a="word" data-i="${i}" data-f="${esc(t)}">${view.cloze?mask(t):esc(t)}</b>`}return `<span data-a="tok" data-t="${esc(o)}">${esc(o)}</span>`});
-    return `<span class="sen" id="s${si}">${html}</span><i class="chip" data-a="say" data-si="${si}">🔊</i><i class="chip" data-a="tr" data-si="${si}">译</i><span class="tr${view.zh?' on':''}" id="t${si}">${esc(p[1])}</span>`}).join(' ');
-  return `<button class="back" data-a="back">‹ 返回</button>
-  <h1 style="margin-top:2px">${esc(U.t)} <span class="sub en" style="font-size:15px">${esc(U.e)}</span></h1>
-  <div class="sub" style="margin:-8px 2px 8px">第${CN[v+1]}册 · 第 ${u+1} 天 · 点任意单词看释义，点“译”看这句的翻译</div>
-  <div class="tools"><button id="btnRead" data-a="read">▶ 朗读全文</button><button class="${view.zh?'on':''}" data-a="zh">全文翻译</button><button class="${view.cloze?'on':''}" data-a="cloze">挖空</button><button data-a="rate">语速 ${S.cfg.rate}</button></div>
-  <div class="card story">${sents}</div>
-  ${U.g.length?`<div class="card gl"><span class="tag">其他生词</span> ${U.g.map(g=>`<b>${esc(g[0])}</b> ${esc(g[1])}`).join(' · ')}</div>`:''}
-  <h2>本单元 ${U.w.length} 个词</h2>
-  <div class="tools"><button id="btnLoop" data-a="loop">▶ 连播单词</button><button class="${view.hide?'on':''}" data-a="hide">遮住中文</button></div>
-  <div class="card ${view.hide?'hide':''}" style="padding:2px 14px">${unitWords(v,u).map(i=>wordRow(i)).join('')}</div>
-  <button class="full pri" data-a="pracUnit">练习本单元</button>
-  <button class="full ${S.learned[k]?'ok':''}" data-a="learn">${S.learned[k]?'✓ 已学（'+S.learned[k]+'），复习 '+(S.rev[k]||0)+'/5':'标记为已学，加入复习计划'}</button>`;
-};
-const MODES=[['mix','混合练习','三种题型随机出'],['card','认词卡片','看英文想意思，自己判断'],['en2zh','英选中','看单词选释义'],['zh2en','中选英','看释义选单词'],['listen','听音选义','只听发音选释义'],['spell','看义拼写','给首字母，拼出单词'],['dict','听写','听发音拼出单词']];
-VIEW.prac=()=>{
-  const sc=view.scope||'due',due=dueUnits(),bookN=Object.keys(S.star).length+Object.keys(S.wrong).length,pv=view.pv??(nextUnit()||{v:0}).v,pu=view.pu??0;
-  return `<h1>练习</h1><h2>练哪些词</h2>
-  <div class="chips">${[['due','到期复习 '+due.length],['unit','某个单元'],['book','生词本 '+bookN],['rand','随机 20 词']].map(s=>`<button class="${sc===s[0]?'on':''}" data-a="scope" data-s="${s[0]}">${s[1]}</button>`).join('')}</div>
-  ${sc==='unit'?`<div class="grid2"><select id="pv">${VOLS.map((_,i)=>`<option value="${i}" ${i==pv?'selected':''}>第${CN[i+1]}册</option>`).join('')}</select><select id="pu">${VOLS[pv].map((u,i)=>`<option value="${i}" ${i==pu?'selected':''}>${i+1}. ${esc(u.t)}</option>`).join('')}</select></div>`:''}
-  ${sc==='due'&&!due.length?'<div class="card sub">现在没有到期的单元，可以选“某个单元”或“随机 20 词”。</div>':''}
-  ${sc==='rand'?'<div class="card sub">从已学单元里随机抽 20 个；还没学过任何单元时从第一册抽。</div>':''}
-  <h2>怎么练</h2>
-  <div class="card" style="padding:2px 0">${MODES.map(m=>`<div class="ul" data-a="start" data-m="${m[0]}"><div class="grow"><div><b>${m[1]}</b></div><div class="sub">${m[2]}</div></div><span class="sub">›</span></div>`).join('')}</div>`;
-};
-function scopeList(){
-  const sc=view.scope||'due';
-  if(sc==='due')return dueUnits().flatMap(d=>unitWords(d.v,d.u));
-  if(sc==='unit')return unitWords(+(view.pv??(nextUnit()||{v:0}).v),+(view.pu??0));
-  if(sc==='book')return [...new Set([...Object.keys(S.wrong),...Object.keys(S.star)])].map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null);
-  const keys=Object.keys(S.learned);let pool=keys.length?keys.flatMap(k=>{const [v,u]=k.split('-').map(Number);return unitWords(v,u)}):W.slice(0,300).map((_,i)=>i);
-  return shuffle(pool).slice(0,20);
+
+function dayProgress(){ const n = new Date(); return (n.getHours()*60 + n.getMinutes()) / 1440; }
+function weekProgress(){ const n = new Date(); return (((n.getDay()+6) % 7) + dayProgress()) / 7; }
+function monthProgress(){ const n = new Date(); return (n.getDate() - 1 + dayProgress()) / daysIn(n); }
+
+// live=true 时把「余额撑得住多少」也算进日预算（取更严的那个）；评价过去的日子用 live=false
+function budgets(live = false){
+  const st = S.settings, dim = daysIn(new Date());
+  let daily = st.daily || (st.monthly ? Math.floor(st.monthly / dim) : 0);
+  let source = st.daily ? '' : daily ? 'month' : '';
+  const bi = live && st.balanceGuard ? balanceInfo() : null;
+  if (bi && (!daily || bi.perDay < daily)) { daily = Math.max(1, bi.perDay); source = 'balance'; }
+  const weekly = st.weekly || daily * 7;
+  return {daily, weekly, monthly: st.monthly, source, dailyDerived: source === 'month'};
 }
 
-/* ---------- quiz ---------- */
-let P=null;
-function startPractice(list,mode,ctx){if(!list.length){toast('这个范围里还没有词');return}P={list:shuffle(list),mode,i:0,right:0,miss:[],ctx:ctx||null,ans:null};go({name:'quiz'},true)}
-function qType(){if(P.type)return P.type;return P.type=P.mode==='mix'?['en2zh','zh2en','listen'][Math.floor(Math.random()*3)]:P.mode}
-function options(i,field){if(P.opts)return P.opts;const x=W[i],pool=shuffle(W.map((_,j)=>j).filter(j=>j!==i&&W[j].v===x.v&&W[j][field]!==x[field])).slice(0,3);return P.opts=shuffle([i,...pool])}
-VIEW.quiz=()=>{
-  const i=P.list[P.i],x=W[i],t=qType(),done=P.ans!==null;let body='';
-  const head=`<div class="row"><button class="back" data-a="quit">✕ 退出</button><div class="grow bar"><i style="width:${P.i/P.list.length*100}%"></i></div><span class="sub">${P.i+1}/${P.list.length}</span></div>`;
-  const fb=done?`<div class="fb ${P.ans?'':'x'}"><div class="row"><div class="grow"><b class="en" style="font-size:20px">${esc(x.w)}</b> <span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}">${S.star[x.w]?'★':'☆'}</button></div><div>${esc(x.m)}</div><div class="sub"><span class="en">${esc(x.c)}</span> ${esc(x.cz)}</div></div><button class="full pri" data-a="next">${P.i+1<P.list.length?'下一个':'看结果'}</button>`:'';
-  if(t==='card'){
-    body=`<div class="card q"><div class="big">${esc(x.w)}</div><div class="ipa">/${esc(x.ipa)}/</div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button></div>`+
-      (P.shown?`<div class="card"><div>${esc(x.m)}</div><div class="sub"><span class="en">${esc(x.c)}</span> ${esc(x.cz)}</div>${x.h?`<div class="sub">${esc(x.h)}</div>`:''}</div><div class="grid2"><button class="bad" data-a="judge" data-ok="0">不认识</button><button class="ok" data-a="judge" data-ok="1">认识</button></div>`:`<button class="full pri" data-a="reveal">显示释义</button>`);
-  }else if(t==='spell'||t==='dict'){
-    body=`<div class="card q">${t==='spell'?`<div class="zhq">${esc(x.m)}</div><div class="sub" style="margin-top:6px">${esc(x.cz)}</div><div class="sub en" style="margin-top:10px;font-size:18px;letter-spacing:3px">${esc(x.w[0])}${'_'.repeat(x.w.length-1)}</div>`:`<button class="pri" data-a="spk" data-t="${esc(x.w)}" style="font-size:22px;padding:16px 26px">🔊 再听一遍</button><div class="sub" style="margin-top:10px">${x.w.length} 个字母</div>`}</div>`+
-      (done?fb:`<input id="ans" class="en" placeholder="输入单词" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"><button class="full pri" data-a="check">确定</button><button class="full ghost" data-a="giveup">不会，看答案</button>`);
-    if(done)body=body.replace(fb,`<div class="sub" style="text-align:center">你的答案：<b class="en">${esc(P.typed||'（空）')}</b></div>`+fb);
-  }else{
-    const field=t==='zh2en'?'w':'m',op=options(i,field);
-    const qh=t==='en2zh'?`<div class="big">${esc(x.w)}</div><div class="ipa">/${esc(x.ipa)}/</div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button>`:t==='zh2en'?`<div class="zhq">${esc(x.m)}</div><div class="sub" style="margin-top:6px">${esc(x.cz)}</div>`:`<button class="pri" data-a="spk" data-t="${esc(x.w)}" style="font-size:22px;padding:16px 26px">🔊 再听一遍</button>${done?`<div class="big" style="margin-top:10px">${esc(x.w)}</div>`:''}`;
-    body=`<div class="card q">${qh}</div>`+op.map(j=>`<button class="opt ${done?(j===i?'r':(j===P.pick?'x':'')):''} ${field==='w'?'en':''}" data-a="pick" data-j="${j}" ${done?'disabled':''}>${esc(W[j][field])}</button>`).join('')+fb;
+/* ---------- 余额 ---------- */
+const acctOf = id => S.accounts.find(a => a.id === id);
+const isCredit = a => a && a.type === 'credit';
+function adjust(id, delta){ const a = acctOf(id); if (a) a.bal += delta; }
+function acctBalText(a){ return isCredit(a) ? (a.bal < 0 ? `待还 ${fmt(-a.bal)}` : '无欠款') : fmt(a.bal); }
+const dayOfMonth = (y, m, day) => new Date(y, m, Math.min(day, daysIn(new Date(y, m, 1))));
+// 某一天之后（不含）的第一个到账日；生活费可以是「每月几号」或「每隔几天」，固定收入也算
+const monthlyAfter = (day, after) => {
+  const a = parse(after);
+  for (let k = 0; k < 3; k++) { const d = dayOfMonth(a.getFullYear(), a.getMonth() + k, day); if (ymd(d) > after) return d; }
+};
+// 生活费的下一个到账日（after 之后，不含当天）；没设就是 null
+function nextAllowance(after){
+  const inc = S.settings.income;
+  if (inc.mode === 'month' && inc.day) return monthlyAfter(inc.day, after);
+  if (inc.mode === 'interval' && inc.every > 0 && inc.last) {
+    let d = parse(inc.last); while (ymd(d) <= after) d = addDays(d, inc.every);
+    return d;
   }
-  return head+body;
+  return null;
+}
+// 下一次有钱进账：生活费和固定收入里最近的那天；都没有就按月底算
+function nextIncome(after = today()){
+  const cands = [nextAllowance(after), ...S.recurring.filter(r => r.kind === 'in').map(r => monthlyAfter(r.day, after))].filter(Boolean);
+  const a = parse(after);
+  return cands.length ? {date: cands.sort((x, y) => x - y)[0], known: true} : {date: new Date(a.getFullYear(), a.getMonth() + 1, 1), known: false};
+}
+// 生活费到账日自动记一笔收入（只处理设置之后出现的到账日，之前的已经在你填的余额里了）
+function runIncome(){
+  const inc = S.settings.income, t = today();
+  if (!inc.auto || !inc.amt || !acctOf(inc.acct) || !inc.genUntil) return;
+  let changed = false;
+  for (let d = nextAllowance(inc.genUntil); d && ymd(d) <= t; d = nextAllowance(inc.genUntil)) {
+    S.flows.push({id:uid(), kind:'in', amt:inc.amt, acct:inc.acct, note:'生活费（自动）', d:ymd(d), tm:'00:00', ts:Date.now()});
+    adjust(inc.acct, inc.amt); inc.genUntil = ymd(d); changed = true;
+  }
+  if (changed) save();
+}
+
+/* 分期：花呗/白条的待还 = 各分期剩余（每期×剩余期数）+ 非分期部分；非分期部分按下一期账单全额算 */
+function creditDue(a){
+  const plans = S.plans.filter(p => p.acct === a.id && p.left > 0);
+  const inst = plans.reduce((s, p) => s + p.per, 0), instAll = plans.reduce((s, p) => s + p.per * p.left, 0);
+  const owed = Math.max(0, -a.bal), other = Math.max(0, owed - instAll), now = new Date();
+  let k = 0; if (a.paidMonth === monthKey(now)) k = 1; // 本月已经还过，看下个月
+  const date = dayOfMonth(now.getFullYear(), now.getMonth() + k, a.dueDay || 10);
+  return {date, amt: inst + other, inst, other, owed, instAll, plans, overdue: ymd(date) < today(), months: plans.reduce((m, p) => Math.max(m, p.left), 0)};
+}
+// [from, to) 之间要还多少：第一期用本期账单，之后几个月只算分期
+function duesBetween(a, from, to){
+  const cd = creditDue(a); let total = 0;
+  for (let k = 0; k < 3; k++) {
+    const d = ymd(dayOfMonth(cd.date.getFullYear(), cd.date.getMonth() + k, a.dueDay || 10));
+    if (d >= from && d < to) total += k === 0 ? cd.amt : cd.plans.filter(p => p.left > k).reduce((s, p) => s + p.per, 0);
+  }
+  return total;
+}
+function balanceInfo(){
+  if (!S.accounts.length) return null;
+  const t = today(), st = S.settings, cash = S.accounts.filter(a => !isCredit(a)), credit = S.accounts.filter(isCredit);
+  const cashTotal = cash.reduce((s, a) => s + a.bal, 0), owed = credit.reduce((s, a) => s + Math.max(0, -a.bal), 0);
+  const next = nextIncome(), nd = ymd(next.date), days = Math.max(1, dayDiff(t, nd));
+  const bills = credit.map(a => ({a, ...creditDue(a)})).filter(b => b.amt > 0);
+  // 下次到账之前就要还的钱，先从余额里扣出来
+  const dueSoon = bills.filter(b => ymd(b.date) < nd).reduce((s, b) => s + b.amt, 0);
+  // 用「今天开始时」的余额来算每日额度，今天花钱不会让今天的额度跟着变
+  const spentToday = sum(S.records.filter(r => r.d === t && cash.some(a => a.id === r.acct)));
+  const avail = cashTotal + spentToday - st.reserve - dueSoon;
+  let cycle = null;
+  if (next.known && st.income.mode !== 'none' && st.income.amt) {
+    const end = nextIncome(nd), ed = ymd(end.date), dues = credit.reduce((s, a) => s + duesBetween(a, nd, ed), 0), len = Math.max(1, dayDiff(nd, ed));
+    cycle = {from: next.date, to: addDays(end.date, -1), len, dues, perDay: Math.max(0, Math.floor((st.income.amt - dues) / len))};
+  }
+  return {cashTotal, owed, total: cashTotal - owed, bills, dueSoon, avail, availNow: cashTotal - st.reserve - dueSoon, next, days, cycle,
+    perDay: Math.max(0, Math.floor(avail / days))};
+}
+
+// 根据「已花 / 预算」以及「这个周期已经过去了多少」判断状态，返回 'none' | 'ok' | 'warn' | 'over'
+// spent、budget 单位是分；progress 是 0~1：今天已过去的比例（晚上 18 点≈0.75）、本周/本月已过去的比例，过去的日子传 1
+function budgetLevel(spent, budget, progress = 1) {
+  if (!budget) return 'none';
+  const used = spent / budget;
+  if (used > 1) return 'over';
+  if (used >= 0.8) return 'warn';
+  // 花钱速度比时间进度快 25 个百分点以上（且已用掉三成），也提前提醒；早上买个早餐不会触发
+  if (used >= 0.3 && used - progress > 0.25) return 'warn';
+  return 'ok';
+}
+
+/* ---------- 弹层 ---------- */
+const openStack = [];
+function openSheet(id){
+  const sh = $('#'+id); sh.scrollTop = 0; sh.classList.add('on');
+  openStack.push(id); $('#mask').classList.add('on'); document.documentElement.classList.add('lock');
+}
+function closeSheet(id){
+  id = id || openStack[openStack.length-1]; if (!id) return;
+  $('#'+id).classList.remove('on');
+  const i = openStack.indexOf(id); if (i >= 0) openStack.splice(i, 1);
+  if (!openStack.length) { $('#mask').classList.remove('on'); document.documentElement.classList.remove('lock'); }
+}
+function ask(title, msg, btns){
+  return new Promise(res => {
+    const box = $('#dialog');
+    box.innerHTML = `<div class="dlg"><h3>${esc(title)}</h3><p>${esc(msg).replace(/\n/g,'<br>')}</p><div class="dbtns">${
+      btns.map((b, i) => `<button data-i="${i}" class="${b.primary?'primary':''}${b.danger?' danger':''}">${esc(b.t)}</button>`).join('')}</div></div>`;
+    box.classList.add('on');
+    box.onclick = e => {
+      const b = e.target.closest('button[data-i]'); if (!b) return;
+      box.classList.remove('on'); box.onclick = null; res(btns[+b.dataset.i].v);
+    };
+  });
+}
+let toastTimer;
+function toast(msg, lv = 'none'){
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast on lv-' + lv;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3000);
+}
+
+/* ---------- 首页 ---------- */
+function rowHTML(r){
+  const c = catOf(r.cat), a = acctOf(r.acct);
+  return `<div class="row" data-act="edit" data-v="${r.id}"><span class="ico" style="background:${c.color}26">${c.emoji}</span>
+    <div class="mid"><div>${esc(r.note || c.name)}</div><div class="muted">${esc(c.name)} · ${r.d === today() ? (r.tm||'') : r.d.slice(5)}${a ? ` · ${a.emoji}${esc(a.name)}` : ''}${r.need==='want' ? ' · <span class="tag">想要</span>' : ''}</div></div>
+    <b>-${yuan(r.amt)}</b></div>`;
+}
+function catBudgetAlerts(all){
+  const now = new Date(), from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)), rs = inRange(from, today());
+  return S.cats.filter(c => S.settings.catBudgets[c.id]).map(c => {
+    const budget = S.settings.catBudgets[c.id], spent = sum(rs.filter(r => r.cat === c.id));
+    return {c, budget, spent, lv: budgetLevel(spent, budget, monthProgress())};
+  }).filter(a => all || a.lv === 'warn' || a.lv === 'over');
+}
+function streaks(){
+  const b = budgets(); if (!b.daily || !S.records.length) return null;
+  const first = S.records.reduce((m, r) => r.d < m ? r.d : m, today());
+  const map = dayMap(S.records), y = ymd(addDays(new Date(), -1));
+  let cur = 0, best = 0;
+  for (let d = parse(first); ymd(d) <= y; d = addDays(d, 1)) {
+    if ((map[ymd(d)] || 0) <= b.daily) { cur++; best = Math.max(best, cur); } else cur = 0;
+  }
+  return {cur, best};
+}
+const wishLeft = w => w.created + S.settings.cooldown * 3600e3 - Date.now();
+
+/* ---------- 抽烟 ---------- */
+function fmtDur(ms){ const m = Math.max(1, Math.round(ms / 60000)); return m < 60 ? `${m} 分钟` : `${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分` : ''}`; }
+function smokeInfo(){
+  const now = new Date(), t = today(), byDay = {};
+  S.smokes.forEach(ts => { const k = ymd(new Date(ts)); byDay[k] = (byDay[k] || 0) + 1; });
+  const first = S.smokes.length ? ymd(new Date(Math.min(...S.smokes))) : t, y = ymd(addDays(now, -1));
+  const past = [];
+  for (let i = 1; i <= 7; i++) { const d = ymd(addDays(now, -i)); if (d >= first) past.push(byDay[d] || 0); }
+  const avg7 = past.length ? past.reduce((a, b) => a + b, 0) / past.length : null;
+  // 自动目标：最近 7 天日均再少 1 根；手动设了就用手动的
+  const goal = S.settings.smokeGoal || (avg7 !== null ? Math.max(0, Math.ceil(avg7) - 1) : null);
+  const last = S.smokes.length ? Math.max(...S.smokes) : 0;
+  const ySame = S.smokes.filter(ts => ymd(new Date(ts)) === y && ts + 864e5 <= Date.now()).length;
+  const recent = S.smokes.filter(ts => ts > Date.now() - 7 * 864e5).sort((a, b) => a - b), gaps = [];
+  for (let i = 1; i < recent.length; i++) if (ymd(new Date(recent[i])) === ymd(new Date(recent[i - 1]))) gaps.push(recent[i] - recent[i - 1]);
+  const avgGap = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
+  let streak = 0;
+  if (goal !== null) for (let i = 1; i < 400; i++) { const d = ymd(addDays(now, -i)); if (d < first || (byDay[d] || 0) > goal) break; streak++; }
+  const per = S.settings.packPrice ? S.settings.packPrice / S.settings.packSize : 0, mk = monthKey(now);
+  const month = S.smokes.filter(ts => monthKey(new Date(ts)) === mk).length;
+  const n = byDay[t] || 0;
+  return {n, y: byDay[y] || 0, ySame, avg7, goal, last, avgGap, streak, per, month, monthCost: Math.round(month * per), byDay,
+    todayTs: S.smokes.filter(ts => ymd(new Date(ts)) === t).sort((a, b) => a - b),
+    lv: goal === null ? 'none' : n < goal ? 'ok' : n === goal ? 'warn' : 'over'};
+}
+function smokeMsg(si){
+  if (!S.smokes.length) return '每抽一根就点一下「+1 根」。先看清楚自己一天抽多少，再一点点往下减。';
+  const gap = Date.now() - si.last, parts = [];
+  parts.push(gap >= 3600e3 ? `已经 ${fmtDur(gap)} 没抽了${gap >= 6 * 3600e3 ? '，非常厉害 🏆' : gap >= 3 * 3600e3 ? '，继续保持 💪' : ''}` : `上一根在 ${fmtDur(gap)} 前`);
+  if (si.goal !== null) parts.push(si.n < si.goal ? `今天最多还能抽 ${si.goal - si.n} 根，能少就少` : si.n === si.goal ? '今天的量到了，后面忍一忍 🙏' : `超过目标 ${si.n - si.goal} 根了，后面一根都别再抽`);
+  if (si.ySame > si.n) parts.push(`比昨天这个时候少 ${si.ySame - si.n} 根 👍`);
+  if (si.avgGap && si.n && si.lv !== 'over') { const at = si.last + si.avgGap * 1.2; if (at > Date.now()) parts.push(`下一根试着等到 ${hm(new Date(at))} 以后`); }
+  return parts.join(' · ');
+}
+function smokeCard(){
+  const si = smokeInfo(), undo = si.last && Date.now() - si.last < 10 * 60e3 && si.n;
+  return `<div class="card lv-${si.lv}"><div class="split"><div><div class="muted">🚬 今天抽了</div>
+      <div class="num">${si.n} 根${si.goal !== null ? ` <span class="muted" style="font-size:15px;font-weight:400">/ 目标 ${si.goal} 根</span>` : ''}</div></div>
+      <button class="smokebtn" data-act="smoke">+1 根</button></div>
+    ${si.goal !== null ? `<div class="bar sm"><i style="width:${si.goal ? pct(si.n, si.goal) : si.n ? 100 : 0}%"></i></div>` : ''}
+    <div class="tip">${smokeMsg(si)}</div>
+    ${undo ? '<button class="link" data-act="smokeUndo">点错了，撤销刚才那根</button>' : ''}</div>`;
+}
+function smokeSection(){
+  const si = smokeInfo(), now = new Date(), vals = [], labels = [];
+  for (let i = 13; i >= 0; i--) { const d = addDays(now, -i); vals.push(si.byDay[ymd(d)] || 0); labels.push(i ? md(d) : '今天'); }
+  let h = `<div class="card"><div class="split"><b>🚬 抽烟记录</b><button class="smokebtn" data-act="smoke">+1 根</button></div>
+    <div class="stat3"><div><span class="muted">今天</span><b>${si.n} 根</b></div><div><span class="muted">昨天</span><b>${si.y} 根</b></div><div><span class="muted">近 7 天日均</span><b>${si.avg7 === null ? '—' : si.avg7.toFixed(1) + ' 根'}</b></div></div>
+    <div class="stat3" style="margin-top:8px"><div><span class="muted">每天目标</span><b>${si.goal === null ? '—' : si.goal + ' 根'}</b></div><div><span class="muted">连续没超标</span><b>${si.streak} 天</b></div><div><span class="muted">本月抽烟花了</span><b>${si.per ? fmt(si.monthCost) : '—'}</b></div></div>
+    ${S.smokes.length ? barChart(vals, labels, si.goal || 0, v => v + ' 根', '目标') : ''}
+    ${si.todayTs.length ? `<p class="muted xs">今天的时间：${si.todayTs.map(ts => hm(new Date(ts))).join('、')}</p>` : ''}
+    <div class="tip lv-${si.lv}">${smokeMsg(si)}</div>`;
+  if (si.goal && si.streak >= 7) h += `<div class="warnline lv-ok">🎉 已经连续 ${si.streak} 天没超过 ${si.goal} 根了！要不要把目标降到 ${si.goal - 1} 根？
+    <button class="btn2 sm" data-act="smokeGoalSet" data-v="${si.goal - 1}">降到 ${si.goal - 1} 根</button></div>`;
+  h += si.per ? `<p class="muted">每天少抽 1 根，一个月能省 ${fmt(Math.round(si.per * 30))}，一年省 ${fmt(Math.round(si.per * 365))}。</p>`
+    : '<p class="muted xs">在设置里填一包烟多少钱，就能看到抽烟一共花了多少。</p>';
+  return h + '</div>';
+}
+
+function balanceCard(){
+  const bi = balanceInfo();
+  if (!bi) return `<div class="card"><b>💰 我的余额</b><p class="muted">填上微信和支付宝里现在有多少钱。之后每记一笔都会从对应账户扣掉，并按「离下次生活费到账还有几天」告诉你每天最多能花多少。</p>
+    <div class="form2"><label>💚 微信余额<input id="bWx" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label>
+    <label>🔷 支付宝余额<input id="bAli" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label></div>
+    <button class="btn wide" data-act="balSetup">开始用余额管钱</button><p class="muted xs">花呗、京东白条的分期，以及生活费周期，在设置里添加。</p></div>`;
+  const st = S.settings, lowLv = bi.availNow <= 0 ? 'over' : bi.availNow < st.lowBal ? 'warn' : '';
+  const set = st.daily || (st.monthly ? Math.floor(st.monthly / daysIn(new Date())) : 0);
+  const cash = S.accounts.filter(a => !isCredit(a)), credit = S.accounts.filter(isCredit);
+  const nextTxt = bi.next.known ? `${md(bi.next.date)} 生活费到账` : '月底';
+  let h = `<div class="card"><div class="split"><div><div class="muted">现在手里的钱${st.reserve ? `（含留着不动的 ${fmt(st.reserve)}）` : ''}</div>
+      <div class="big2 ${bi.cashTotal < 0 ? 'red' : ''}">${fmt(bi.cashTotal)}</div></div>
+      ${bi.owed ? `<div class="right"><div class="muted">分期/欠款共</div><b class="red">${fmt(bi.owed)}</b></div>` : ''}</div>
+    <div class="acctrow">${cash.map(a => `<button class="acct" data-act="fix" data-v="${a.id}"><span class="muted">${a.emoji} ${esc(a.name)}</span><b class="${a.bal < 0 ? 'red' : ''}">${fmt(a.bal)}</b></button>`).join('')}</div>
+    <div class="calc"><div class="split"><span>离 ${nextTxt}</span><b>还有 ${bi.days} 天</b></div>
+      ${bi.dueSoon ? `<div class="split"><span>到账前要还</span><b class="red">−${fmt(bi.dueSoon)}</b></div>` : ''}
+      ${st.reserve ? `<div class="split"><span>留着不动</span><b>−${fmt(st.reserve)}</b></div>` : ''}
+      <div class="split big-line"><span>每天最多花</span><b>${fmt(bi.perDay)}</b></div>
+      <div class="muted xs">（余额${bi.dueSoon ? ' − 要还的' : ''}${st.reserve ? ' − 留着的' : ''}）÷ ${bi.days} 天${bi.next.known ? '' : '。在设置里填生活费周期，会算得更准'}</div></div>
+    ${bi.cycle ? `<p class="muted">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：生活费 ${fmt(st.income.amt)}${bi.cycle.dues ? ` − 期间要还 ${fmt(bi.cycle.dues)}` : ''}，平均每天约 <b>${fmt(bi.cycle.perDay)}</b>。</p>` : ''}
+    ${lowLv ? `<div class="warnline lv-${lowLv}">${bi.availNow <= 0 ? `🛑 扣掉要还的钱，手里已经没有能花的了，${bi.next.known ? `撑到 ${md(bi.next.date)}` : '接下来'}只能花必要的钱。` : `⚠️ 扣掉要还的钱，能动用的只剩 ${fmt(bi.availNow)}，请只花必要的钱。`}</div>` : ''}
+    ${set && bi.perDay < set ? `<div class="warnline lv-warn">你的日预算 ${fmt(set)} 比余额撑得住的 ${fmt(bi.perDay)} 高，${st.balanceGuard ? '今天已按余额收紧' : '照这样花撑不到下次到账'}。</div>` : ''}
+    <div class="btnrow"><button class="btn2" data-act="flow" data-v="in">＋ 记收入</button><button class="btn2" data-act="flow" data-v="move">⇄ 转账</button></div>
+    <p class="muted xs">点账户可以校准成 App 里显示的真实余额。</p></div>`;
+  if (credit.length) {
+    const monthly = credit.reduce((s, a) => s + creditDue(a).inst, 0), months = credit.reduce((m, a) => Math.max(m, creditDue(a).months), 0);
+    h += `<div class="card"><div class="split"><b>💳 分期与还款</b><span class="muted">共欠 ${fmt(bi.owed)}</span></div>
+      ${monthly ? `<p class="muted">分期每月固定要还 ${fmt(monthly)}，最长还要还 ${months} 个月。</p>` : ''}
+      ${credit.map(a => { const cd = creditDue(a), soon = ymd(cd.date) < ymd(bi.next.date);
+        return `<div class="bill ${cd.overdue && cd.amt ? 'lv-over' : soon && cd.amt ? 'lv-warn' : 'lv-none'}">
+          <div class="split"><b>${a.emoji} ${esc(a.name)}</b><span>${cd.amt ? `${md(cd.date)} 应还 <b class="${cd.overdue ? 'red' : ''}">${fmt(cd.amt)}</b>` : '<span class="green">本期不用还</span>'}</span></div>
+          ${cd.overdue && cd.amt ? '<div class="red xs">⚠️ 已经过了还款日，尽快还，避免逾期影响信用</div>' : soon && cd.amt ? `<div class="muted xs">在 ${md(bi.next.date)} 到账之前，已从每天能花的钱里预留</div>` : ''}
+          ${cd.plans.map(p => `<div class="split muted xs"><span>· ${esc(p.name)}</span><span>${fmt(p.per)}/期 · 还剩 ${p.left} 期</span></div>`).join('')}
+          ${cd.other ? `<div class="split muted xs"><span>· 没分期的消费</span><span>${fmt(cd.other)}</span></div>` : ''}
+          <div class="split" style="margin-top:6px"><span class="muted xs">总共还欠 ${fmt(cd.owed)}</span>${cd.amt ? `<button class="btn2 sm" data-act="bill" data-v="${a.id}">还这期</button>` : ''}</div></div>`; }).join('')}
+      <p class="muted xs">在设置 →「花呗 / 白条 / 分期」里添加或修改分期。</p></div>`;
+  }
+  return h;
+}
+function renderHome(){
+  const now = new Date(), t = today(), b = budgets(true);
+  const tSum = sum(S.records.filter(r => r.d === t));
+  const wSum = sum(inRange(ymd(startOfWeek(now)), t));
+  const mSum = sum(inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t));
+  const s7 = sum(inRange(ymd(addDays(now, -6)), t)), s30 = sum(inRange(ymd(addDays(now, -29)), t));
+  const lv = budgetLevel(tSum, b.daily, dayProgress());
+  const tips = {none:'先定一个每月最多花多少，之后每天都会告诉你今天还能花多少：', ok:'节奏不错，继续保持 👍', warn:'花得有点快了，接下来悠着点 ⚠️', over:'今天已经超预算了，剩下的时间尽量别再花钱 🛑'};
+  let h = `<header class="top"><div><div class="muted">${now.getMonth()+1}月${now.getDate()}日 周${DAY_NAMES[now.getDay()]}</div><h1>Self restraint</h1></div>
+    <button class="icon" data-act="settings" aria-label="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button></header>`;
+  if (!navigator.standalone && /iPhone|iPad/.test(navigator.userAgent))
+    h += `<div class="card notice">📲 先把我放到主屏幕：点 Safari 的「分享」按钮 →「添加到主屏幕」。从主屏幕打开，数据保存更稳定。</div>`;
+  h += `<div class="card hero lv-${lv}">
+    <div class="muted">今日已花</div><div class="big">${fmt(tSum)}</div>
+    ${b.daily ? `<div class="bar"><i style="width:${pct(tSum, b.daily)}%"></i></div>
+      <div class="split"><span>${tSum <= b.daily ? `还能花 <b>${fmt(b.daily - tSum)}</b>` : `已超支 <b class="red">${fmt(tSum - b.daily)}</b>`}</span>
+      <span class="muted">日预算 ${fmt(b.daily)}${{month:'（按月折算）', balance:'（按余额）'}[b.source] || ''}</span></div>` : ''}
+    <div class="tip">${tips[lv]}</div>
+    ${b.daily ? '' : `<div class="setup"><input id="quickBudget" type="number" inputmode="decimal" enterkeyhint="done" placeholder="每月预算，例如 1500"><button class="btn" data-act="quickBudget">设好了</button></div>`}</div>`;
+  h += balanceCard();
+  if (S.settings.smokeOn) h += smokeCard();
+  const lastB = S.settings.lastBackup, ref = lastB || S.records.reduce((m, r) => Math.min(m, r.ts || m), Date.now());
+  if (S.records.length >= 10 && Date.now() - ref > 30 * 864e5)
+    h += `<div class="card notice" data-act="backup">📦 ${lastB ? `距离上次备份已经 ${Math.floor((Date.now() - lastB) / 864e5)} 天` : '记录只存在这台手机上，还没有备份过'}，点这里备份一份到「文件」→</div>`;
+  const mini = (label, v, budget, prog, sub) => `<div class="mini lv-${budgetLevel(v, budget, prog)}"><span class="muted">${label}</span><b>${fmt(v)}</b>
+    ${budget ? `<div class="bar sm"><i style="width:${pct(v, budget)}%"></i></div><span class="muted xs">预算 ${fmt(budget)}</span>` : `<span class="muted xs">${sub || ''}</span>`}</div>`;
+  h += `<div class="grid2">${mini('本周', wSum, b.weekly, weekProgress())}${mini('本月', mSum, b.monthly, monthProgress())}
+    ${mini('近7天', s7, 0, 1, '日均 ' + fmt(Math.round(s7/7)))}${mini('近30天', s30, 0, 1, '日均 ' + fmt(Math.round(s30/30)))}</div>`;
+  if (b.monthly) {
+    const left = daysIn(now) - now.getDate() + 1, per = Math.max(0, Math.floor((b.monthly - (mSum - tSum)) / left));
+    h += `<div class="card"><div class="split"><b>本月计划</b><span class="muted">还剩 ${left} 天</span></div><p>${b.monthly >= mSum
+      ? `本月还能花 <b>${fmt(b.monthly - mSum)}</b>。从今天起每天平均不超过 <b>${fmt(per)}</b>，就能守住月预算。`
+      : `本月已经超预算 <b class="red">${fmt(mSum - b.monthly)}</b>，剩下的日子请只花必要的钱。`}</p></div>`;
+  }
+  const alerts = catBudgetAlerts(false);
+  if (alerts.length) h += `<div class="card"><b>分类预算提醒</b>${alerts.map(a => `<div class="alert lv-${a.lv}"><span>${a.c.emoji} ${esc(a.c.name)}${a.lv==='over'?' 已超':''}</span><span>${fmt(a.spent)} / ${fmt(a.budget)}</span><div class="bar sm"><i style="width:${pct(a.spent, a.budget)}%"></i></div></div>`).join('')}</div>`;
+  const sk = streaks();
+  if (sk) h += `<div class="card split"><div><div class="muted">连续不超日预算</div><div class="num">${sk.cur} 天</div></div><div class="right"><div class="muted">最长纪录</div><div class="num">${sk.best} 天</div></div></div>`;
+  const ready = S.wishes.filter(w => w.status === 'wait' && wishLeft(w) <= 0).length;
+  if (ready) h += `<div class="card notice" data-act="go" data-v="restraint">🧊 冷静清单里有 ${ready} 件东西冷静期到了，去做个决定 →</div>`;
+  const tr = sorted(S.records.filter(r => r.d === t));
+  h += `<div class="card"><div class="split"><b>今日明细</b><span class="muted">${tr.length} 笔</span></div>${tr.length ? tr.map(rowHTML).join('') : '<div class="empty">今天还没记账。花了钱就马上点下面的 ＋ 记一笔 ✍️</div>'}</div>`;
+  $('#home').innerHTML = h;
+}
+
+/* ---------- 明细 ---------- */
+let listMonth = 0, listCat = '', listQ = '';
+function renderList(){
+  const n = new Date(), s = new Date(n.getFullYear(), n.getMonth() + listMonth, 1), e = new Date(s.getFullYear(), s.getMonth()+1, 0);
+  let rs = inRange(ymd(s), ymd(e));
+  const monthTotal = sum(rs);
+  if (listCat) rs = rs.filter(r => r.cat === listCat);
+  const q = listQ.trim().toLowerCase();
+  if (q) rs = rs.filter(r => (r.note + catOf(r.cat).name + yuan(r.amt) + (r.amt/100)).toLowerCase().includes(q));
+  $('#listMonth').textContent = `${s.getFullYear()}年${s.getMonth()+1}月`;
+  $('#listNext').disabled = listMonth >= 0;
+  $('#listChips').innerHTML = `<button class="chip ${listCat ? '' : 'on'}" data-act="listCat" data-v="">全部</button>` +
+    S.cats.map(c => `<button class="chip ${listCat === c.id ? 'on' : ''}" data-act="listCat" data-v="${c.id}">${c.emoji} ${esc(c.name)}</button>`).join('');
+  const groups = {}; sorted(rs).forEach(r => (groups[r.d] ||= []).push(r));
+  let h = `<div class="card split"><div><div class="muted">${listCat || q ? '筛选结果' : '本月合计'}</div><div class="num">${fmt(sum(rs))}</div></div>
+    <div class="right muted">${rs.length} 笔${listCat || q ? `<br>占当月 ${pct(sum(rs), monthTotal)}%` : ''}</div></div>`;
+  h += Object.keys(groups).map(d => { const dt = parse(d);
+    return `<div class="dayh"><span>${dt.getMonth()+1}月${dt.getDate()}日 周${DAY_NAMES[dt.getDay()]}${d === today() ? ' · 今天' : ''}</span><span>${fmt(sum(groups[d]))}</span></div>
+      <div class="card" style="padding:4px 16px">${groups[d].map(rowHTML).join('')}</div>`; }).join('') || '<div class="empty">这里还没有记录</div>';
+  $('#listBody').innerHTML = h;
+}
+
+/* ---------- 统计 ---------- */
+let statKind = 'month', statOff = 0;
+function period(kind, off){
+  const n = new Date(); let s, e, label;
+  if (kind === 'week') { s = addDays(startOfWeek(n), off*7); e = addDays(s, 6); label = off === 0 ? '本周' : off === -1 ? '上周' : `${md(s)} – ${md(e)}`; }
+  else if (kind === 'month') { s = new Date(n.getFullYear(), n.getMonth()+off, 1); e = new Date(s.getFullYear(), s.getMonth()+1, 0); label = off === 0 ? '本月' : `${s.getFullYear()}年${s.getMonth()+1}月`; }
+  else if (kind === 'year') { s = new Date(n.getFullYear()+off, 0, 1); e = new Date(n.getFullYear()+off, 11, 31); label = `${s.getFullYear()}年`; }
+  else { e = addDays(n, off*30); s = addDays(e, -29); label = off === 0 ? '近30天' : `${md(s)} – ${md(e)}`; }
+  return {s, e, from: ymd(s), to: ymd(e), label};
+}
+function barChart(vals, labels, line, f = fmt, lineName = '预算'){
+  const W = 340, H = 150, top = 14, bot = 18, n = vals.length, max = Math.max(line || 0, ...vals, 1), bw = W / n, every = Math.ceil(n / 8);
+  const y = v => H - bot - v / max * (H - top - bot);
+  let g = '';
+  vals.forEach((v, i) => {
+    const x = i * bw, h = H - bot - y(v);
+    if (v) g += `<rect x="${x + bw*.18}" y="${y(v)}" width="${bw*.64}" height="${Math.max(h, 1)}" rx="${Math.min(3, bw*.2)}" class="${line && v > line ? 'b1' : 'b0'}"/>`;
+    g += `<rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent" data-act="tip" data-v="${labels[i]}：${f(v)}"/>`;
+    if (i % every === 0) g += `<text x="${i ? x + bw/2 : 1}" y="${H - 4}" class="ax"${i ? '' : ' style="text-anchor:start"'}>${labels[i]}</text>`;
+  });
+  if (line) g += `<line x1="0" x2="${W}" y1="${y(line)}" y2="${y(line)}" class="bl"/><text x="${W - 2}" y="${y(line) - 3}" class="ax" style="text-anchor:end">${lineName} ${f(line)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function donut(items, total){
+  let acc = 0;
+  const segs = items.map(it => { const p = it.v / total * 100;
+    const s = `<circle r="15.9155" cx="21" cy="21" fill="none" stroke="${it.c.color}" stroke-width="6" stroke-dasharray="${p} ${100 - p}" stroke-dashoffset="${25 - acc}"/>`;
+    acc += p; return s; }).join('');
+  return `<div class="donutwrap"><svg viewBox="0 0 42 42" class="donut"><circle r="15.9155" cx="21" cy="21" fill="none" class="track" stroke-width="6"/>${segs}
+    <text x="21" y="19.5" class="dt1">总支出</text><text x="21" y="25" class="dt2">${fmt(total)}</text></svg></div>`;
+}
+function heatmap(p, map, daily){
+  const t = today(), lead = (p.s.getDay() + 6) % 7, vals = Object.values(map), max = Math.max(1, ...vals);
+  let h = ['一','二','三','四','五','六','日'].map(d => `<div class="hd">${d}</div>`).join('') + '<div class="pad0"></div>'.repeat(lead);
+  for (let i = 1; i <= daysIn(p.s); i++) {
+    const d = ymd(new Date(p.s.getFullYear(), p.s.getMonth(), i)), v = map[d] || 0;
+    let style = '', cls = d === t ? 'today' : '';
+    if (d <= t && v) {
+      if (daily) { cls += ' lv-' + budgetLevel(v, daily, 1); style = 'background:color-mix(in srgb,var(--lv) 38%,var(--card))'; }
+      else style = `background:color-mix(in srgb,var(--accent) ${Math.round(15 + 70 * v / max)}%,var(--card))`;
+    }
+    h += `<div class="${cls}" style="${style}" data-act="tip" data-v="${i}日：${fmt(v)}">${i}${v ? `<small>${v >= 100000 ? Math.round(v/100000) + 'k' : Math.round(v/100)}</small>` : ''}</div>`;
+  }
+  return `<div class="heat">${h}</div>` + (daily ? `<div class="legend"><span class="lv-ok">预算内</span><span class="lv-warn">接近</span><span class="lv-over">超预算</span></div>` : '');
+}
+function renderStats(){
+  const p = period(statKind, statOff), pp = period(statKind, statOff - 1), t = today(), b = budgets();
+  const end = p.to < t ? p.to : t;
+  const rs = p.from > t ? [] : inRange(p.from, end), total = sum(rs);
+  const elapsed = p.from > t ? 0 : dayDiff(p.from, end) + 1;
+  let cmpTo = statOff === 0 ? ymd(addDays(pp.s, elapsed - 1)) : pp.to; if (cmpTo > pp.to) cmpTo = pp.to;
+  const prev = sum(inRange(pp.from, cmpTo)), chg = prev ? Math.round((total - prev) / prev * 100) : null;
+  const map = dayMap(rs), cats = groupCat(rs), want = sum(rs.filter(r => r.need === 'want'));
+  const inc = p.from > t ? 0 : sum(S.flows.filter(f => f.kind === 'in' && f.d >= p.from && f.d <= end));
+  let h = `<header class="top"><h1>统计</h1></header>
+    <div class="seg">${[['week','周'],['month','月'],['year','年'],['30d','近30天']].map(([k, l]) => `<button data-act="stat" data-v="${k}" class="${statKind === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div class="monthnav"><button class="icon" data-act="statNav" data-v="-1">‹</button><b>${p.label}</b><button class="icon" data-act="statNav" data-v="1" ${statOff >= 0 ? 'disabled' : ''}>›</button></div>
+    <div class="card"><div class="muted">总支出</div><div class="big" style="margin-bottom:4px">${fmt(total)}</div>
+    <div class="stat3"><div><span class="muted">日均</span><b>${fmt(elapsed ? Math.round(total / elapsed) : 0)}</b></div><div><span class="muted">笔数</span><b>${rs.length}</b></div>
+    <div><span class="muted">${statOff === 0 ? '比上期同期' : '比上一期'}</span><b class="${chg > 0 ? 'red' : 'green'}">${chg === null ? '—' : (chg > 0 ? '↑' : '↓') + Math.abs(chg) + '%'}</b></div></div>
+    ${inc ? `<div class="stat3" style="margin-top:10px"><div><span class="muted">收入</span><b class="green">${fmt(inc)}</b></div><div><span class="muted">结余</span><b class="${inc < total ? 'red' : 'green'}">${fmt(inc - total)}</b></div><div><span class="muted">花掉收入的</span><b>${Math.round(total / inc * 100)}%</b></div></div>` : ''}</div>`;
+  if (!rs.length) { $('#stats').innerHTML = h + '<div class="empty">这段时间没有支出记录</div>'; return; }
+  let vals = [], labels = [], line;
+  if (statKind === 'year') {
+    for (let m = 0; m < 12; m++) { const k = `${p.s.getFullYear()}-${pad(m+1)}`; vals.push(sum(rs.filter(r => r.d.startsWith(k)))); labels.push(m + 1 + '月'); }
+    line = b.monthly;
+  } else {
+    for (let d = p.s; ymd(d) <= p.to; d = addDays(d, 1)) { vals.push(map[ymd(d)] || 0); labels.push(statKind === 'week' ? '周' + DAY_NAMES[d.getDay()] : (statKind === '30d' && (d === p.s || d.getDate() === 1) ? md(d) : String(d.getDate()))); }
+    line = b.daily;
+  }
+  h += `<div class="card"><b>支出趋势</b><span class="muted"> · 点柱子看金额</span>${barChart(vals, labels, line)}</div>`;
+  h += `<div class="card"><b>钱都花在哪了</b>${donut(cats, total)}${cats.map(x => `<div class="catrow" ${statKind === 'month' ? `data-act="catJump" data-v="${x.id}"` : ''}>
+    <span>${x.c.emoji}</span><span>${esc(x.c.name)} <span class="muted">${x.n}笔</span></span><span><b>${fmt(x.v)}</b> <span class="muted">${Math.round(x.v / total * 100)}%</span></span>
+    <div class="bar sm"><i style="width:${x.v / cats[0].v * 100}%;background:${x.c.color}"></i></div></div>`).join('')}</div>`;
+  h += `<div class="card"><div class="split"><b>必要 vs 想要</b><span class="muted">想要占 ${pct(want, total)}%</span></div>
+    <div class="bar" style="height:14px;display:flex"><i style="width:${100 - pct(want, total)}%;background:var(--accent);border-radius:0"></i><i style="width:${pct(want, total)}%;background:var(--warn);border-radius:0"></i></div>
+    <div class="split muted"><span>必要 ${fmt(total - want)}</span><span>想要 ${fmt(want)}</span></div></div>`;
+  if (statKind === 'month') h += `<div class="card"><b>消费日历</b>${heatmap(p, map, b.daily)}</div>`;
+  if (statKind !== 'week') {
+    const wd = [0,0,0,0,0,0,0]; rs.forEach(r => wd[(parse(r.d).getDay() + 6) % 7] += r.amt);
+    const top = wd.indexOf(Math.max(...wd));
+    h += `<div class="card"><b>星期几最能花</b><span class="muted"> · 周${['一','二','三','四','五','六','日'][top]}花得最多</span>${barChart(wd, ['周一','周二','周三','周四','周五','周六','周日'])}</div>`;
+  }
+  h += `<div class="card"><b>最大的 5 笔</b>${[...rs].sort((a, b) => b.amt - a.amt).slice(0, 5).map(rowHTML).join('')}</div>`;
+  $('#stats').innerHTML = h;
+}
+
+/* ---------- 克制 ---------- */
+function fmtLeft(ms){ const m = Math.ceil(ms / 60000), hh = Math.floor(m / 60); return hh >= 24 ? `${Math.floor(hh/24)}天${hh%24}小时` : hh ? `${hh}小时${m%60}分` : `${m}分钟`; }
+function renderRestraint(){
+  const now = new Date(), t = today(), b = budgets();
+  const saved = S.wishes.filter(w => w.status === 'skip'), savedSum = saved.reduce((a, w) => a + w.price, 0);
+  const waiting = S.wishes.filter(w => w.status === 'wait').sort((a, b) => a.created - b.created);
+  const done = S.wishes.filter(w => w.status !== 'wait').sort((a, b) => b.decided - a.decided).slice(0, 8);
+  const mRs = inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t), mSum = sum(mRs), want = sum(mRs.filter(r => r.need === 'want'));
+  let h = `<header class="top"><h1>克制</h1></header>${S.settings.smokeOn ? smokeSection() : ''}
+    <div class="card"><div class="muted">靠冷静期忍住没买，一共省下</div><div class="big green">${fmt(savedSum)}</div><div class="muted">忍住了 ${saved.length} 次</div></div>
+    <div class="card"><b>🧊 冷静清单</b><p class="muted">想买但还没付钱的东西先放这里，等 ${S.settings.cooldown} 小时后还想要再买。大多数冲动会自己消失。</p>
+    <div class="wishform"><input id="wName" placeholder="想买什么" maxlength="30"><input id="wPrice" type="number" inputmode="decimal" placeholder="价格"><button class="btn" data-act="wishAdd">放进去</button></div>
+    ${waiting.map(w => { const left = wishLeft(w);
+      return `<div class="wish"><div class="mid"><div>${esc(w.name)} · <b>${fmt(w.price)}</b></div><div class="muted">${left > 0 ? `还需冷静 ${fmtLeft(left)}` : '冷静期结束了：现在还想要吗？'}</div></div>
+      ${left > 0 ? '' : `<button class="link" data-act="wishBuy" data-v="${w.id}">买了</button>`}<button class="link green" data-act="wishSkip" data-v="${w.id}">不要了</button></div>`; }).join('') || '<div class="empty">清单是空的</div>'}
+    ${done.length ? `<p class="muted" style="margin-top:14px">最近的决定</p>${done.map(w => `<div class="wish"><div class="mid"><div>${esc(w.name)}</div></div><span class="${w.status === 'skip' ? 'green' : 'muted'}">${w.status === 'skip' ? '忍住了 +' : '买了 '}${fmt(w.price)}</span><button class="link danger" data-act="wishDel" data-v="${w.id}">×</button></div>`).join('')}` : ''}</div>`;
+  h += `<div class="card"><b>本月「想要」类消费</b><div class="big2">${fmt(want)} <span class="muted">占本月 ${pct(want, mSum)}%</span></div>
+    <div class="bar"><i style="width:${pct(want, mSum)}%;background:var(--warn)"></i></div>
+    <p class="muted">记账时标成「想要」的钱，不花也不影响生活。这个比例越低，说明自控越好。</p></div>`;
+  if (b.daily) {
+    const map = dayMap(mRs), passed = now.getDate() - 1; let okDays = 0;
+    for (let i = 1; i <= passed; i++) if ((map[ymd(new Date(now.getFullYear(), now.getMonth(), i))] || 0) <= b.daily) okDays++;
+    h += `<div class="card"><b>本月守住日预算的天数</b>${passed ? `<div class="big2">${okDays} / ${passed} 天</div><div class="bar lv-${okDays === passed ? 'ok' : okDays / passed >= .7 ? 'warn' : 'over'}"><i style="width:${pct(okDays, passed)}%"></i></div>` : '<p class="muted">今天是本月第一天，从今天开始加油</p>'}</div>`;
+  }
+  const cats = groupCat(mRs);
+  if (cats.length) {
+    const top = cats[0], perDay = Math.round(top.v / now.getDate());
+    h += `<div class="card"><b>花钱最多的地方</b><p>本月在「${top.c.emoji} ${esc(top.c.name)}」上花了 <b>${fmt(top.v)}</b>，占 ${pct(top.v, mSum)}%，平均每天 ${fmt(perDay)}。</p>
+      <p class="muted">如果这一项每天少花 ¥10，一年就能多存 ¥3,650。</p></div>`;
+  }
+  $('#restraint').innerHTML = h;
+}
+
+/* ---------- 记一笔 ---------- */
+let draft = null;
+function openAdd(r, preset){
+  const defAcct = acctOf(S.lastAcct) ? S.lastAcct : S.accounts[0]?.id || '';
+  draft = r ? {id:r.id, amt:String(r.amt / 100), cat:r.cat, need:r.need || 'need', note:r.note || '', d:r.d, tm:r.tm, ts:r.ts, acct:r.acct || ''}
+            : {id:null, amt:'', cat:S.lastCat || 'food', need:'need', note:'', d:today(), acct:defAcct, ...preset};
+  if (!S.cats.some(c => c.id === draft.cat)) draft.cat = S.cats[0].id;
+  const keys = ['1','2','3','del','4','5','6','+','7','8','9','ok','.','0','C'];
+  const quick = r || preset ? [] : frequent();
+  $('#addSheet').innerHTML = `<div class="sheet-top"><div class="grab"></div>
+    <div class="sheet-h"><button class="link" data-act="close" data-v="addSheet">取消</button><b>${draft.id ? '编辑支出' : '记一笔'}</b>${draft.id ? '<button class="link danger" data-act="delRec">删除</button>' : '<span style="width:40px"></span>'}</div></div>
+    <div class="amt"><span class="expr" id="expr"></span><span class="amtv" id="amtv"></span></div>
+    ${quick.length ? `<div class="quick">${quick.map(q => `<button class="chip" data-act="quick" data-v="${q.id}">${catOf(q.cat).emoji} ${esc(q.note)} ${yuan(q.amt)}</button>`).join('')}</div>` : ''}
+    <div class="cats">${S.cats.map(c => `<button class="catb ${c.id === draft.cat ? 'on' : ''}" data-act="cat" data-v="${c.id}"><span>${c.emoji}</span>${esc(c.name)}</button>`).join('')}</div>
+    <div class="seg"><button data-act="need" data-v="need" class="${draft.need === 'need' ? 'on' : ''}">必要（不花不行）</button><button data-act="need" data-v="want" class="${draft.need === 'want' ? 'on' : ''}">想要（可以不花）</button></div>
+    ${S.accounts.length ? `<div class="accts"><span class="muted xs">用什么付的</span>${S.accounts.map(a => `<button class="chip ${draft.acct === a.id ? 'on' : ''}" data-act="pickAcct" data-v="${a.id}">${a.emoji} ${esc(a.name)}</button>`).join('')}<button class="chip ${draft.acct ? '' : 'on'}" data-act="pickAcct" data-v="">不扣余额</button></div>` : ''}
+    <div class="fields"><input data-f="note" placeholder="备注：买了什么" maxlength="40" enterkeyhint="done" value="${esc(draft.note)}"><input type="date" data-f="d" value="${draft.d}" max="${today()}"></div>
+    <div class="pad">${keys.map(k => k === 'ok' ? '<button class="ok" data-act="save">完成</button>'
+      : `<button data-act="key" data-v="${k}">${k === 'del' ? '⌫' : k}</button>`).join('')}</div>`;
+  updateAmt(); openSheet('addSheet');
+}
+// 常记的（同分类+同备注+同金额出现 2 次以上），按次数排序，点一下就填好
+function frequent(){
+  const m = {};
+  for (const r of S.records) {
+    if (!r.note || r.note.endsWith('（固定）')) continue;
+    const x = m[r.cat + '|' + r.note + '|' + r.amt] ||= {r, n:0};
+    x.n++; if (r.d >= x.r.d) x.r = r;
+  }
+  return Object.values(m).filter(x => x.n >= 2).sort((a, b) => b.n - a.n || b.r.d.localeCompare(a.r.d)).slice(0, 8).map(x => x.r);
+}
+const evalAmt = s => s.split('+').reduce((a, x) => a + toCents(x), 0);
+function updateAmt(){
+  $('#amtv').textContent = fmt(evalAmt(draft.amt));
+  $('#amtv').style.opacity = draft.amt ? 1 : .35;
+  $('#expr').textContent = draft.amt.includes('+') ? draft.amt.replace(/\+/g, ' + ') : '';
+}
+function pressKey(k){
+  let s = draft.amt; const last = s.split('+').pop();
+  if (k === 'del') s = s.slice(0, -1);
+  else if (k === 'C') s = '';
+  else if (k === '+') { if (last && !last.endsWith('.')) s += '+'; }
+  else if (k === '.') { if (!last.includes('.')) s += last ? '.' : '0.'; }
+  else {
+    if (/\.\d{2}$/.test(last) || (!last.includes('.') && last.length >= 6)) return;
+    if (last === '0') s = s.slice(0, -1);
+    s += k;
+  }
+  draft.amt = s; updateAmt();
+}
+async function saveDraft(){
+  const amt = evalAmt(draft.amt);
+  if (amt <= 0) return toast('先输入金额', 'warn');
+  const isNew = !draft.id, st = S.settings;
+  if (isNew && !draft.wishId && st.big > 0 && amt >= st.big) {
+    const a = await ask('这是一笔大额支出', `${fmt(amt)} 超过了你设的大额提醒线 ${fmt(st.big)}。\n如果还没付钱，先放进冷静清单，${st.cooldown} 小时后还想要再买。`,
+      [{t:'还没付，先冷静一下', v:'wish', primary:true}, {t:'已经付了，记账', v:'ok'}, {t:'取消', v:null}]);
+    if (!a) return;
+    if (a === 'wish') {
+      S.wishes.push({id:uid(), name:draft.note.trim() || catOf(draft.cat).name, price:amt, created:Date.now(), status:'wait'});
+      save(); closeSheet('addSheet'); go('restraint'); return toast('已放进冷静清单 🧊');
+    }
+  }
+  const old = isNew ? null : S.records.find(x => x.id === draft.id), pay = acctOf(draft.acct);
+  if (pay && !isCredit(pay)) {
+    const canUse = pay.bal + (old && old.acct === pay.id ? old.amt : 0);
+    if (amt > canUse && !await ask(`${pay.name}余额不够`, `${pay.name}里只有 ${fmt(canUse)}，这笔 ${fmt(amt)} 付不起。\n如果其实是用别的钱付的，请返回换一个账户。`,
+      [{t:'返回修改', v:0, primary:true}, {t:'仍然记账（余额会变成负数）', v:1}])) return;
+  }
+  const rec = {id:draft.id || uid(), amt, cat:draft.cat, need:draft.need, note:draft.note.trim(), d:draft.d || today(), tm:draft.tm || hm(new Date()), ts:draft.ts || Date.now()};
+  if (pay) rec.acct = pay.id;
+  if (old?.acct) adjust(old.acct, old.amt); // 改账时先把旧的金额退回原账户，再按新的扣
+  if (pay) adjust(pay.id, -amt);
+  if (isNew) S.records.push(rec); else S.records[S.records.findIndex(x => x.id === rec.id)] = rec;
+  if (pay) S.lastAcct = pay.id;
+  if (draft.wishId) { const w = S.wishes.find(x => x.id === draft.wishId); if (w) Object.assign(w, {status:'bought', decided:Date.now(), price:amt}); }
+  S.lastCat = rec.cat; save(); closeSheet('addSheet'); render();
+  feedback(rec, isNew);
+}
+function feedback(rec, isNew){
+  if (!isNew) return toast('已修改');
+  const b = budgets(true), t = today(), a = acctOf(rec.acct);
+  const balMsg = a ? `；${a.name}${isCredit(a) ? acctBalText(a) : '还剩 ' + fmt(a.bal)}` : '';
+  const cb = S.settings.catBudgets[rec.cat];
+  let catMsg = '';
+  if (cb) {
+    const now = new Date(), cs = sum(inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t).filter(r => r.cat === rec.cat));
+    if (cs > cb) catMsg = `；${catOf(rec.cat).name}本月已超 ${fmt(cs - cb)}`;
+  }
+  const catOver = !!catMsg;
+  catMsg += balMsg;
+  if (rec.d !== t) return toast('已记下' + catMsg, catOver ? 'over' : 'none');
+  const tSum = sum(S.records.filter(r => r.d === t)), lv = budgetLevel(tSum, b.daily, dayProgress());
+  const msg = lv === 'over' ? `⚠️ 今天已花 ${fmt(tSum)}，超预算 ${fmt(tSum - b.daily)}`
+    : lv === 'warn' ? `今天已花 ${fmt(tSum)}，只剩 ${fmt(Math.max(0, b.daily - tSum))} 了，悠着点`
+    : `已记下，今天共花 ${fmt(tSum)}`;
+  toast(msg + catMsg, catOver && lv !== 'over' ? 'over' : lv);
+}
+
+/* ---------- 收入 / 转账还款 / 校准余额 ---------- */
+let flowMode = 'in', fixAcct = '';
+function openFlow(mode, id){ flowMode = mode; fixAcct = id || ''; renderFlow(); openSheet('flowSheet'); }
+function refresh(){ render(); if (openStack.includes('setSheet')) renderSettings(); }
+const acctOpts = (sel, list = S.accounts) => list.map(a => `<option value="${a.id}" ${a.id === sel ? 'selected' : ''}>${a.emoji} ${esc(a.name)}（${acctBalText(a)}）</option>`).join('');
+function flowRow(f){
+  const a = acctOf(f.acct), b = acctOf(f.to), nm = x => x ? x.emoji + x.name : '已删账户';
+  const label = f.kind === 'in' ? `收入 → ${nm(a)}` : f.kind === 'move' ? `${nm(a)} → ${nm(b)}` : `校准 · ${nm(a)}`;
+  const amt = f.kind === 'move' ? yuan(f.amt) : (f.amt > 0 ? '+' : '') + yuan(f.amt);
+  return `<div class="wish"><div class="mid"><div>${esc(f.note || label)}</div><div class="muted">${f.d.slice(5)} · ${label}</div></div>
+    <b class="${f.kind === 'in' ? 'green' : ''}">${amt}</b><button class="link danger" data-act="flowDel" data-v="${f.id}">×</button></div>`;
+}
+function renderFlow(){
+  const m = flowMode, a = acctOf(fixAcct), title = {in:'记收入', move:'转账 / 还款', fix:`校准${a ? a.name : ''}`, bill:`还${a ? a.name : ''}`}[m];
+  let body = '';
+  if (m === 'bill') {
+    const cd = creditDue(a), cash = S.accounts.filter(x => !isCredit(x));
+    body = `<p>${md(cd.date)} 应还 <b>${fmt(cd.amt)}</b>${cd.overdue ? ' <span class="red">已过还款日</span>' : ''}</p>
+      <div class="card" style="padding:8px 14px">${cd.plans.map(p => `<div class="split muted"><span>${esc(p.name)}（还剩 ${p.left} 期）</span><span>${fmt(p.per)}</span></div>`).join('')}
+        ${cd.other ? `<div class="split muted"><span>没分期的消费</span><span>${fmt(cd.other)}</span></div>` : ''}</div>
+      <div class="form"><label>还多少<input id="fAmt" type="number" inputmode="decimal" enterkeyhint="done" value="${cd.amt / 100}"></label>
+      <label>用哪个账户的钱还<select id="fFrom">${acctOpts(cash[0]?.id, cash)}</select></label>
+      <label>日期<input id="fDate" type="date" value="${today()}" max="${today()}"></label>
+      <button class="btn wide" data-act="billSave">确认已还款</button>
+      <p class="muted xs">按应还金额全额还时，每个分期自动减少一期；少还的话只减少欠款，分期期数不变。</p></div>`;
+  } else if (m === 'fix') {
+    const cr = isCredit(a);
+    body = `<p class="muted">打开${esc(a.name)}看一眼${cr ? '现在欠多少（待还金额）' : '现在的真实余额'}，照着填进来。</p>
+      <div class="form"><label>记录里的${cr ? '待还' : '余额'}<input disabled value="${cr ? yuan(Math.max(0, -a.bal)) : yuan(a.bal)}"></label>
+      <label>${esc(a.name)}里实际${cr ? '待还' : '余额'}<input id="fixVal" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label>
+      <div class="diff" id="fixDiff">填上后会显示和记录差了多少</div>
+      <button class="btn wide" data-act="fixSave">保存</button></div>`;
+  } else {
+    const credit = S.accounts.find(isCredit), cash = S.accounts.filter(x => !isCredit(x));
+    body = `<div class="seg"><button data-act="flowSeg" data-v="in" class="${m === 'in' ? 'on' : ''}">收入</button><button data-act="flowSeg" data-v="move" class="${m === 'move' ? 'on' : ''}">转账 / 还款</button></div>
+      <div class="form"><label>金额<input id="fAmt" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></label>
+      ${m === 'in' ? `<label>到哪个账户<select id="fAcct">${acctOpts(S.lastAcct, cash.length ? cash : S.accounts)}</select></label>
+        <div class="quick" style="margin-bottom:0">${['生活费','红包','兼职','奖学金','退款','别人还钱'].map(n => `<button class="chip" data-act="fNote" data-v="${n}">${n}</button>`).join('')}</div>`
+      : S.accounts.length < 2 ? '<p class="muted">至少要有两个账户才能转账，先去设置里添加。</p>'
+      : `<label>从<select id="fFrom">${acctOpts(cash[0]?.id)}</select></label><label>到<select id="fTo">${acctOpts((credit || S.accounts[1]).id)}</select></label>
+        <p class="muted xs">还花呗 = 从支付宝转到花呗；微信提现到银行卡、给饭卡充值也在这里记。转账不算支出。</p>`}
+      <label>备注<input id="fNote" maxlength="20" enterkeyhint="done" placeholder="${m === 'in' ? '比如：妈妈给的生活费' : '比如：还花呗'}"></label>
+      <label>日期<input id="fDate" type="date" value="${today()}" max="${today()}"></label>
+      <button class="btn wide" data-act="flowSave">保存</button></div>`;
+  }
+  const recent = [...S.flows].filter(f => m !== 'fix' || f.acct === fixAcct).sort((x, y) => y.d.localeCompare(x.d) || y.ts - x.ts).slice(0, 12);
+  $('#flowSheet').innerHTML = `<div class="sheet-top"><div class="grab"></div><div class="sheet-h"><button class="link" data-act="close" data-v="flowSheet">取消</button><b>${title}</b><span style="width:40px"></span></div></div>
+    ${body}${recent.length ? `<h4>最近的收入和转账</h4><div class="card" style="padding:4px 16px">${recent.map(flowRow).join('')}</div>` : ''}`;
+}
+function fixTarget(){
+  const a = acctOf(fixAcct), raw = $('#fixVal').value;
+  if (raw === '') return null;
+  const v = toCents(raw), nb = isCredit(a) ? -v : v;
+  return {a, nb, diff: nb - a.bal};
+}
+function updateFixDiff(){
+  const x = fixTarget(), el = $('#fixDiff'); if (!x) return el.textContent = '填上后会显示和记录差了多少';
+  el.textContent = x.diff === 0 ? '和记录一模一样 👍' : x.diff < 0 ? `比记录少了 ${fmt(-x.diff)}，多半是有花销没记账` : `比记录多了 ${fmt(x.diff)}，可能有收入没记`;
+}
+async function saveFix(){
+  const x = fixTarget(); if (!x) return toast('先填实际金额', 'warn');
+  const {a, nb, diff} = x, base = {id:uid(), d:today(), tm:hm(new Date()), ts:Date.now()};
+  if (diff === 0) { closeSheet('flowSheet'); return toast('和记录一致，不用改 👍', 'ok'); }
+  const choice = diff < 0
+    ? await ask(`少了 ${fmt(-diff)}`, `${a.name}比记录少了 ${fmt(-diff)}。这笔钱多半是花掉了但忘了记。\n记成一笔支出，统计才是真实的。`, [{t:'记为一笔没记的支出', v:'out', primary:true}, {t:'只修正余额，不算支出', v:'fix'}, {t:'取消', v:null}])
+    : await ask(`多了 ${fmt(diff)}`, `${a.name}比记录多了 ${fmt(diff)}，可能有收入没记。`, [{t:'记为一笔收入', v:'in', primary:true}, {t:'只修正余额', v:'fix'}, {t:'取消', v:null}]);
+  if (!choice) return;
+  if (choice === 'out') S.records.push({...base, amt:-diff, cat:'other', need:'need', note:'没记的支出（校准差额）', acct:a.id});
+  else S.flows.push({...base, kind:choice, amt:diff, acct:a.id, note:choice === 'in' ? '校准差额' : '校准'});
+  a.bal = nb; save(); closeSheet('flowSheet'); refresh();
+  toast(choice === 'out' ? `已补记 ${fmt(-diff)} 的支出，下次花了钱记得马上记 ✍️` : `${a.name}已校准为 ${acctBalText(a)}`, choice === 'out' ? 'warn' : 'ok');
+}
+function undoFlow(f){
+  if (f.kind === 'move') { adjust(f.acct, f.amt); adjust(f.to, -f.amt); } else adjust(f.acct, -f.amt);
+  if (f.bill) { // 撤销「还这期」：分期期数加回去，还款月份恢复
+    f.bill.plans.forEach(id => { const p = S.plans.find(x => x.id === id); if (p) p.left++; });
+    const a = acctOf(f.to); if (a) a.paidMonth = f.bill.prevPaid;
+  }
+}
+function saveBill(){
+  const a = acctOf(fixAcct), cd = creditDue(a), amt = toCents($('#fAmt').value), from = $('#fFrom').value;
+  if (amt <= 0) return toast('先填金额', 'warn');
+  if (!acctOf(from)) return toast('先在设置里添加微信或支付宝账户', 'warn');
+  const f = {id:uid(), kind:'move', amt, acct:from, to:a.id, note:`还${a.name}`, d:$('#fDate').value || today(), tm:hm(new Date()), ts:Date.now()};
+  const full = amt >= cd.amt;
+  if (full) {
+    f.note += `（${cd.date.getMonth() + 1}月账单）`;
+    f.bill = {plans: cd.plans.map(p => p.id), prevPaid: a.paidMonth || ''};
+    cd.plans.forEach(p => p.left--); a.paidMonth = monthKey(cd.date);
+  }
+  adjust(from, -amt); adjust(a.id, amt);
+  S.flows.push(f); save(); closeSheet('flowSheet'); refresh();
+  toast(full ? `已还 ${fmt(amt)}，${a.name}还欠 ${fmt(Math.max(0, -a.bal))}` : `已还 ${fmt(amt)}，本期还差 ${fmt(cd.amt - amt)}`, full ? 'ok' : 'warn');
+}
+
+/* ---------- 设置 ---------- */
+function field(label, k){
+  return `<label class="fld"><span>${label}</span><input type="number" inputmode="decimal" placeholder="未设置" data-set="${k}" value="${S.settings[k] ? S.settings[k] / 100 : ''}"></label>`;
+}
+function renderSettings(){
+  const st = S.settings, inc = st.income, catOpts = S.cats.map(c => `<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
+  $('#setSheet').innerHTML = `<div class="sheet-top"><div class="grab"></div>
+    <div class="sheet-h"><span style="width:40px"></span><b>设置</b><button class="link" data-act="close" data-v="setSheet"><b>完成</b></button></div></div>
+    <h4>预算（元）</h4><div class="group">${field('每日预算', 'daily')}${field('每周预算', 'weekly')}${field('每月预算', 'monthly')}</div>
+    <p class="note">只填月预算也行：每日 = 月预算 ÷ 当月天数，每周 = 每日 × 7。建议先按过去一个月的实际花费打个八折来定。</p>
+    <h4>生活费</h4><div class="group">
+      <label class="fld"><span>多久发一次</span><select data-inc="mode"><option value="none" ${inc.mode === 'none' ? 'selected' : ''}>不固定</option><option value="interval" ${inc.mode === 'interval' ? 'selected' : ''}>每隔几天</option><option value="month" ${inc.mode === 'month' ? 'selected' : ''}>每月固定几号</option></select></label>
+      ${inc.mode === 'interval' ? `<label class="fld"><span>每隔几天发一次</span><input type="number" inputmode="numeric" data-inc="every" value="${inc.every || ''}" placeholder="15"></label>
+        <label class="fld"><span>上一次是哪天发的</span><input type="date" data-inc="last" value="${inc.last}" max="${today()}"></label>` : ''}
+      ${inc.mode === 'month' ? `<label class="fld"><span>每月几号</span><input type="number" inputmode="numeric" data-inc="day" value="${inc.day || ''}"></label>` : ''}
+      ${inc.mode === 'none' ? '' : `<label class="fld"><span>每次发多少（元）</span><input type="number" inputmode="decimal" data-inc="amt" value="${inc.amt ? inc.amt / 100 : ''}" placeholder="可不填"></label>
+        ${S.accounts.some(a => !isCredit(a)) ? `<label class="fld"><span>发到哪个账户</span><select data-inc="acct"><option value="">不自动记</option>${acctOpts(inc.acct, S.accounts.filter(a => !isCredit(a)))}</select></label>
+        <div class="fld"><span>到账那天自动记一笔收入</span><input type="checkbox" class="switch" data-inc="auto" ${inc.auto ? 'checked' : ''}></div>` : ''}`}</div>
+    <p class="note">${inc.mode === 'none' ? '设好之后，「每天最多花多少」会按离下次发生活费的天数来算，而不是到月底。' : nextAllowance(today()) ? `下次发生活费：<b>${md(nextAllowance(today()))}</b>，还有 ${dayDiff(today(), ymd(nextAllowance(today())))} 天。` : '把上面的信息填完整就能算出下次哪天发。'}</p>
+    <h4>账户余额</h4><div class="group">${S.accounts.filter(a => !isCredit(a)).map(a => `<div class="fld"><span>${a.emoji} ${esc(a.name)}</span><span>${fmt(a.bal)}</span>
+        <button class="link" data-act="fix" data-v="${a.id}">校准</button><button class="link danger" data-act="acctDel" data-v="${a.id}">删除</button></div>`).join('')}
+      <div class="addrow"><input id="aEmoji" placeholder="图标💳" maxlength="4" style="flex:0 0 80px"><input id="aName" placeholder="名称，如 银行卡 / 饭卡" maxlength="8"><input id="aBal" type="number" inputmode="decimal" placeholder="现在余额"><button class="btn" data-act="acctAdd" data-v="cash">添加</button></div>
+      ${field('留着不动的钱（元）', 'reserve')}${field('余额提醒线（元）', 'lowBal')}
+      <div class="fld"><span>余额不够时，自动收紧日预算</span><input type="checkbox" class="switch" id="guardT" ${st.balanceGuard ? 'checked' : ''}></div></div>
+    <p class="note">每天最多花 =（手里的钱 − 下次生活费到账前要还的分期 − 留着不动的钱）÷ 离到账的天数。</p>
+    <h4>花呗 / 白条 / 分期</h4><div class="group">${S.accounts.filter(isCredit).map(a => { const cd = creditDue(a);
+        return `<div class="fld"><span>${a.emoji} ${esc(a.name)}<br><span class="muted xs">共欠 ${fmt(cd.owed)}，下期 ${md(cd.date)} 还 ${fmt(cd.amt)}</span></span>
+          <label class="muted xs" style="display:grid;gap:2px;text-align:right">还款日<input type="number" inputmode="numeric" data-due="${a.id}" value="${a.dueDay || 10}" style="max-width:64px"></label>
+          <button class="link" data-act="fix" data-v="${a.id}">校准</button><button class="link danger" data-act="acctDel" data-v="${a.id}">删除</button></div>
+          ${cd.plans.map(p => `<div class="fld sub"><span>└ ${esc(p.name)}</span><span>${fmt(p.per)}/期 · 剩 ${p.left} 期</span><button class="link danger" data-act="planDel" data-v="${p.id}">删除</button></div>`).join('')}`; }).join('')}
+      ${S.accounts.some(isCredit) ? `<div class="addrow"><span class="muted xs" style="flex-basis:100%">添加一笔分期（在花呗/白条 App 的分期账单里能看到每期金额和剩余期数）</span>
+        <select id="pAcct">${acctOpts('', S.accounts.filter(isCredit))}</select><input id="pName" placeholder="买的什么，如 手机" maxlength="12"><input id="pPer" type="number" inputmode="decimal" placeholder="每期还多少"><input id="pLeft" type="number" inputmode="numeric" placeholder="还剩几期"><button class="btn" data-act="planAdd">添加分期</button></div>` : ''}
+      <div class="addrow"><span class="muted xs" style="flex-basis:100%">添加平台</span>${[['花呗','🧾'],['京东白条','🐶'],['信用卡','💳'],['抖音月付','🎵']].filter(([n]) => !S.accounts.some(a => a.name === n)).map(([n, e]) => `<button class="chip" data-act="creditPreset" data-v="${n}|${e}">＋ ${e} ${n}</button>`).join('')}</div></div>
+    <p class="note">分期每期的钱会在还款日前自动从「每天能花」里预留。还了钱就点首页的「还这期」，剩余期数会自动减一。</p>
+    <h4>抽烟记录</h4><div class="group">
+      <div class="fld"><span>在首页显示抽烟卡片</span><input type="checkbox" class="switch" id="smokeT" ${st.smokeOn ? 'checked' : ''}></div>
+      <label class="fld"><span>每天最多几根（空着 = 自动）</span><input type="number" inputmode="numeric" data-set="smokeGoal" value="${st.smokeGoal || ''}" placeholder="自动"></label>
+      ${field('一包烟多少钱（元）', 'packPrice')}
+      <label class="fld"><span>一包几根</span><input type="number" inputmode="numeric" data-set="packSize" value="${st.packSize}"></label></div>
+    <p class="note">自动目标 = 最近 7 天平均每天抽的根数再少 1 根，抽得越少目标越低，一点点往下减。</p>
+    <h4>克制</h4><div class="group">${field('大额提醒线（单笔，元）', 'big')}
+      <label class="fld"><span>冷静期（小时）</span><input type="number" inputmode="numeric" data-set="cooldown" value="${st.cooldown}"></label></div>
+    <p class="note">单笔达到提醒线时会弹窗，让你选择先放进冷静清单。</p>
+    <h4>分类月预算（元）</h4><div class="group">${S.cats.map(c => `<label class="fld"><span>${c.emoji} ${esc(c.name)}</span><input type="number" inputmode="decimal" placeholder="不限" data-cb="${c.id}" value="${st.catBudgets[c.id] ? st.catBudgets[c.id] / 100 : ''}"></label>`).join('')}</div>
+    <h4>固定收支（每月自动记一笔）</h4><div class="group">${S.recurring.map(r => `<div class="fld"><span>每月${r.day}日 · ${r.kind === 'in' ? '💰 收入' : catOf(r.cat).emoji} ${esc(r.name)}${acctOf(r.acct) ? `<br><span class="muted xs">${r.kind === 'in' ? '到' : '从'}${esc(acctOf(r.acct).name)}</span>` : ''}</span><span class="${r.kind === 'in' ? 'green' : ''}">${r.kind === 'in' ? '+' : ''}${fmt(r.amt)}</span><button class="link danger" data-act="recDel" data-v="${r.id}">删除</button></div>`).join('')}
+      <div class="addrow"><select id="rKind"><option value="out">支出</option><option value="in">收入（如生活费）</option></select><input id="rName" placeholder="名称，如 话费" maxlength="12"><input id="rAmt" type="number" inputmode="decimal" placeholder="金额"><input id="rDay" type="number" inputmode="numeric" placeholder="每月几号"><select id="rCat">${catOpts}</select>
+        ${S.accounts.length ? `<select id="rAcct"><option value="">不动余额</option>${acctOpts(S.accounts[0].id)}</select>` : ''}<button class="btn" data-act="recAdd">添加</button></div></div>
+    <p class="note">固定收入（比如每月 1 号的生活费）会自动加到账户里，也会用来算「离下次到账还有几天」。</p>
+    <h4>分类管理</h4><div class="group">${S.cats.map(c => `<div class="fld"><span>${c.emoji} ${esc(c.name)}</span>${c.id === 'other' ? '' : `<button class="link danger" data-act="catDel" data-v="${c.id}">删除</button>`}</div>`).join('')}
+      <div class="addrow"><input id="cEmoji" placeholder="图标😀" maxlength="4" style="flex:0 0 90px"><input id="cName" placeholder="新分类名称" maxlength="6"><button class="btn" data-act="catAdd">添加</button></div></div>
+    <h4>提醒</h4><div class="group"><div class="fld"><span>App 图标角标显示今日已花（元）</span><input type="checkbox" class="switch" id="badgeT" ${st.badge ? 'checked' : ''}></div></div>
+    <p class="note">角标在每次打开 App 时更新，需要先添加到主屏幕并允许通知。<br><br>
+      <b>每天定时提醒记账</b>（推荐）：打开 iPhone「快捷指令」→ 底部「自动化」→ 右上角 ＋ →「特定时间」，设为每天 21:00、选「立即运行」→ 添加操作「打开 App」选 Self restraint（或「打开 URL」填这个网页的地址）。之后每晚它会自动弹出来提醒你对账。</p>
+    <h4>数据</h4><div class="group"><button class="rowbtn" data-act="exportCsv">导出 Excel 表格（CSV）</button><button class="rowbtn" data-act="backup">备份全部数据（JSON）</button>
+      <button class="rowbtn" data-act="restore">从备份恢复</button><button class="rowbtn danger" data-act="reset">清空所有数据</button></div>
+    <p class="note">数据只保存在这台手机的这个 App 里，不上传任何服务器。建议每月备份一次存到「文件」，换手机时用「从备份恢复」。</p>
+    <p class="note center">Self restraint ${APP_VERSION} · 共 ${S.records.length} 笔记录${st.lastBackup ? ` · 上次备份 ${ymd(new Date(st.lastBackup))}` : ''}</p>`;
+}
+async function shareFile(name, text, type){
+  const file = new File([text], name, {type});
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try { await navigator.share({files:[file]}); return true; } catch (e) { if (e.name === 'AbortError') return false; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return true;
+}
+async function importFile(file){
+  let data; try { data = JSON.parse(await file.text()); } catch (e) { data = null; }
+  if (!data || !Array.isArray(data.records)) return toast('这不是 Self restraint 的备份文件', 'over');
+  const ok = await ask('从备份恢复', `备份里有 ${data.records.length} 笔记录。恢复会覆盖现在的全部数据，确定吗？`, [{t:'覆盖恢复', v:1, danger:true}, {t:'取消', v:0}]);
+  if (!ok) return;
+  S = merge(data); S.settings.lastOpen = today(); save(); renderSettings(); render(); toast('已恢复 ✅', 'ok');
+}
+async function toggleBadge(on){
+  if (on) {
+    const fail = m => { toast(m, 'warn'); $('#badgeT').checked = false; };
+    if (navigator.standalone === false) return fail('你现在是在 Safari 里打开的，请回到桌面，点 Self restraint 图标打开后再开启');
+    if (!('setAppBadge' in navigator) || !('Notification' in window)) return fail('这台设备不支持图标角标（需要 iOS 16.4 以上）');
+    if (await Notification.requestPermission() !== 'granted') return fail('需要允许通知，角标才能显示');
+  } else if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
+  S.settings.badge = on; save(); updateBadge();
+}
+function updateBadge(){
+  if (!S.settings.badge || !navigator.setAppBadge) return;
+  const v = Math.round(sum(S.records.filter(r => r.d === today())) / 100);
+  (v ? navigator.setAppBadge(v) : navigator.clearAppBadge()).catch(() => {});
+}
+
+/* ---------- 固定支出 & 每日回顾 ---------- */
+function runRecurring(){
+  const t = today(), cur = monthKey(new Date()); let changed = false;
+  for (const r of S.recurring) {
+    for (let k = nextMonthKey(r.last); k <= cur; k = nextMonthKey(k)) {
+      const [y, m] = k.split('-').map(Number), d = `${k}-${pad(Math.min(r.day, new Date(y, m, 0).getDate()))}`;
+      if (d > t) break;
+      const base = {id:uid(), amt:r.amt, note:r.name + '（固定）', d, tm:'00:00', ts:Date.now()}, a = acctOf(r.acct);
+      if (r.kind === 'in') { S.flows.push({...base, kind:'in', acct:r.acct || ''}); if (a) adjust(a.id, r.amt); }
+      else { S.records.push({...base, cat:r.cat, need:'need', ...(a ? {acct:a.id} : {})}); if (a) adjust(a.id, -r.amt); }
+      r.last = k; changed = true;
+    }
+  }
+  if (changed) save();
+}
+function dailyReview(){
+  const t = today(), st = S.settings;
+  if (st.lastOpen === t) return;
+  const first = !st.lastOpen; st.lastOpen = t; save();
+  if (first || !S.records.length) return;
+  const y = ymd(addDays(new Date(), -1)), ys = sum(S.records.filter(r => r.d === y)), b = budgets();
+  let msg = ys ? `昨天一共花了 ${fmt(ys)}` : '昨天一分钱没花（还是忘了记账？）';
+  if (b.daily && ys) msg += ys > b.daily ? `，超出日预算 ${fmt(ys - b.daily)}。今天收着点 💪` : '，守住了预算 👍';
+  const now = new Date(), wSum = sum(inRange(ymd(startOfWeek(now)), y));
+  if (now.getDay() !== 1) msg += `\n本周到昨天为止：${fmt(wSum)}${b.weekly ? ` / 预算 ${fmt(b.weekly)}` : ''}`;
+  else {
+    const ws = startOfWeek(now), lw = sum(inRange(ymd(addDays(ws, -7)), ymd(addDays(ws, -1))));
+    msg += `\n上周一共花了 ${fmt(lw)}${b.weekly ? (lw > b.weekly ? `，超出周预算 ${fmt(lw - b.weekly)}` : '，守住了周预算 👍') : ''}`;
+  }
+  if (now.getDate() === 1) {
+    const pm = new Date(now.getFullYear(), now.getMonth() - 1, 1), ls = sum(inRange(ymd(pm), y)), mb = S.settings.monthly;
+    msg += `\n${pm.getMonth() + 1}月一共花了 ${fmt(ls)}${mb ? (ls > mb ? `，超出月预算 ${fmt(ls - mb)}` : '，守住了月预算 🎉') : ''}`;
+  }
+  const bi = balanceInfo();
+  if (bi) msg += `\n手里还有 ${fmt(bi.cashTotal)}${bi.dueSoon ? `（到账前要还 ${fmt(bi.dueSoon)}）` : ''}，离${bi.next.known ? '下次生活费' : '月底'}还有 ${bi.days} 天，今天最多花 ${fmt(bi.perDay)}`;
+  if (S.settings.smokeOn && S.smokes.length) {
+    const si = smokeInfo(), ys = si.byDay[y] || 0, yy = si.byDay[ymd(addDays(new Date(), -2))] || 0;
+    msg += `\n昨天抽了 ${ys} 根烟${ys < yy ? `，比前天少 ${yy - ys} 根，很棒 👏` : ys > yy ? `，比前天多 ${ys - yy} 根，今天争取少一点` : ''}`;
+  }
+  ask('📒 昨日回顾', msg, [{t:'知道了', v:1, primary:true}]);
+}
+
+/* ---------- 路由与事件 ---------- */
+let tab = 'home';
+function go(t){
+  tab = t;
+  $$('.page').forEach(p => p.classList.toggle('on', p.id === t));
+  $$('nav.tabs [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === t));
+  render(); scrollTo(0, 0);
+}
+function render(){ ({home:renderHome, list:renderList, stats:renderStats, restraint:renderRestraint})[tab](); updateBadge(); }
+
+const actions = {
+  go, add: () => openAdd(),
+  edit: id => { const r = S.records.find(x => x.id === id); if (r) openAdd(r); },
+  close: id => closeSheet(id),
+  key: pressKey, save: saveDraft,
+  cat: v => { draft.cat = v; $$('#addSheet .catb').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  need: v => { draft.need = v; $$('#addSheet .seg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  delRec: async () => {
+    if (!await ask('删除这笔记录？', '删除后不能恢复。', [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
+    const old = S.records.find(r => r.id === draft.id);
+    if (old?.acct) adjust(old.acct, old.amt);
+    S.records = S.records.filter(r => r.id !== draft.id); save(); closeSheet('addSheet'); render();
+    toast(acctOf(old?.acct) ? `已删除，${fmt(old.amt)} 已退回${acctOf(old.acct).name}` : '已删除');
+  },
+  settings: () => { renderSettings(); openSheet('setSheet'); },
+  listNav: v => { listMonth = Math.min(0, listMonth + +v); renderList(); },
+  listCat: v => { listCat = v; renderList(); },
+  stat: v => { statKind = v; statOff = 0; renderStats(); },
+  statNav: v => { statOff = Math.min(0, statOff + +v); renderStats(); },
+  catJump: v => { listCat = v; listMonth = statOff; listQ = ''; $('#q').value = ''; go('list'); },
+  tip: v => toast(v),
+  wishAdd: () => {
+    const name = $('#wName').value.trim(), price = toCents($('#wPrice').value);
+    if (!name || price <= 0) return toast('填上名称和价格', 'warn');
+    S.wishes.push({id:uid(), name, price, created:Date.now(), status:'wait'}); save(); renderRestraint();
+    toast(`已放进冷静清单，${S.settings.cooldown} 小时后再决定 🧊`);
+  },
+  wishBuy: id => { const w = S.wishes.find(x => x.id === id); openAdd(null, {amt:String(w.price / 100), note:w.name, need:'want', cat:'shop', wishId:id}); },
+  wishSkip: id => { const w = S.wishes.find(x => x.id === id); Object.assign(w, {status:'skip', decided:Date.now()}); save(); render(); toast(`忍住了！又省下 ${fmt(w.price)} 🎉`, 'ok'); },
+  wishDel: id => { S.wishes = S.wishes.filter(w => w.id !== id); save(); render(); },
+  recAdd: () => {
+    const name = $('#rName').value.trim(), amt = toCents($('#rAmt').value), day = parseInt($('#rDay').value);
+    if (!name || amt <= 0 || !(day >= 1 && day <= 31)) return toast('名称、金额、日期（1-31）都要填', 'warn');
+    const now = new Date();
+    // 本月扣款日已过就从下个月开始，避免和你手动记过的重复
+    const last = day < now.getDate() ? monthKey(now) : monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+    const kind = $('#rKind').value;
+    S.recurring.push({id:uid(), kind, name, amt, day, cat:$('#rCat').value, acct:$('#rAcct')?.value || '', last});
+    runRecurring(); save(); renderSettings(); render(); toast(kind === 'in' ? '已添加固定收入' : '已添加固定支出');
+  },
+  recDel: id => { S.recurring = S.recurring.filter(r => r.id !== id); save(); renderSettings(); },
+  catAdd: () => {
+    const name = $('#cName').value.trim(); if (!name) return toast('填上分类名称', 'warn');
+    S.cats.splice(S.cats.length - 1, 0, {id:'c' + uid(), name, emoji:$('#cEmoji').value.trim() || '🏷️', color:PALETTE[S.cats.length % PALETTE.length]});
+    save(); renderSettings(); toast('已添加分类');
+  },
+  catDel: async id => {
+    const c = catOf(id);
+    if (!await ask(`删除「${c.name}」？`, '这个分类下的记录会移到「其他」。', [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
+    S.records.forEach(r => { if (r.cat === id) r.cat = 'other'; });
+    S.recurring.forEach(r => { if (r.cat === id) r.cat = 'other'; });
+    S.cats = S.cats.filter(x => x.id !== id); delete S.settings.catBudgets[id];
+    save(); renderSettings(); render();
+  },
+  exportCsv: () => {
+    const an = id => acctOf(id)?.name || '';
+    const rows = [['类型','日期','时间','分类','金额','账户','必要/想要','备注']]
+      .concat(sorted(S.records).map(r => ['支出', r.d, r.tm || '', catOf(r.cat).name, (r.amt / 100).toFixed(2), an(r.acct), r.need === 'want' ? '想要' : '必要', r.note || '']))
+      .concat(sorted(S.flows).map(f => [{in:'收入', move:'转账', fix:'校准'}[f.kind], f.d, f.tm || '', '', (f.amt / 100).toFixed(2), f.kind === 'move' ? `${an(f.acct)}→${an(f.to)}` : an(f.acct), '', f.note || '']));
+    shareFile(`SelfRestraint-${today()}.csv`, '﻿' + rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n'), 'text/csv');
+  },
+  backup: async () => {
+    if (!await shareFile(`SelfRestraint-backup-${today()}.json`, JSON.stringify(S), 'application/json')) return;
+    S.settings.lastBackup = Date.now(); save(); render(); toast('已备份 ✅ 记得选「存储到文件」', 'ok');
+  },
+  quickBudget: () => {
+    const v = toCents($('#quickBudget').value);
+    if (v <= 0) return toast('填一个大于 0 的金额', 'warn');
+    S.settings.monthly = v; save(); render();
+    toast(`月预算 ${fmt(v)}，平均每天 ${fmt(budgets().daily)}`, 'ok');
+  },
+  quick: id => {
+    const r = S.records.find(x => x.id === id); if (!r) return;
+    Object.assign(draft, {amt:String(r.amt / 100), cat:r.cat, need:r.need || 'need', note:r.note});
+    $$('#addSheet .catb').forEach(b => b.classList.toggle('on', b.dataset.v === r.cat));
+    $$('#addSheet .seg button').forEach(b => b.classList.toggle('on', b.dataset.v === draft.need));
+    $('#addSheet [data-f=note]').value = r.note; updateAmt();
+  },
+  flow: v => openFlow(v),
+  fix: id => openFlow('fix', id),
+  flowSeg: v => { flowMode = v; renderFlow(); },
+  fNote: v => { $('#fNote').value = v; },
+  fixSave: saveFix,
+  pickAcct: v => { draft.acct = v; $$('#addSheet .accts .chip').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  flowSave: () => {
+    const amt = toCents($('#fAmt').value), note = $('#fNote').value.trim();
+    if (amt <= 0) return toast('先填金额', 'warn');
+    const f = {id:uid(), kind:flowMode, amt, note, d:$('#fDate').value || today(), tm:hm(new Date()), ts:Date.now()};
+    if (flowMode === 'in') { f.acct = $('#fAcct').value; adjust(f.acct, amt); }
+    else {
+      if (!$('#fFrom')) return;
+      f.acct = $('#fFrom').value; f.to = $('#fTo').value;
+      if (f.acct === f.to) return toast('转出和转入不能是同一个账户', 'warn');
+      adjust(f.acct, -amt); adjust(f.to, amt);
+    }
+    S.flows.push(f); save(); closeSheet('flowSheet'); refresh();
+    const a = acctOf(flowMode === 'in' ? f.acct : f.to);
+    toast(flowMode === 'in' ? `+${fmt(amt)}，${a.name}现在 ${acctBalText(a)}` : `已转入${a.name}，现在 ${acctBalText(a)}`, 'ok');
+  },
+  flowDel: async id => {
+    const f = S.flows.find(x => x.id === id);
+    if (!f || !await ask('删除这条记录？', '账户余额会退回到记这笔之前。', [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
+    undoFlow(f); S.flows = S.flows.filter(x => x.id !== id); save(); renderFlow(); refresh(); toast('已删除');
+  },
+  balSetup: () => {
+    const v = id => $(id).value.trim(), wx = v('#bWx'), ali = v('#bAli');
+    if (!wx && !ali) return toast('至少填一个余额，没有就填 0', 'warn');
+    if (wx) S.accounts.push({id:'wx', name:'微信', emoji:'💚', type:'cash', bal:toCents(wx)});
+    if (ali) S.accounts.push({id:'ali', name:'支付宝', emoji:'🔷', type:'cash', bal:toCents(ali)});
+    S.lastAcct = S.accounts[0].id; save(); render();
+    toast(`设好了！别忘了在设置里填生活费周期`, 'ok');
+  },
+  acctAdd: () => {
+    const name = $('#aName').value.trim(), v = toCents($('#aBal').value);
+    if (!name) return toast('填上账户名称', 'warn');
+    S.accounts.push({id:'a' + uid(), name, emoji:$('#aEmoji').value.trim() || '💳', type:'cash', bal:v});
+    save(); refresh(); toast(`已添加${name}`);
+  },
+  creditPreset: v => {
+    const [name, emoji] = v.split('|');
+    S.accounts.push({id:'c' + uid(), name, emoji, type:'credit', bal:0, dueDay:10, paidMonth:''});
+    save(); refresh(); toast(`已添加${name}，接着在上面添加它的分期，再核对一下还款日`, 'ok');
+  },
+  planAdd: async () => {
+    const acct = $('#pAcct').value, name = $('#pName').value.trim() || '分期', per = toCents($('#pPer').value), left = parseInt($('#pLeft').value);
+    if (per <= 0 || !(left >= 1 && left <= 60)) return toast('填上每期金额和剩余期数（1-60）', 'warn');
+    const a = acctOf(acct), cd = creditDue(a), add = per * left;
+    // 如果之前校准过一个总欠款，这笔分期可能已经包含在里面了，问一下避免重复
+    let mode = 'add';
+    if (cd.other >= add) {
+      mode = await ask('这笔分期已经算在欠款里了吗？', `「${name}」还剩 ${left} 期，共 ${fmt(add)}。\n${a.name}现在记录的欠款里，有 ${fmt(cd.other)} 还没分到具体分期。`,
+        [{t:'已经算在里面了', v:'in', primary:true}, {t:'没有，加到欠款里', v:'add'}, {t:'取消', v:null}]);
+      if (!mode) return;
+    }
+    if (mode === 'add') adjust(acct, -add);
+    S.plans.push({id:uid(), acct, name, per, left}); save(); refresh();
+    toast(`已添加：${name} ${fmt(per)}/期，还剩 ${left} 期`, 'ok');
+  },
+  planDel: async id => {
+    const p = S.plans.find(x => x.id === id);
+    const c = await ask(`删除「${p.name}」？`, `还剩 ${p.left} 期，共 ${fmt(p.per * p.left)}。`,
+      [{t:'已经提前还清了（欠款一起减掉）', v:'paid', primary:true}, {t:'只删除这条分期', v:'only'}, {t:'取消', v:null}]);
+    if (!c) return;
+    if (c === 'paid') adjust(p.acct, p.per * p.left);
+    S.plans = S.plans.filter(x => x.id !== id); save(); refresh();
+  },
+  bill: id => openFlow('bill', id),
+  billSave: saveBill,
+  acctDel: async id => {
+    const a = acctOf(id);
+    if (!await ask(`删除「${a.name}」？`, `${isCredit(a) ? '它的欠款和分期' : '它的余额'}不再算进来。已经记过的账不会被删除。`, [{t:'删除', v:1, danger:true}, {t:'取消', v:0}])) return;
+    S.accounts = S.accounts.filter(x => x.id !== id);
+    S.plans = S.plans.filter(p => p.acct !== id);
+    S.recurring.forEach(r => { if (r.acct === id) r.acct = ''; });
+    if (S.settings.income.acct === id) S.settings.income.acct = '';
+    save(); refresh();
+  },
+  smoke: () => {
+    const prev = S.smokes.length ? Math.max(...S.smokes) : 0, now = Date.now();
+    const before = smokeInfo(); // 加这一根之前的平均间隔，用来判断这次忍得够不够久
+    S.smokes.push(now); save(); render();
+    const si = smokeInfo(), gap = prev ? now - prev : 0;
+    let msg = `今天第 ${si.n} 根`;
+    if (si.goal !== null && si.n > si.goal) msg += '，已经超过目标了。下一根试着再推迟 30 分钟？';
+    else if (si.goal !== null && si.n === si.goal) msg += '，今天的目标量到了，后面就别抽了 💪';
+    else if (si.ySame > si.n) msg += `，比昨天这个时候少 ${si.ySame - si.n} 根 👍`;
+    if (gap && before.avgGap && gap > before.avgGap * 1.2) msg += `。这次忍了 ${fmtDur(gap)}，比平时久 👏`;
+    toast(msg, si.lv === 'none' ? 'none' : si.lv);
+  },
+  smokeUndo: () => {
+    const last = Math.max(...S.smokes);
+    S.smokes = S.smokes.filter(ts => ts !== last); save(); render(); toast('已撤销');
+  },
+  smokeGoalSet: v => { S.settings.smokeGoal = Math.max(0, +v); save(); render(); toast(`目标改成每天最多 ${v} 根，加油 💪`, 'ok'); },
+  restore: () => $('#fileIn').click(),
+  reset: async () => {
+    if (!await ask('清空所有数据？', '所有记录、预算、清单都会被删除，没有备份就找不回来。', [{t:'全部清空', v:1, danger:true}, {t:'取消', v:0}])) return;
+    S = fresh(); S.settings.lastOpen = today(); save(); renderSettings(); render(); toast('已清空');
+  },
 };
-function afterQuiz(){const t=qType(),x=W[P.list[P.i]];if(P.ans===null&&!P.said){P.said=1;if(t==='listen'||t==='dict'||(S.cfg.auto&&(t==='en2zh'||t==='card')))speak(x.w)}const a=$('#ans');if(a)a.focus()}
-function answer(ok){const x=W[P.list[P.i]];P.ans=ok;if(ok){P.right++;S.ok[x.w]=(S.ok[x.w]||0)+1;if(S.wrong[x.w]){S.wrong[x.w]--;if(S.wrong[x.w]<=0)delete S.wrong[x.w]}}else{P.miss.push(P.list[P.i]);S.wrong[x.w]=(S.wrong[x.w]||0)+1;S.ok[x.w]=0}save();if(qType()!=='en2zh'&&qType()!=='card')speak(x.w);render()}
-VIEW.done=()=>{const n=P.list.length,pc=Math.round(P.right/n*100);
-  return `<h1>练习完成</h1><div class="card q"><div class="big">${P.right} / ${n}</div><div class="sub">正确率 ${pc}%${P.ctx&&P.ctx.msg?' · '+P.ctx.msg:''}</div></div>
-  ${P.miss.length?`<h2>答错的 ${P.miss.length} 个（已进生词本）</h2><div class="card" style="padding:2px 14px">${P.miss.map(i=>wordRow(i,true)).join('')}</div><button class="full pri" data-a="redo">再练一遍错词</button>`:'<div class="card sub" style="text-align:center">全对，漂亮。</div>'}
-  <button class="full" data-a="tab" data-t="home">回到今日</button>`};
-function finish(){logStudy(P.list.length);if(P.ctx&&P.ctx.rev){const k=P.ctx.rev,c=S.rev[k]||0;if(S.learned[k]&&c<5&&today()>=addDays(S.learned[k],OFF[c])){S.rev[k]=c+1;P.ctx.msg='已记为第 '+(c+1)+'/5 次复习';save()}}stack=[];view={name:'done'};render();window.scrollTo(0,0)}
-
-VIEW.words=()=>{const tab=view.wt||'wrong',src=tab==='wrong'?S.wrong:S.star,list=Object.keys(src).map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null);
-  if(tab==='wrong')list.sort((a,b)=>(S.wrong[W[b].w]||0)-(S.wrong[W[a].w]||0));
-  return `<h1>生词本</h1><div class="chips"><button class="${tab==='wrong'?'on':''}" data-a="wt" data-t="wrong">错词 ${Object.keys(S.wrong).length}</button><button class="${tab==='star'?'on':''}" data-a="wt" data-t="star">收藏 ${Object.keys(S.star).length}</button></div>
-  ${list.length?`<button class="full pri" data-a="pracBook">练习这 ${list.length} 个词</button><div class="card" style="padding:2px 14px">${list.map(i=>wordRow(i,true)).join('')}</div>`:`<div class="card sub">${tab==='wrong'?'练习中答错的词会自动出现在这里，答对一次减一次，减到 0 自动移出。':'在任何单词旁点 ☆ 即可收藏。'}</div>`}`};
-VIEW.me=()=>{const vs=voices.length?voices:[];
-  return `<h1>我的</h1>
-  <h2>发音</h2><div class="card">
-  <div class="sub">美式发音人（来自手机系统自带语音）</div><select id="voice" style="margin:6px 0 10px"><option value="">自动选择</option>${vs.map(v=>`<option ${v.name===S.cfg.voice?'selected':''}>${esc(v.name)}</option>`).join('')}</select>
-  <div class="row"><span class="grow">语速 <b id="rv">${S.cfg.rate}</b></span><input id="rate" type="range" min="0.5" max="1.2" step="0.1" value="${S.cfg.rate}" style="flex:2;padding:0"></div>
-  <div class="row" style="margin-top:10px"><span class="grow">点单词时自动发音</span><button data-a="auto" class="${S.cfg.auto?'pri':''}">${S.cfg.auto?'开':'关'}</button></div>
-  <button class="full" data-a="spk" data-t="Words are easier to retain when you meet them in context.">试听一句</button>
-  ${vs.length?'':'<div class="sub">没有检测到英文语音。iPhone 可在 设置 → 辅助功能 → 朗读内容 → 声音 → 英语 里下载。</div>'}</div>
-  <h2>学习数据</h2><div class="card"><div class="sub">数据只保存在这部手机的浏览器里，换手机或清除数据前请先备份。</div>
-  <button class="full" data-a="export">导出备份</button><button class="full" data-a="import">从备份恢复</button><button class="full bad" data-a="reset">清空全部学习记录</button></div>
-  <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考</div>`};
-
-/* ---------- sheets ---------- */
-function sheet(html){const s=$('#sheet');s.innerHTML=`<div data-a="noop">${html}<button class="full ghost" data-a="closeSheet">关闭</button></div>`;s.classList.add('on')}
-function closeSheet(){$('#sheet').classList.remove('on')}
-function wordSheet(i,form){const x=W[i];if(S.cfg.auto)speak(x.w);
-  sheet(`<div class="row"><div class="grow"><h3>${esc(x.w)}</h3><span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}" style="font-size:26px">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}" style="font-size:26px">${S.star[x.w]?'★':'☆'}</button></div>
-  ${form&&form.toLowerCase()!==x.w.toLowerCase()?`<div class="sub">文中形式：<span class="en">${esc(form)}</span></div>`:''}
-  <p style="font-size:18px;margin:10px 0 6px">${esc(x.m)}</p>
-  <div class="row"><div class="grow"><span class="en">${esc(x.c)}</span> <span class="sub">${esc(x.cz)}</span></div><button class="ic" data-a="spk" data-t="${esc(x.c)}">🔊</button></div>
-  ${x.h?`<p class="sub">💡 ${esc(x.h)}</p>`:''}
-  <div class="sub">第${CN[x.v+1]}册 · 第 ${x.u+1} 天 · ${esc(VOLS[x.v][x.u].t)}</div>
-  ${view.name==='unit'&&view.v===x.v&&view.u===x.u?'':`<button class="full" data-a="open" data-v="${x.v}" data-u="${x.u}">去这个单元看短文</button>`}`)}
-function tokSheet(raw){const t=raw.toLowerCase().replace(/’/g,"'");if(IDX[t]!=null)return wordSheet(IDX[t],raw);
-  const d=DICT[t],U=view.name==='unit'?VOLS[view.v][view.u]:null,gl=U?U.g.filter(g=>g[0].toLowerCase().split(/\s+/).includes(t)):[];
-  if(S.cfg.auto)speak(raw);
-  sheet(`<div class="row"><div class="grow"><h3>${esc(raw)}</h3>${d&&d[1]?`<span class="ipa">/${esc(d[1])}/</span>`:''}</div><button class="ic" data-a="spk" data-t="${esc(raw)}" style="font-size:26px">🔊</button></div>
-  ${gl.map(g=>`<p style="font-size:17px;margin:10px 0 4px"><span class="tag">本文中</span> <span class="en">${esc(g[0])}</span> ${esc(g[1])}</p>`).join('')}
-  ${d?`${d[0]!==t?`<div class="sub">原形：<span class="en">${esc(d[0])}</span></div>`:''}<p style="font-size:17px;margin:8px 0">${d[2]?esc(d[2])+' ':''}${esc(d[3])}</p><div class="sub">词典释义为自动摘录，以“本文中”的注释为准</div>`:(gl.length?'':'<p class="sub">词典里没有这个词，可能是人名或地名。</p>')}`)}
-
-/* ---------- actions ---------- */
-const A={
-  tab:d=>go({name:d.t}),noop:()=>{},closeSheet:closeSheet,back:back,
-  open:d=>{closeSheet();const v={name:'unit',v:+d.v,u:+d.u};if(view.name==='unit')go(v,false);else{view.y=window.scrollY;go(v,true)}},
-  vol:d=>{view.v=+d.v;render()},
-  spk:d=>speak(d.t),
-  word:(d,el)=>{if(el.classList.contains('mk')){el.classList.remove('mk');el.textContent=d.f;return}wordSheet(+d.i,d.f)},
-  tok:d=>tokSheet(d.t),
-  showw:(d,el)=>{if(view.hide)el.classList.toggle('show')},
-  star:(d,el)=>{const w=W[+d.i].w;if(S.star[w])delete S.star[w];else S.star[w]=1;save();el.classList.toggle('on',!!S.star[w]);el.textContent=S.star[w]?'★':'☆';toast(S.star[w]?'已收藏':'已取消收藏')},
-  say:d=>{const p=VOLS[view.v][view.u].s[+d.si];speak(p[0].replace(/[\[\]]/g,''))},
-  tr:d=>$('#t'+d.si).classList.toggle('on'),
-  zh:()=>{view.zh=!view.zh;render()},cloze:()=>{view.cloze=!view.cloze;render()},hide:()=>{view.hide=!view.hide;render()},
-  rate:()=>{const r=[0.7,0.8,0.9,1,1.1];S.cfg.rate=r[(r.indexOf(S.cfg.rate)+1)%r.length]||0.9;save();render()},
-  read:()=>{if(playing===1)return stopAll();stopAll();playing=1;updPlay();const U=VOLS[view.v][view.u];let i=0;const nx=()=>{document.querySelectorAll('.sen.hl').forEach(e=>e.classList.remove('hl'));if(playing!==1||i>=U.s.length){if(playing===1)stopAll();return}const e=$('#s'+i);if(e){e.classList.add('hl');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(U.s[i][0].replace(/[\[\]]/g,''),()=>{i++;nx()},true)};nx()},
-  loop:()=>{if(playing===2)return stopAll();stopAll();playing=2;updPlay();const L=unitWords(view.v,view.u);let i=0,rep=0;const nx=()=>{document.querySelectorAll('.w.on').forEach(e=>e.classList.remove('on'));if(playing!==2||i>=L.length){if(playing===2)stopAll();return}const e=$('#w'+L[i]);if(e){e.classList.add('on');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(W[L[i]].w,()=>setTimeout(()=>{if(playing!==2)return;if(++rep>=2){rep=0;i++}nx()},rep?1400:600),true)};nx()},
-  learn:()=>{const k=key(view.v,view.u);if(S.learned[k]){if(!confirm('取消“已学”会清除这个单元的复习进度，确定吗？'))return;delete S.learned[k];delete S.rev[k]}else{S.learned[k]=today();logStudy(VOLS[view.v][view.u].w.length);toast('已加入复习计划：明天第一次复习')}save();render()},
-  pracUnit:()=>{view.y=window.scrollY;startPractice(unitWords(view.v,view.u),'mix')},
-  review:d=>startPractice(unitWords(+d.v,+d.u),'mix',{rev:key(+d.v,+d.u)}),
-  quick:()=>{view.scope='rand';startPractice(scopeList(),'mix')},
-  scope:d=>{view.scope=d.s;render()},
-  start:d=>{const sc=view.scope||'due',due=dueUnits();startPractice(scopeList(),d.m,sc==='due'&&due.length===1?{rev:key(due[0].v,due[0].u)}:null)},
-  pracBook:()=>{const src=(view.wt||'wrong')==='wrong'?S.wrong:S.star;startPractice(Object.keys(src).map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null),'mix')},
-  wt:d=>{view.wt=d.t;render()},
-  reveal:()=>{P.shown=1;render()},
-  judge:d=>{answer(d.ok==='1');A.next()},
-  pick:d=>{if(P.ans!==null)return;P.pick=+d.j;answer(+d.j===P.list[P.i])},
-  check:()=>{const a=$('#ans');P.typed=a.value.trim();answer(P.typed.toLowerCase()===W[P.list[P.i]].w.toLowerCase())},
-  giveup:()=>{P.typed='';answer(false)},
-  next:()=>{P.i++;P.ans=null;P.type=null;P.opts=null;P.pick=null;P.shown=0;P.said=0;P.typed='';if(P.i>=P.list.length)finish();else{render();window.scrollTo(0,0)}},
-  quit:()=>{if(P.i>0&&!confirm('退出后本次练习不计入复习，确定吗？'))return;back()},
-  redo:()=>startPractice(P.miss,'mix'),
-  auto:()=>{S.cfg.auto=!S.cfg.auto;save();render()},
-  export:()=>{const txt=JSON.stringify(S);sheet(`<h3 style="font-size:20px">导出备份</h3><p class="sub">把下面的文字全部复制，存到备忘录或发给自己。恢复时粘贴回来。</p><textarea id="bk" rows="6" readonly>${esc(txt)}</textarea><button class="full pri" data-a="copy">复制</button>`)},
-  copy:()=>{const t=$('#bk');t.select();t.setSelectionRange(0,1e7);(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('已复制'),()=>{document.execCommand('copy');toast('已复制')})},
-  import:()=>sheet(`<h3 style="font-size:20px">从备份恢复</h3><p class="sub">粘贴之前导出的文字。会覆盖当前的学习记录。</p><textarea id="bk" rows="6" placeholder="在这里粘贴"></textarea><button class="full pri" data-a="doImport">恢复</button>`),
-  doImport:()=>{let o;try{o=JSON.parse($('#bk').value)}catch(e){return toast('内容不是有效的备份')}if(!o||typeof o!=='object'||!o.learned)return toast('内容不是有效的备份');localStorage.setItem(KEY,JSON.stringify(o));S=load();closeSheet();toast('已恢复');render()},
-  reset:()=>{if(!confirm('确定清空全部学习记录吗？此操作不可恢复，建议先导出备份。'))return;localStorage.removeItem(KEY);S=load();toast('已清空');render()},
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const fn = actions[el.dataset.act]; if (fn) fn(el.dataset.v);
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.f && draft) draft[el.dataset.f] = el.value;
+  else if (el.id === 'q') { listQ = el.value; renderList(); }
+  else if (el.id === 'fixVal') updateFixDiff();
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.set) {
+    const k = el.dataset.set;
+    S.settings[k] = ['cooldown', 'smokeGoal'].includes(k) ? Math.max(0, parseInt(el.value) || 0)
+      : k === 'packSize' ? Math.max(1, parseInt(el.value) || 20)
+      : Math.max(0, toCents(el.value));
+    save(); render();
+  } else if (el.dataset.inc) {
+    const k = el.dataset.inc, inc = S.settings.income;
+    inc[k] = k === 'auto' ? el.checked : k === 'amt' ? Math.max(0, toCents(el.value))
+      : ['day', 'every'].includes(k) ? Math.min(k === 'day' ? 31 : 90, Math.max(0, parseInt(el.value) || 0)) : el.value;
+    // 改了周期就从今天开始自动记，今天以前的到账已经在你填的余额里了
+    if (['mode', 'day', 'every', 'last', 'acct', 'auto'].includes(k)) inc.genUntil = today();
+    save(); renderSettings(); render();
+  } else if (el.dataset.due) {
+    const a = acctOf(el.dataset.due); a.dueDay = Math.min(31, Math.max(1, parseInt(el.value) || 10));
+    save(); renderSettings(); render();
+  } else if (el.dataset.cb) {
+    const v = toCents(el.value);
+    if (v > 0) S.settings.catBudgets[el.dataset.cb] = v; else delete S.settings.catBudgets[el.dataset.cb];
+    save(); render();
+  } else if (el.id === 'badgeT') toggleBadge(el.checked);
+  else if (el.id === 'guardT') { S.settings.balanceGuard = el.checked; save(); render(); }
+  else if (el.id === 'smokeT') { S.settings.smokeOn = el.checked; save(); render(); }
+  else if (el.id === 'fileIn' && el.files[0]) { importFile(el.files[0]); el.value = ''; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
+// 按住弹层顶部往下拖可以关闭，和系统弹窗手感一致
+let drag = null;
+document.addEventListener('touchstart', e => {
+  const top = e.target.closest('.sheet-top');
+  if (top) drag = {sh: top.parentElement, y: e.touches[0].clientY, dy: 0};
+}, {passive: true});
+document.addEventListener('touchmove', e => {
+  if (!drag) return;
+  drag.dy = Math.max(0, e.touches[0].clientY - drag.y);
+  if (drag.dy > 6) { drag.sh.style.transition = 'none'; drag.sh.style.transform = `translateY(${drag.dy}px)`; }
+}, {passive: true});
+const endDrag = () => {
+  if (!drag) return;
+  const {sh, dy} = drag; drag = null;
+  sh.style.transition = ''; sh.style.transform = '';
+  if (dy > 80) closeSheet(sh.id);
 };
-document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const f=A[el.dataset.a];if(f){e.stopPropagation();f(el.dataset,el,e)}});
-document.addEventListener('input',e=>{const t=e.target;
-  if(t.id==='q'){view.q=t.value;const pos=t.selectionStart;render();const n=$('#q');n.focus();n.setSelectionRange(pos,pos)}
-  if(t.id==='rate'){S.cfg.rate=+t.value;$('#rv').textContent=t.value;save()}});
-document.addEventListener('change',e=>{const t=e.target;
-  if(t.id==='voice'){S.cfg.voice=t.value;save();speak('Hello, this is my voice.')}
-  if(t.id==='pv'){view.pv=+t.value;view.pu=0;render()}
-  if(t.id==='pu'){view.pu=+t.value}});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ans')A.check()});
-render();
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/cet6/sw.js',{scope:'/cet6/'});
+document.addEventListener('touchend', endDrag);
+document.addEventListener('touchcancel', endDrag);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { runRecurring(); runIncome(); render(); dailyReview(); }
+});
+
+runRecurring();
+runIncome();
+go('home');
+dailyReview();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js', {scope: '/'});
+// 申请"持久存储"，降低系统在空间紧张时清掉记账数据的可能
+navigator.storage?.persist?.().catch(() => {});
 </script>
 </body>
 </html>

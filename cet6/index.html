@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="六级词汇">
+<meta name="theme-color" content="#f4f6fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="/cet6/icon-180.png">
+<link rel="manifest" href="/cet6/manifest.webmanifest">
+<title>六级语境词汇</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--text:#1c2430;--soft:#6a7686;--line:#e3e8ef;--pri:#2f6fde;--prib:#e6efff;--red:#d6336c;--redb:#ffe6ef;--ok:#1f9d63;--okb:#e0f6ea;--warn:#e07a00;--warnb:#fff1dc}
+@media (prefers-color-scheme: dark){:root{--bg:#0f1318;--card:#1a2029;--text:#e8edf4;--soft:#93a0b2;--line:#2a323e;--pri:#6ea0ff;--prib:#1c2a44;--red:#ff7aa5;--redb:#3a1c28;--ok:#4fd39a;--okb:#143326;--warn:#ffb454;--warnb:#3a2a12}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-text-size-adjust:100%}
+body{padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 76px)}
+h1{font-size:24px;margin:6px 2px 12px}h2{font-size:17px;margin:18px 2px 8px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.row{display:flex;align-items:center;gap:10px}.grow{flex:1;min-width:0}.sub{color:var(--soft);font-size:13px}
+.en{font-family:"Helvetica Neue",Arial,sans-serif}
+button,.btn{font:inherit;border:0;border-radius:11px;padding:10px 14px;background:var(--prib);color:var(--pri);font-weight:600;cursor:pointer}
+button.pri{background:var(--pri);color:#fff}button.ghost{background:transparent;color:var(--soft);padding:6px 8px}
+button.ok{background:var(--okb);color:var(--ok)}button.bad{background:var(--redb);color:var(--red)}
+button.full{display:block;width:100%;margin:8px 0;padding:13px}
+button:disabled{opacity:.45}
+input,select,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;width:100%}
+.bar{height:8px;background:var(--line);border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--pri);border-radius:5px}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.stat b{display:block;font-size:22px}
+#tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px);z-index:5}
+#tabs a{flex:1;text-align:center;font-size:11px;color:var(--soft);padding:4px 0}#tabs a b{display:block;font-size:20px;font-weight:400;line-height:1.2}#tabs a.on{color:var(--pri)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px}.chips button{white-space:nowrap;padding:7px 13px;background:var(--card);color:var(--soft)}.chips button.on{background:var(--pri);color:#fff}
+.ul{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}.ul:last-child{border:0}
+.tag{font-size:11px;border-radius:20px;padding:2px 8px;background:var(--line);color:var(--soft);white-space:nowrap}.tag.ok{background:var(--okb);color:var(--ok)}.tag.due{background:var(--warnb);color:var(--warn)}
+.story{font-family:"Helvetica Neue",Arial,sans-serif;font-size:18px;line-height:1.95}
+.story .tg{color:var(--red);background:var(--redb);border-radius:5px;padding:1px 4px;font-weight:700}
+.story .tg.mk{letter-spacing:1px}
+.story .sen.hl{background:var(--prib);border-radius:6px}
+.story .chip{font-style:normal;font-size:12px;color:var(--pri);background:var(--prib);border-radius:9px;padding:2px 6px;margin-left:4px;font-family:-apple-system,"PingFang SC",sans-serif;white-space:nowrap}
+.story .tr{display:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:14.5px;line-height:1.6;color:var(--soft);border-left:3px solid var(--pri);padding-left:9px;margin:4px 0 8px}
+.story .tr.on{display:block}
+.gl{font-size:13.5px;color:var(--soft);line-height:1.9}.gl b{color:var(--text);font-family:"Helvetica Neue",Arial,sans-serif;font-weight:600}
+.w{padding:11px 0;border-bottom:1px solid var(--line)}.w:last-child{border:0}.w.on{background:var(--prib);border-radius:10px;padding-left:8px;padding-right:8px}
+.w .hw{font-family:"Helvetica Neue",Arial,sans-serif;font-size:18px;font-weight:700;color:var(--pri)}
+.ipa{font-family:"Lucida Sans Unicode","Helvetica Neue",Arial,sans-serif;color:var(--soft);font-size:14px}
+.w .m{font-size:15px;margin-top:2px}.w .c{font-size:14px;color:var(--soft);margin-top:2px}.w .c span{font-family:"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+.hide .w .m,.hide .w .c{filter:blur(6px)}.hide .w.show .m,.hide .w.show .c{filter:none}
+.ic{background:transparent;color:var(--pri);padding:6px 8px;font-size:18px}
+.star{background:transparent;padding:6px 8px;font-size:20px;color:var(--soft)}.star.on{color:var(--warn)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}.tools button{padding:8px 12px;font-size:14px}
+.tools button.on{background:var(--pri);color:#fff}
+.sheet{position:fixed;left:0;right:0;bottom:0;top:0;background:rgba(0,0,0,.35);display:none;z-index:20;align-items:flex-end}
+.sheet.on{display:flex}
+.sheet>div{background:var(--card);width:100%;max-height:calc(100% - env(safe-area-inset-top) - 60px);overflow:auto;border-radius:18px 18px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px)}
+.sheet h3{font-family:"Helvetica Neue",Arial,sans-serif;font-size:26px;margin:0}
+.q{text-align:center;padding:22px 6px}.q .big{font-family:"Helvetica Neue",Arial,sans-serif;font-size:32px;font-weight:700}.q .zhq{font-size:21px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;margin:9px 0;padding:14px;background:var(--card);color:var(--text);font-weight:500;border:1px solid var(--line)}
+.opt.r{background:var(--okb);color:var(--ok);border-color:var(--ok)}.opt.x{background:var(--redb);color:var(--red);border-color:var(--red)}
+.fb{border-radius:12px;padding:12px;margin:10px 0;background:var(--okb)}.fb.x{background:var(--redb)}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);background:rgba(20,25,32,.92);color:#fff;border-radius:20px;padding:8px 16px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;white-space:nowrap}
+#toast.on{opacity:1}
+.back{background:transparent;color:var(--pri);padding:6px 2px;font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="tabs"></nav>
+<div id="sheet" class="sheet" data-a="closeSheet"></div>
+<div id="toast"></div>
+<script src="/cet6/data.js"></script>
+<script>
+const VERSION='v1.0', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true}};
+let S=load();
+function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
+const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+const W=[],IDX={},UB=[];
+VOLS.forEach((vu,v)=>{UB[v]=[];vu.forEach((u,ui)=>{UB[v][ui]=W.length;u.w.forEach(r=>{IDX[r[0].toLowerCase()]=W.length;W.push({w:r[0],ipa:r[1],m:r[2],c:r[3],cz:r[4],h:r[5],v,u:ui})})})});
+const NU=VOLS.reduce((a,v)=>a+v.length,0);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>dstr(new Date());
+const addDays=(s,n)=>{const [y,m,d]=s.split('-').map(Number);return dstr(new Date(y,m-1,d+n))};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const key=(v,u)=>v+'-'+u;
+const unitWords=(v,u)=>VOLS[v][u].w.map((_,i)=>UB[v][u]+i);
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1600)}
+function logStudy(n){S.log[today()]=(S.log[today()]||0)+(n||1);save()}
+function streak(){let n=0,d=today();if(!S.log[d])d=addDays(d,-1);while(S.log[d]){n++;d=addDays(d,-1)}return n}
+function dueUnits(){const t=today(),out=[];for(const k in S.learned){const c=S.rev[k]||0;if(c<5&&t>=addDays(S.learned[k],OFF[c])){const [v,u]=k.split('-').map(Number);out.push({v,u,c})}}return out.sort((a,b)=>a.v-b.v||a.u-b.u)}
+function nextUnit(){for(let v=0;v<VOLS.length;v++)for(let u=0;u<VOLS[v].length;u++)if(!S.learned[key(v,u)])return{v,u};return null}
+const mastered=()=>W.filter(x=>(S.ok[x.w]||0)>=2&&!S.wrong[x.w]).length;
+
+/* ---------- speech ---------- */
+let voices=[],spk=0,playing=0;
+function loadVoices(){if(!('speechSynthesis' in window))return;voices=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang))}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function pickVoice(){if(!voices.length)loadVoices();return voices.find(v=>v.name===S.cfg.voice)||voices.find(v=>/Samantha|Ava|Allison|Google US/i.test(v.name))||voices[0]||null}
+function speak(text,cb,chain){
+  if(!('speechSynthesis' in window)){toast('此浏览器不支持朗读');return}
+  if(!chain&&playing){playing=0;updPlay()}
+  const my=++spk,u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=pickVoice();if(v)u.voice=v;u.rate=S.cfg.rate;
+  u.onend=()=>{if(my===spk&&cb)cb()};u.onerror=u.onend;
+  const go=()=>{if(my===spk)speechSynthesis.speak(u)};
+  if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,90)}else go();
+}
+function stopAll(){playing=0;spk++;if('speechSynthesis' in window)speechSynthesis.cancel();updPlay()}
+function updPlay(){const a=$('#btnRead'),b=$('#btnLoop');if(a)a.textContent=playing===1?'■ 停止':'▶ 朗读全文';if(b)b.textContent=playing===2?'■ 停止连播':'▶ 连播单词';if(!playing){document.querySelectorAll('.sen.hl,.w.on').forEach(e=>e.classList.remove('hl','on'))}}
+
+/* ---------- views ---------- */
+let view={name:'home'},stack=[];
+function go(v,push){if(push)stack.push(view);else if(push===false){}else stack=[];stopAll();view=v;render();window.scrollTo(0,0)}
+function back(){stopAll();view=stack.pop()||{name:'home'};render();window.scrollTo(0,view.y||0)}
+const TABS=[['home','今日','◐'],['book','课本','▤'],['prac','练习','✎'],['words','生词本','☆'],['me','我的','☺']];
+function render(){
+  const root={home:'home',book:'book',unit:'book',prac:'prac',quiz:'prac',done:'prac',words:'words',me:'me'}[view.name];
+  $('#tabs').innerHTML=TABS.map(t=>`<a class="${t[0]===root?'on':''}" data-a="tab" data-t="${t[0]}"><b>${t[2]}</b>${t[1]}</a>`).join('');
+  $('#tabs').style.display=view.name==='quiz'?'none':'flex';
+  $('#app').innerHTML=VIEW[view.name]();
+  if(view.name==='quiz')afterQuiz();
+}
+const VIEW={};
+VIEW.home=()=>{
+  const lu=Object.keys(S.learned).length,ms=mastered(),due=dueUnits(),nx=nextUnit();
+  return `<h1>六级语境词汇</h1>
+  <div class="card"><div class="stat"><div><b>${streak()}</b><span class="sub">连续天数</span></div><div><b>${lu}<small class="sub">/${NU}</small></b><span class="sub">已学单元</span></div><div><b>${ms}<small class="sub">/${W.length}</small></b><span class="sub">已掌握词</span></div></div>
+  <div class="bar" style="margin-top:12px"><i style="width:${Math.round(lu/NU*100)}%"></i></div></div>
+  <h2>今日新学</h2>
+  ${nx?`<div class="card row"><div class="grow"><div><b>第${CN[nx.v+1]}册 · 第 ${nx.u+1} 天</b></div><div class="sub">${esc(VOLS[nx.v][nx.u].t)} · ${VOLS[nx.v][nx.u].w.length} 个词</div></div><button class="pri" data-a="open" data-v="${nx.v}" data-u="${nx.u}">开始</button></div>`:'<div class="card">七册全部学完了 🎉</div>'}
+  <h2>今日复习 <span class="sub">${due.length?due.length+' 个单元到期':'暂无到期'}</span></h2>
+  ${due.length?'<div class="card" style="padding:2px 0">'+due.map(d=>`<div class="ul"><div class="grow"><div>第${CN[d.v+1]}册 · ${esc(VOLS[d.v][d.u].t)}</div><div class="sub">第 ${d.c+1}/5 次复习</div></div><button data-a="review" data-v="${d.v}" data-u="${d.u}">复习</button></div>`).join('')+'</div>':'<div class="card sub">学完一个单元后，会在第 1、2、4、7、15 天自动出现在这里。</div>'}
+  <h2>快捷入口</h2>
+  <div class="grid2"><button data-a="tab" data-t="words">生词本 ${Object.keys(S.star).length+Object.keys(S.wrong).length}</button><button data-a="quick">随机抽 20 词</button></div>`;
+};
+VIEW.book=()=>{
+  const v=view.v||0,q=(view.q||'').trim().toLowerCase();
+  let body;
+  if(q){const hit=W.map((x,i)=>[x,i]).filter(([x])=>x.w.toLowerCase().includes(q)||x.m.includes(q)).sort((a,b)=>(a[0].w.toLowerCase().startsWith(q)?0:1)-(b[0].w.toLowerCase().startsWith(q)?0:1)).slice(0,40);
+    body=hit.length?'<div class="card" style="padding:2px 14px">'+hit.map(([x,i])=>wordRow(i,true)).join('')+'</div>':'<div class="card sub">没有找到</div>'}
+  else body=`<div class="chips">${VOLS.map((_,i)=>`<button class="${i===v?'on':''}" data-a="vol" data-v="${i}">第${CN[i+1]}册</button>`).join('')}</div>
+  <div class="card" style="padding:2px 0">${VOLS[v].map((u,i)=>{const k=key(v,i),c=S.rev[k]||0,due=S.learned[k]&&c<5&&today()>=addDays(S.learned[k],OFF[c]);
+    return `<div class="ul" data-a="open" data-v="${v}" data-u="${i}"><div class="grow"><div>${i+1}. ${esc(u.t)} <span class="sub en">${esc(u.e)}</span></div><div class="sub">${u.w.length} 词</div></div>${S.learned[k]?(due?'<span class="tag due">待复习</span>':`<span class="tag ok">已学 · 复习 ${c}/5</span>`):'<span class="tag">未学</span>'}</div>`}).join('')}</div>`;
+  return `<h1>课本</h1><input id="q" placeholder="搜索 2100 个词（英文或中文）" value="${esc(view.q||'')}" autocapitalize="off" autocorrect="off" spellcheck="false">${body}`;
+};
+function wordRow(i,loc){const x=W[i];return `<div class="w" id="w${i}" data-a="showw"><div class="row"><div class="grow"><span class="hw" data-a="word" data-i="${i}">${esc(x.w)}</span> <span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}">${S.star[x.w]?'★':'☆'}</button></div>
+  <div class="m">${esc(x.m)}</div><div class="c"><span>${esc(x.c)}</span> ${esc(x.cz)}</div>${loc?`<div class="sub">第${CN[x.v+1]}册 · ${esc(VOLS[x.v][x.u].t)}${S.wrong[x.w]?' · 错 '+S.wrong[x.w]+' 次':''}</div>`:(x.h?`<div class="sub">${esc(x.h)}</div>`:'')}</div>`}
+function mask(t){return esc(t[0])+'＿＿＿'}
+VIEW.unit=()=>{
+  const {v,u}=view,U=VOLS[v][u],k=key(v,u);let n=0;
+  const sents=U.s.map((p,si)=>{const html=p[0].replace(/\[([^\]]+)\]|([A-Za-zé][A-Za-zé'’-]*)/g,(m,t,o)=>{if(t){const i=UB[v][u]+n++;return `<b class="tg${view.cloze?' mk':''}" data-a="word" data-i="${i}" data-f="${esc(t)}">${view.cloze?mask(t):esc(t)}</b>`}return `<span data-a="tok" data-t="${esc(o)}">${esc(o)}</span>`});
+    return `<span class="sen" id="s${si}">${html}</span><i class="chip" data-a="say" data-si="${si}">🔊</i><i class="chip" data-a="tr" data-si="${si}">译</i><span class="tr${view.zh?' on':''}" id="t${si}">${esc(p[1])}</span>`}).join(' ');
+  return `<button class="back" data-a="back">‹ 返回</button>
+  <h1 style="margin-top:2px">${esc(U.t)} <span class="sub en" style="font-size:15px">${esc(U.e)}</span></h1>
+  <div class="sub" style="margin:-8px 2px 8px">第${CN[v+1]}册 · 第 ${u+1} 天 · 点任意单词看释义，点“译”看这句的翻译</div>
+  <div class="tools"><button id="btnRead" data-a="read">▶ 朗读全文</button><button class="${view.zh?'on':''}" data-a="zh">全文翻译</button><button class="${view.cloze?'on':''}" data-a="cloze">挖空</button><button data-a="rate">语速 ${S.cfg.rate}</button></div>
+  <div class="card story">${sents}</div>
+  ${U.g.length?`<div class="card gl"><span class="tag">其他生词</span> ${U.g.map(g=>`<b>${esc(g[0])}</b> ${esc(g[1])}`).join(' · ')}</div>`:''}
+  <h2>本单元 ${U.w.length} 个词</h2>
+  <div class="tools"><button id="btnLoop" data-a="loop">▶ 连播单词</button><button class="${view.hide?'on':''}" data-a="hide">遮住中文</button></div>
+  <div class="card ${view.hide?'hide':''}" style="padding:2px 14px">${unitWords(v,u).map(i=>wordRow(i)).join('')}</div>
+  <button class="full pri" data-a="pracUnit">练习本单元</button>
+  <button class="full ${S.learned[k]?'ok':''}" data-a="learn">${S.learned[k]?'✓ 已学（'+S.learned[k]+'），复习 '+(S.rev[k]||0)+'/5':'标记为已学，加入复习计划'}</button>`;
+};
+const MODES=[['mix','混合练习','三种题型随机出'],['card','认词卡片','看英文想意思，自己判断'],['en2zh','英选中','看单词选释义'],['zh2en','中选英','看释义选单词'],['listen','听音选义','只听发音选释义'],['spell','看义拼写','给首字母，拼出单词'],['dict','听写','听发音拼出单词']];
+VIEW.prac=()=>{
+  const sc=view.scope||'due',due=dueUnits(),bookN=Object.keys(S.star).length+Object.keys(S.wrong).length,pv=view.pv??(nextUnit()||{v:0}).v,pu=view.pu??0;
+  return `<h1>练习</h1><h2>练哪些词</h2>
+  <div class="chips">${[['due','到期复习 '+due.length],['unit','某个单元'],['book','生词本 '+bookN],['rand','随机 20 词']].map(s=>`<button class="${sc===s[0]?'on':''}" data-a="scope" data-s="${s[0]}">${s[1]}</button>`).join('')}</div>
+  ${sc==='unit'?`<div class="grid2"><select id="pv">${VOLS.map((_,i)=>`<option value="${i}" ${i==pv?'selected':''}>第${CN[i+1]}册</option>`).join('')}</select><select id="pu">${VOLS[pv].map((u,i)=>`<option value="${i}" ${i==pu?'selected':''}>${i+1}. ${esc(u.t)}</option>`).join('')}</select></div>`:''}
+  ${sc==='due'&&!due.length?'<div class="card sub">现在没有到期的单元，可以选“某个单元”或“随机 20 词”。</div>':''}
+  ${sc==='rand'?'<div class="card sub">从已学单元里随机抽 20 个；还没学过任何单元时从第一册抽。</div>':''}
+  <h2>怎么练</h2>
+  <div class="card" style="padding:2px 0">${MODES.map(m=>`<div class="ul" data-a="start" data-m="${m[0]}"><div class="grow"><div><b>${m[1]}</b></div><div class="sub">${m[2]}</div></div><span class="sub">›</span></div>`).join('')}</div>`;
+};
+function scopeList(){
+  const sc=view.scope||'due';
+  if(sc==='due')return dueUnits().flatMap(d=>unitWords(d.v,d.u));
+  if(sc==='unit')return unitWords(+(view.pv??(nextUnit()||{v:0}).v),+(view.pu??0));
+  if(sc==='book')return [...new Set([...Object.keys(S.wrong),...Object.keys(S.star)])].map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null);
+  const keys=Object.keys(S.learned);let pool=keys.length?keys.flatMap(k=>{const [v,u]=k.split('-').map(Number);return unitWords(v,u)}):W.slice(0,300).map((_,i)=>i);
+  return shuffle(pool).slice(0,20);
+}
+
+/* ---------- quiz ---------- */
+let P=null;
+function startPractice(list,mode,ctx){if(!list.length){toast('这个范围里还没有词');return}P={list:shuffle(list),mode,i:0,right:0,miss:[],ctx:ctx||null,ans:null};go({name:'quiz'},true)}
+function qType(){if(P.type)return P.type;return P.type=P.mode==='mix'?['en2zh','zh2en','listen'][Math.floor(Math.random()*3)]:P.mode}
+function options(i,field){if(P.opts)return P.opts;const x=W[i],pool=shuffle(W.map((_,j)=>j).filter(j=>j!==i&&W[j].v===x.v&&W[j][field]!==x[field])).slice(0,3);return P.opts=shuffle([i,...pool])}
+VIEW.quiz=()=>{
+  const i=P.list[P.i],x=W[i],t=qType(),done=P.ans!==null;let body='';
+  const head=`<div class="row"><button class="back" data-a="quit">✕ 退出</button><div class="grow bar"><i style="width:${P.i/P.list.length*100}%"></i></div><span class="sub">${P.i+1}/${P.list.length}</span></div>`;
+  const fb=done?`<div class="fb ${P.ans?'':'x'}"><div class="row"><div class="grow"><b class="en" style="font-size:20px">${esc(x.w)}</b> <span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}">${S.star[x.w]?'★':'☆'}</button></div><div>${esc(x.m)}</div><div class="sub"><span class="en">${esc(x.c)}</span> ${esc(x.cz)}</div></div><button class="full pri" data-a="next">${P.i+1<P.list.length?'下一个':'看结果'}</button>`:'';
+  if(t==='card'){
+    body=`<div class="card q"><div class="big">${esc(x.w)}</div><div class="ipa">/${esc(x.ipa)}/</div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button></div>`+
+      (P.shown?`<div class="card"><div>${esc(x.m)}</div><div class="sub"><span class="en">${esc(x.c)}</span> ${esc(x.cz)}</div>${x.h?`<div class="sub">${esc(x.h)}</div>`:''}</div><div class="grid2"><button class="bad" data-a="judge" data-ok="0">不认识</button><button class="ok" data-a="judge" data-ok="1">认识</button></div>`:`<button class="full pri" data-a="reveal">显示释义</button>`);
+  }else if(t==='spell'||t==='dict'){
+    body=`<div class="card q">${t==='spell'?`<div class="zhq">${esc(x.m)}</div><div class="sub" style="margin-top:6px">${esc(x.cz)}</div><div class="sub en" style="margin-top:10px;font-size:18px;letter-spacing:3px">${esc(x.w[0])}${'_'.repeat(x.w.length-1)}</div>`:`<button class="pri" data-a="spk" data-t="${esc(x.w)}" style="font-size:22px;padding:16px 26px">🔊 再听一遍</button><div class="sub" style="margin-top:10px">${x.w.length} 个字母</div>`}</div>`+
+      (done?fb:`<input id="ans" class="en" placeholder="输入单词" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"><button class="full pri" data-a="check">确定</button><button class="full ghost" data-a="giveup">不会，看答案</button>`);
+    if(done)body=body.replace(fb,`<div class="sub" style="text-align:center">你的答案：<b class="en">${esc(P.typed||'（空）')}</b></div>`+fb);
+  }else{
+    const field=t==='zh2en'?'w':'m',op=options(i,field);
+    const qh=t==='en2zh'?`<div class="big">${esc(x.w)}</div><div class="ipa">/${esc(x.ipa)}/</div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button>`:t==='zh2en'?`<div class="zhq">${esc(x.m)}</div><div class="sub" style="margin-top:6px">${esc(x.cz)}</div>`:`<button class="pri" data-a="spk" data-t="${esc(x.w)}" style="font-size:22px;padding:16px 26px">🔊 再听一遍</button>${done?`<div class="big" style="margin-top:10px">${esc(x.w)}</div>`:''}`;
+    body=`<div class="card q">${qh}</div>`+op.map(j=>`<button class="opt ${done?(j===i?'r':(j===P.pick?'x':'')):''} ${field==='w'?'en':''}" data-a="pick" data-j="${j}" ${done?'disabled':''}>${esc(W[j][field])}</button>`).join('')+fb;
+  }
+  return head+body;
+};
+function afterQuiz(){const t=qType(),x=W[P.list[P.i]];if(P.ans===null&&!P.said){P.said=1;if(t==='listen'||t==='dict'||(S.cfg.auto&&(t==='en2zh'||t==='card')))speak(x.w)}const a=$('#ans');if(a)a.focus()}
+function answer(ok){const x=W[P.list[P.i]];P.ans=ok;if(ok){P.right++;S.ok[x.w]=(S.ok[x.w]||0)+1;if(S.wrong[x.w]){S.wrong[x.w]--;if(S.wrong[x.w]<=0)delete S.wrong[x.w]}}else{P.miss.push(P.list[P.i]);S.wrong[x.w]=(S.wrong[x.w]||0)+1;S.ok[x.w]=0}save();if(qType()!=='en2zh'&&qType()!=='card')speak(x.w);render()}
+VIEW.done=()=>{const n=P.list.length,pc=Math.round(P.right/n*100);
+  return `<h1>练习完成</h1><div class="card q"><div class="big">${P.right} / ${n}</div><div class="sub">正确率 ${pc}%${P.ctx&&P.ctx.msg?' · '+P.ctx.msg:''}</div></div>
+  ${P.miss.length?`<h2>答错的 ${P.miss.length} 个（已进生词本）</h2><div class="card" style="padding:2px 14px">${P.miss.map(i=>wordRow(i,true)).join('')}</div><button class="full pri" data-a="redo">再练一遍错词</button>`:'<div class="card sub" style="text-align:center">全对，漂亮。</div>'}
+  <button class="full" data-a="tab" data-t="home">回到今日</button>`};
+function finish(){logStudy(P.list.length);if(P.ctx&&P.ctx.rev){const k=P.ctx.rev,c=S.rev[k]||0;if(S.learned[k]&&c<5&&today()>=addDays(S.learned[k],OFF[c])){S.rev[k]=c+1;P.ctx.msg='已记为第 '+(c+1)+'/5 次复习';save()}}stack=[];view={name:'done'};render();window.scrollTo(0,0)}
+
+VIEW.words=()=>{const tab=view.wt||'wrong',src=tab==='wrong'?S.wrong:S.star,list=Object.keys(src).map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null);
+  if(tab==='wrong')list.sort((a,b)=>(S.wrong[W[b].w]||0)-(S.wrong[W[a].w]||0));
+  return `<h1>生词本</h1><div class="chips"><button class="${tab==='wrong'?'on':''}" data-a="wt" data-t="wrong">错词 ${Object.keys(S.wrong).length}</button><button class="${tab==='star'?'on':''}" data-a="wt" data-t="star">收藏 ${Object.keys(S.star).length}</button></div>
+  ${list.length?`<button class="full pri" data-a="pracBook">练习这 ${list.length} 个词</button><div class="card" style="padding:2px 14px">${list.map(i=>wordRow(i,true)).join('')}</div>`:`<div class="card sub">${tab==='wrong'?'练习中答错的词会自动出现在这里，答对一次减一次，减到 0 自动移出。':'在任何单词旁点 ☆ 即可收藏。'}</div>`}`};
+VIEW.me=()=>{const vs=voices.length?voices:[];
+  return `<h1>我的</h1>
+  <h2>发音</h2><div class="card">
+  <div class="sub">美式发音人（来自手机系统自带语音）</div><select id="voice" style="margin:6px 0 10px"><option value="">自动选择</option>${vs.map(v=>`<option ${v.name===S.cfg.voice?'selected':''}>${esc(v.name)}</option>`).join('')}</select>
+  <div class="row"><span class="grow">语速 <b id="rv">${S.cfg.rate}</b></span><input id="rate" type="range" min="0.5" max="1.2" step="0.1" value="${S.cfg.rate}" style="flex:2;padding:0"></div>
+  <div class="row" style="margin-top:10px"><span class="grow">点单词时自动发音</span><button data-a="auto" class="${S.cfg.auto?'pri':''}">${S.cfg.auto?'开':'关'}</button></div>
+  <button class="full" data-a="spk" data-t="Words are easier to retain when you meet them in context.">试听一句</button>
+  ${vs.length?'':'<div class="sub">没有检测到英文语音。iPhone 可在 设置 → 辅助功能 → 朗读内容 → 声音 → 英语 里下载。</div>'}</div>
+  <h2>学习数据</h2><div class="card"><div class="sub">数据只保存在这部手机的浏览器里，换手机或清除数据前请先备份。</div>
+  <button class="full" data-a="export">导出备份</button><button class="full" data-a="import">从备份恢复</button><button class="full bad" data-a="reset">清空全部学习记录</button></div>
+  <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考</div>`};
+
+/* ---------- sheets ---------- */
+function sheet(html){const s=$('#sheet');s.innerHTML=`<div data-a="noop">${html}<button class="full ghost" data-a="closeSheet">关闭</button></div>`;s.classList.add('on')}
+function closeSheet(){$('#sheet').classList.remove('on')}
+function wordSheet(i,form){const x=W[i];if(S.cfg.auto)speak(x.w);
+  sheet(`<div class="row"><div class="grow"><h3>${esc(x.w)}</h3><span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}" style="font-size:26px">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}" style="font-size:26px">${S.star[x.w]?'★':'☆'}</button></div>
+  ${form&&form.toLowerCase()!==x.w.toLowerCase()?`<div class="sub">文中形式：<span class="en">${esc(form)}</span></div>`:''}
+  <p style="font-size:18px;margin:10px 0 6px">${esc(x.m)}</p>
+  <div class="row"><div class="grow"><span class="en">${esc(x.c)}</span> <span class="sub">${esc(x.cz)}</span></div><button class="ic" data-a="spk" data-t="${esc(x.c)}">🔊</button></div>
+  ${x.h?`<p class="sub">💡 ${esc(x.h)}</p>`:''}
+  <div class="sub">第${CN[x.v+1]}册 · 第 ${x.u+1} 天 · ${esc(VOLS[x.v][x.u].t)}</div>
+  ${view.name==='unit'&&view.v===x.v&&view.u===x.u?'':`<button class="full" data-a="open" data-v="${x.v}" data-u="${x.u}">去这个单元看短文</button>`}`)}
+function tokSheet(raw){const t=raw.toLowerCase().replace(/’/g,"'");if(IDX[t]!=null)return wordSheet(IDX[t],raw);
+  const d=DICT[t],U=view.name==='unit'?VOLS[view.v][view.u]:null,gl=U?U.g.filter(g=>g[0].toLowerCase().split(/\s+/).includes(t)):[];
+  if(S.cfg.auto)speak(raw);
+  sheet(`<div class="row"><div class="grow"><h3>${esc(raw)}</h3>${d&&d[1]?`<span class="ipa">/${esc(d[1])}/</span>`:''}</div><button class="ic" data-a="spk" data-t="${esc(raw)}" style="font-size:26px">🔊</button></div>
+  ${gl.map(g=>`<p style="font-size:17px;margin:10px 0 4px"><span class="tag">本文中</span> <span class="en">${esc(g[0])}</span> ${esc(g[1])}</p>`).join('')}
+  ${d?`${d[0]!==t?`<div class="sub">原形：<span class="en">${esc(d[0])}</span></div>`:''}<p style="font-size:17px;margin:8px 0">${d[2]?esc(d[2])+' ':''}${esc(d[3])}</p><div class="sub">词典释义为自动摘录，以“本文中”的注释为准</div>`:(gl.length?'':'<p class="sub">词典里没有这个词，可能是人名或地名。</p>')}`)}
+
+/* ---------- actions ---------- */
+const A={
+  tab:d=>go({name:d.t}),noop:()=>{},closeSheet:closeSheet,back:back,
+  open:d=>{closeSheet();const v={name:'unit',v:+d.v,u:+d.u};if(view.name==='unit')go(v,false);else{view.y=window.scrollY;go(v,true)}},
+  vol:d=>{view.v=+d.v;render()},
+  spk:d=>speak(d.t),
+  word:(d,el)=>{if(el.classList.contains('mk')){el.classList.remove('mk');el.textContent=d.f;return}wordSheet(+d.i,d.f)},
+  tok:d=>tokSheet(d.t),
+  showw:(d,el)=>{if(view.hide)el.classList.toggle('show')},
+  star:(d,el)=>{const w=W[+d.i].w;if(S.star[w])delete S.star[w];else S.star[w]=1;save();el.classList.toggle('on',!!S.star[w]);el.textContent=S.star[w]?'★':'☆';toast(S.star[w]?'已收藏':'已取消收藏')},
+  say:d=>{const p=VOLS[view.v][view.u].s[+d.si];speak(p[0].replace(/[\[\]]/g,''))},
+  tr:d=>$('#t'+d.si).classList.toggle('on'),
+  zh:()=>{view.zh=!view.zh;render()},cloze:()=>{view.cloze=!view.cloze;render()},hide:()=>{view.hide=!view.hide;render()},
+  rate:()=>{const r=[0.7,0.8,0.9,1,1.1];S.cfg.rate=r[(r.indexOf(S.cfg.rate)+1)%r.length]||0.9;save();render()},
+  read:()=>{if(playing===1)return stopAll();stopAll();playing=1;updPlay();const U=VOLS[view.v][view.u];let i=0;const nx=()=>{document.querySelectorAll('.sen.hl').forEach(e=>e.classList.remove('hl'));if(playing!==1||i>=U.s.length){if(playing===1)stopAll();return}const e=$('#s'+i);if(e){e.classList.add('hl');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(U.s[i][0].replace(/[\[\]]/g,''),()=>{i++;nx()},true)};nx()},
+  loop:()=>{if(playing===2)return stopAll();stopAll();playing=2;updPlay();const L=unitWords(view.v,view.u);let i=0,rep=0;const nx=()=>{document.querySelectorAll('.w.on').forEach(e=>e.classList.remove('on'));if(playing!==2||i>=L.length){if(playing===2)stopAll();return}const e=$('#w'+L[i]);if(e){e.classList.add('on');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(W[L[i]].w,()=>setTimeout(()=>{if(playing!==2)return;if(++rep>=2){rep=0;i++}nx()},rep?1400:600),true)};nx()},
+  learn:()=>{const k=key(view.v,view.u);if(S.learned[k]){if(!confirm('取消“已学”会清除这个单元的复习进度，确定吗？'))return;delete S.learned[k];delete S.rev[k]}else{S.learned[k]=today();logStudy(VOLS[view.v][view.u].w.length);toast('已加入复习计划：明天第一次复习')}save();render()},
+  pracUnit:()=>{view.y=window.scrollY;startPractice(unitWords(view.v,view.u),'mix')},
+  review:d=>startPractice(unitWords(+d.v,+d.u),'mix',{rev:key(+d.v,+d.u)}),
+  quick:()=>{view.scope='rand';startPractice(scopeList(),'mix')},
+  scope:d=>{view.scope=d.s;render()},
+  start:d=>{const sc=view.scope||'due',due=dueUnits();startPractice(scopeList(),d.m,sc==='due'&&due.length===1?{rev:key(due[0].v,due[0].u)}:null)},
+  pracBook:()=>{const src=(view.wt||'wrong')==='wrong'?S.wrong:S.star;startPractice(Object.keys(src).map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null),'mix')},
+  wt:d=>{view.wt=d.t;render()},
+  reveal:()=>{P.shown=1;render()},
+  judge:d=>{answer(d.ok==='1');A.next()},
+  pick:d=>{if(P.ans!==null)return;P.pick=+d.j;answer(+d.j===P.list[P.i])},
+  check:()=>{const a=$('#ans');P.typed=a.value.trim();answer(P.typed.toLowerCase()===W[P.list[P.i]].w.toLowerCase())},
+  giveup:()=>{P.typed='';answer(false)},
+  next:()=>{P.i++;P.ans=null;P.type=null;P.opts=null;P.pick=null;P.shown=0;P.said=0;P.typed='';if(P.i>=P.list.length)finish();else{render();window.scrollTo(0,0)}},
+  quit:()=>{if(P.i>0&&!confirm('退出后本次练习不计入复习，确定吗？'))return;back()},
+  redo:()=>startPractice(P.miss,'mix'),
+  auto:()=>{S.cfg.auto=!S.cfg.auto;save();render()},
+  export:()=>{const txt=JSON.stringify(S);sheet(`<h3 style="font-size:20px">导出备份</h3><p class="sub">把下面的文字全部复制，存到备忘录或发给自己。恢复时粘贴回来。</p><textarea id="bk" rows="6" readonly>${esc(txt)}</textarea><button class="full pri" data-a="copy">复制</button>`)},
+  copy:()=>{const t=$('#bk');t.select();t.setSelectionRange(0,1e7);(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('已复制'),()=>{document.execCommand('copy');toast('已复制')})},
+  import:()=>sheet(`<h3 style="font-size:20px">从备份恢复</h3><p class="sub">粘贴之前导出的文字。会覆盖当前的学习记录。</p><textarea id="bk" rows="6" placeholder="在这里粘贴"></textarea><button class="full pri" data-a="doImport">恢复</button>`),
+  doImport:()=>{let o;try{o=JSON.parse($('#bk').value)}catch(e){return toast('内容不是有效的备份')}if(!o||typeof o!=='object'||!o.learned)return toast('内容不是有效的备份');localStorage.setItem(KEY,JSON.stringify(o));S=load();closeSheet();toast('已恢复');render()},
+  reset:()=>{if(!confirm('确定清空全部学习记录吗？此操作不可恢复，建议先导出备份。'))return;localStorage.removeItem(KEY);S=load();toast('已清空');render()},
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const f=A[el.dataset.a];if(f){e.stopPropagation();f(el.dataset,el,e)}});
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.id==='q'){view.q=t.value;const pos=t.selectionStart;render();const n=$('#q');n.focus();n.setSelectionRange(pos,pos)}
+  if(t.id==='rate'){S.cfg.rate=+t.value;$('#rv').textContent=t.value;save()}});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='voice'){S.cfg.voice=t.value;save();speak('Hello, this is my voice.')}
+  if(t.id==='pv'){view.pv=+t.value;view.pu=0;render()}
+  if(t.id==='pu'){view.pu=+t.value}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ans')A.check()});
+render();
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/cet6/sw.js',{scope:'/cet6/'});
+</script>
+</body>
+</html>
