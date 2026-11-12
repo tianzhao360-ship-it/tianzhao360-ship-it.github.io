@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="referrer" content="no-referrer">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -73,8 +74,8 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 <div id="toast"></div>
 <script src="/cet6/data.js"></script>
 <script>
-const VERSION='v1.0', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
-const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true}};
+const VERSION='v1.1', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true,online:true}};
 let S=load();
 function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
 const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
@@ -101,16 +102,36 @@ const mastered=()=>W.filter(x=>(S.ok[x.w]||0)>=2&&!S.wrong[x.w]).length;
 let voices=[],spk=0,playing=0;
 function loadVoices(){if(!('speechSynthesis' in window))return;voices=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang))}
 if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
-function pickVoice(){if(!voices.length)loadVoices();return voices.find(v=>v.name===S.cfg.voice)||voices.find(v=>/Samantha|Ava|Allison|Google US/i.test(v.name))||voices[0]||null}
-function speak(text,cb,chain){
+const GOOD=/Premium|Enhanced|高级|优化|Natural|Neural/i;
+function pickVoice(){if(!voices.length)loadVoices();return voices.find(v=>v.name===S.cfg.voice)||voices.find(v=>GOOD.test(v.name))||voices.find(v=>/Ava|Zoe|Evan|Samantha|Allison|Google US/i.test(v.name))||voices[0]||null}
+const AU=new Audio();AU.preload='auto';
+let warmAt=0;function warm(){if(!S.cfg.online||navigator.onLine===false||Date.now()-warmAt<60000)return;warmAt=Date.now();try{fetch('https://dict.youdao.com/dictvoice?type=2&audio=a',{mode:'no-cors',cache:'no-store'}).catch(()=>{})}catch(e){}}
+const isWord=t=>/^[A-Za-z][A-Za-z'’-]*$/.test(t)&&t.length<32;
+function tts(text,cb,my){
   if(!('speechSynthesis' in window)){toast('此浏览器不支持朗读');return}
-  if(!chain&&playing){playing=0;updPlay()}
-  const my=++spk,u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=pickVoice();if(v)u.voice=v;u.rate=S.cfg.rate;
+  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=pickVoice();if(v)u.voice=v;u.rate=S.cfg.rate;
   u.onend=()=>{if(my===spk&&cb)cb()};u.onerror=u.onend;
   const go=()=>{if(my===spk)speechSynthesis.speak(u)};
   if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,90)}else go();
 }
-function stopAll(){playing=0;spk++;if('speechSynthesis' in window)speechSynthesis.cancel();updPlay()}
+function speak(text,cb,chain){
+  if(!chain&&playing){playing=0;updPlay()}
+  const my=++spk;AU.onended=AU.onerror=AU.onplaying=null;AU.pause();clearTimeout(speak.t);
+  if('speechSynthesis' in window&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();
+  if(S.cfg.online&&navigator.onLine!==false&&isWord(text)){
+    // 单词：有道词典美音真人发音；取不到（断网、超时、无此词）时退回系统语音
+    let dead=false;const fall=()=>{if(dead||my!==spk)return;dead=true;clearTimeout(speak.t);AU.onended=AU.onerror=AU.onplaying=null;AU.pause();tts(text,cb,my)};
+    AU.src='https://dict.youdao.com/dictvoice?type=2&audio='+encodeURIComponent(text.replace(/’/g,"'"));
+    AU.playbackRate=Math.max(0.75,Math.min(1.1,S.cfg.rate+0.1));
+    AU.onplaying=()=>clearTimeout(speak.t);
+    AU.onended=()=>{if(!dead&&my===spk&&cb)cb()};AU.onerror=fall;
+    speak.t=setTimeout(fall,4000);
+    const p=AU.play();if(p&&p.catch)p.catch(fall);
+    return;
+  }
+  tts(text,cb,my);
+}
+function stopAll(){playing=0;spk++;clearTimeout(speak.t);AU.onended=AU.onerror=AU.onplaying=null;AU.pause();if('speechSynthesis' in window)speechSynthesis.cancel();updPlay()}
 function updPlay(){const a=$('#btnRead'),b=$('#btnLoop');if(a)a.textContent=playing===1?'■ 停止':'▶ 朗读全文';if(b)b.textContent=playing===2?'■ 停止连播':'▶ 连播单词';if(!playing){document.querySelectorAll('.sen.hl,.w.on').forEach(e=>e.classList.remove('hl','on'))}}
 
 /* ---------- views ---------- */
@@ -189,7 +210,7 @@ function scopeList(){
 
 /* ---------- quiz ---------- */
 let P=null;
-function startPractice(list,mode,ctx){if(!list.length){toast('这个范围里还没有词');return}P={list:shuffle(list),mode,i:0,right:0,miss:[],ctx:ctx||null,ans:null};go({name:'quiz'},true)}
+function startPractice(list,mode,ctx){if(!list.length){toast('这个范围里还没有词');return}P={list:shuffle(list),mode,i:0,right:0,miss:[],ctx:ctx||null,ans:null};warm();go({name:'quiz'},true)}
 function qType(){if(P.type)return P.type;return P.type=P.mode==='mix'?['en2zh','zh2en','listen'][Math.floor(Math.random()*3)]:P.mode}
 function options(i,field){if(P.opts)return P.opts;const x=W[i],pool=shuffle(W.map((_,j)=>j).filter(j=>j!==i&&W[j].v===x.v&&W[j][field]!==x[field])).slice(0,3);return P.opts=shuffle([i,...pool])}
 VIEW.quiz=()=>{
@@ -225,14 +246,16 @@ VIEW.words=()=>{const tab=view.wt||'wrong',src=tab==='wrong'?S.wrong:S.star,list
 VIEW.me=()=>{const vs=voices.length?voices:[];
   return `<h1>我的</h1>
   <h2>发音</h2><div class="card">
-  <div class="sub">美式发音人（来自手机系统自带语音）</div><select id="voice" style="margin:6px 0 10px"><option value="">自动选择</option>${vs.map(v=>`<option ${v.name===S.cfg.voice?'selected':''}>${esc(v.name)}</option>`).join('')}</select>
+  <div class="row"><span class="grow">单词用在线真人发音<div class="sub">有道词典美音，需联网；取不到时自动改用系统语音</div></span><button data-a="online" class="${S.cfg.online?'pri':''}">${S.cfg.online?'开':'关'}</button></div>
+  <button class="full" data-a="spk" data-t="curriculum">试听单词 curriculum</button>
+  <div class="sub" style="margin-top:10px">整句和短文朗读用手机系统语音。带“Premium / Enhanced / 高级 / 优化”的更自然，会自动优先选用。</div><select id="voice" style="margin:6px 0 10px"><option value="">自动选择（优先高质量）</option>${vs.map(v=>`<option ${v.name===S.cfg.voice?'selected':''}>${esc(v.name)}</option>`).join('')}</select>
   <div class="row"><span class="grow">语速 <b id="rv">${S.cfg.rate}</b></span><input id="rate" type="range" min="0.5" max="1.2" step="0.1" value="${S.cfg.rate}" style="flex:2;padding:0"></div>
   <div class="row" style="margin-top:10px"><span class="grow">点单词时自动发音</span><button data-a="auto" class="${S.cfg.auto?'pri':''}">${S.cfg.auto?'开':'关'}</button></div>
   <button class="full" data-a="spk" data-t="Words are easier to retain when you meet them in context.">试听一句</button>
-  ${vs.length?'':'<div class="sub">没有检测到英文语音。iPhone 可在 设置 → 辅助功能 → 朗读内容 → 声音 → 英语 里下载。</div>'}</div>
+  <div class="sub">想让整句朗读更像真人：iPhone 设置 → 辅助功能 → 朗读内容 → 声音 → 英语，下载 Ava、Zoe 或 Evan 的“高级/优化”版本，然后回到这里在上面的列表里选它（列表里没出现就说明系统没有把它开放给网页）。</div></div>
   <h2>学习数据</h2><div class="card"><div class="sub">数据只保存在这部手机的浏览器里，换手机或清除数据前请先备份。</div>
   <button class="full" data-a="export">导出备份</button><button class="full" data-a="import">从备份恢复</button><button class="full bad" data-a="reset">清空全部学习记录</button></div>
-  <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考</div>`};
+  <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考<br>单词发音来自有道词典在线接口</div>`};
 
 /* ---------- sheets ---------- */
 function sheet(html){const s=$('#sheet');s.innerHTML=`<div data-a="noop">${html}<button class="full ghost" data-a="closeSheet">关闭</button></div>`;s.classList.add('on')}
@@ -255,7 +278,7 @@ function tokSheet(raw){const t=raw.toLowerCase().replace(/’/g,"'");if(IDX[t]!=
 /* ---------- actions ---------- */
 const A={
   tab:d=>go({name:d.t}),noop:()=>{},closeSheet:closeSheet,back:back,
-  open:d=>{closeSheet();const v={name:'unit',v:+d.v,u:+d.u};if(view.name==='unit')go(v,false);else{view.y=window.scrollY;go(v,true)}},
+  open:d=>{closeSheet();warm();const v={name:'unit',v:+d.v,u:+d.u};if(view.name==='unit')go(v,false);else{view.y=window.scrollY;go(v,true)}},
   vol:d=>{view.v=+d.v;render()},
   spk:d=>speak(d.t),
   word:(d,el)=>{if(el.classList.contains('mk')){el.classList.remove('mk');el.textContent=d.f;return}wordSheet(+d.i,d.f)},
@@ -285,6 +308,7 @@ const A={
   quit:()=>{if(P.i>0&&!confirm('退出后本次练习不计入复习，确定吗？'))return;back()},
   redo:()=>startPractice(P.miss,'mix'),
   auto:()=>{S.cfg.auto=!S.cfg.auto;save();render()},
+  online:()=>{S.cfg.online=!S.cfg.online;save();render()},
   export:()=>{const txt=JSON.stringify(S);sheet(`<h3 style="font-size:20px">导出备份</h3><p class="sub">把下面的文字全部复制，存到备忘录或发给自己。恢复时粘贴回来。</p><textarea id="bk" rows="6" readonly>${esc(txt)}</textarea><button class="full pri" data-a="copy">复制</button>`)},
   copy:()=>{const t=$('#bk');t.select();t.setSelectionRange(0,1e7);(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('已复制'),()=>{document.execCommand('copy');toast('已复制')})},
   import:()=>sheet(`<h3 style="font-size:20px">从备份恢复</h3><p class="sub">粘贴之前导出的文字。会覆盖当前的学习记录。</p><textarea id="bk" rows="6" placeholder="在这里粘贴"></textarea><button class="full pri" data-a="doImport">恢复</button>`),
