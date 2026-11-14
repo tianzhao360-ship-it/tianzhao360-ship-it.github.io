@@ -74,7 +74,7 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 <div id="toast"></div>
 <script src="/cet6/data.js"></script>
 <script>
-const VERSION='v1.2', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const VERSION='v1.3', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
 const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true,online:true}};
 let S=load();
 function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
@@ -254,8 +254,11 @@ VIEW.me=()=>{const vs=voices.length?voices:[];
   <div class="row" style="margin-top:10px"><span class="grow">点单词时自动发音</span><button data-a="auto" class="${S.cfg.auto?'pri':''}">${S.cfg.auto?'开':'关'}</button></div>
   <button class="full" data-a="spk" data-t="Words are easier to retain when you meet them in context.">试听一句</button>
   <div class="sub">备用系统语音想更自然：iPhone 设置 → 辅助功能 → 朗读内容 → 声音 → 英语，下载 Ava、Zoe 或 Evan 的“高级/优化”版本，再回到上面的列表里选它（列表里没出现就说明系统没有把它开放给网页）。</div></div>
-  <h2>学习数据</h2><div class="card"><div class="sub">数据只保存在这部手机的浏览器里，换手机或清除数据前请先备份。</div>
-  <button class="full" data-a="export">导出备份</button><button class="full" data-a="import">从备份恢复</button><button class="full bad" data-a="reset">清空全部学习记录</button></div>
+  <h2>多设备同步</h2><div class="card"><div class="sub">学习记录只存在每台设备自己的浏览器里，电脑和手机不会自动互通。用同步码把一台设备的记录合并到另一台：两边的记录取并集，不会互相覆盖。</div>
+  <button class="full pri" data-a="syncOut">① 在这台设备生成同步码</button><button class="full" data-a="syncIn">② 在另一台设备粘贴同步码</button>
+  <div class="sub">当前：已学 ${Object.keys(S.learned).length} 个单元 · 生词本 ${Object.keys(S.star).length+Object.keys(S.wrong).length} 词${S.syncAt?' · 上次合并 '+esc(S.syncAt):''}</div></div>
+  <h2>备份</h2><div class="card"><div class="sub">备份恢复会用备份<b>覆盖</b>这台设备的记录，适合换手机或清除数据前使用。</div>
+  <button class="full" data-a="export">导出备份</button><button class="full" data-a="import">从备份恢复（覆盖）</button><button class="full bad" data-a="reset">清空全部学习记录</button></div>
   <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考<br>单词发音来自有道词典在线接口，整句语音由微软神经网络语音预先生成</div>`};
 
 /* ---------- sheets ---------- */
@@ -275,6 +278,25 @@ function tokSheet(raw){const t=raw.toLowerCase().replace(/’/g,"'");if(IDX[t]!=
   sheet(`<div class="row"><div class="grow"><h3>${esc(raw)}</h3>${d&&d[1]?`<span class="ipa">/${esc(d[1])}/</span>`:''}</div><button class="ic" data-a="spk" data-t="${esc(raw)}" style="font-size:26px">🔊</button></div>
   ${gl.map(g=>`<p style="font-size:17px;margin:10px 0 4px"><span class="tag">本文中</span> <span class="en">${esc(g[0])}</span> ${esc(g[1])}</p>`).join('')}
   ${d?`${d[0]!==t?`<div class="sub">原形：<span class="en">${esc(d[0])}</span></div>`:''}<p style="font-size:17px;margin:8px 0">${d[2]?esc(d[2])+' ':''}${esc(d[3])}</p><div class="sub">词典释义为自动摘录，以“本文中”的注释为准</div>`:(gl.length?'':'<p class="sub">词典里没有这个词，可能是人名或地名。</p>')}`)}
+
+/* ---------- sync code ---------- */
+const b64e=u=>{let s='';for(let i=0;i<u.length;i+=8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const b64d=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function pack(o){const j=JSON.stringify(o);
+  if(window.CompressionStream){try{const b=await new Response(new Blob([j]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer();return 'CET6:'+b64e(new Uint8Array(b))}catch(e){}}
+  return 'CET6J:'+b64e(new TextEncoder().encode(j))}
+async function unpack(raw){const t=raw.trim(),c=t.replace(/\s+/g,'');
+  if(c.startsWith('CET6:')){if(!window.DecompressionStream)throw new Error('old');return JSON.parse(await new Response(new Blob([b64d(c.slice(5))]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text())}
+  if(c.startsWith('CET6J:'))return JSON.parse(new TextDecoder().decode(b64d(c.slice(6))));
+  return JSON.parse(t)}
+function mergeIn(o){
+  const mx=(a,b,cap)=>{for(const k in b||{}){let n=+b[k]||0;if(cap)n=Math.min(cap,n);if(n>0&&(!(k in a)||n>a[k]))a[k]=n}};
+  for(const k in o.learned||{}){const d=o.learned[k];if(typeof d==='string'&&/^\d{4}-\d\d-\d\d$/.test(d)&&(!S.learned[k]||d<S.learned[k]))S.learned[k]=d}
+  mx(S.rev,o.rev,5);mx(S.ok,o.ok);mx(S.wrong,o.wrong);mx(S.log,o.log);
+  for(const k in o.star||{})S.star[k]=1;
+  for(const k in S.rev)if(!S.learned[k])delete S.rev[k];
+}
+const snap=()=>({u:Object.keys(S.learned).length,r:Object.values(S.rev).reduce((a,b)=>a+b,0),b:Object.keys(S.star).length+Object.keys(S.wrong).length,m:mastered()});
 
 /* ---------- actions ---------- */
 const A={
@@ -314,6 +336,15 @@ const A={
   copy:()=>{const t=$('#bk');t.select();t.setSelectionRange(0,1e7);(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('已复制'),()=>{document.execCommand('copy');toast('已复制')})},
   import:()=>sheet(`<h3 style="font-size:20px">从备份恢复</h3><p class="sub">粘贴之前导出的文字。会覆盖当前的学习记录。</p><textarea id="bk" rows="6" placeholder="在这里粘贴"></textarea><button class="full pri" data-a="doImport">恢复</button>`),
   doImport:()=>{let o;try{o=JSON.parse($('#bk').value)}catch(e){return toast('内容不是有效的备份')}if(!o||typeof o!=='object'||!o.learned)return toast('内容不是有效的备份');localStorage.setItem(KEY,JSON.stringify(o));S=load();closeSheet();toast('已恢复');render()},
+  syncOut:async()=>{const code=await pack({learned:S.learned,rev:S.rev,star:S.star,wrong:S.wrong,ok:S.ok,log:S.log});
+    sheet(`<h3 style="font-size:20px">同步码</h3><p class="sub">把这段同步码发到另一台设备（微信发给自己、隔空投送、备忘录都行），在那边打开“我的 → ② 粘贴同步码”。</p><textarea id="bk" rows="5" readonly class="en" style="font-size:12px">${esc(code)}</textarea><button class="full pri" data-a="copy">复制同步码</button>${navigator.share?'<button class="full" data-a="shareCode">发送到其他设备</button>':''}<div class="sub">共 ${code.length} 个字符 · 包含 ${Object.keys(S.learned).length} 个已学单元</div>`)},
+  shareCode:()=>{navigator.share({text:$('#bk').value}).catch(()=>{})},
+  syncIn:()=>sheet(`<h3 style="font-size:20px">粘贴同步码</h3><p class="sub">粘贴另一台设备生成的同步码。已学单元、收藏、错词取两边的并集；复习次数、答对次数取较大的。这台设备原有的记录不会丢。</p><textarea id="bk" rows="5" class="en" style="font-size:12px" placeholder="在这里粘贴同步码" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>${navigator.clipboard&&navigator.clipboard.readText?'<button class="full" data-a="pasteClip">从剪贴板粘贴</button>':''}<button class="full pri" data-a="doMerge">合并到这台设备</button>`),
+  pasteClip:()=>{navigator.clipboard.readText().then(t=>{$('#bk').value=t},()=>toast('读不到剪贴板，请长按输入框粘贴'))},
+  doMerge:async()=>{let o;try{o=await unpack($('#bk').value)}catch(e){return toast(e.message==='old'?'这台设备系统较旧，无法解开同步码':'同步码无效或不完整')}
+    if(!o||typeof o!=='object'||!o.learned)return toast('同步码无效或不完整');
+    const a=snap();mergeIn(o);S.syncAt=today();save();const b=snap();closeSheet();render();
+    sheet(`<h3 style="font-size:20px">合并完成</h3><p>已学单元：${a.u} → <b>${b.u}</b><br>复习次数合计：${a.r} → <b>${b.r}</b><br>生词本：${a.b} → <b>${b.b}</b> 词<br>已掌握：${a.m} → <b>${b.m}</b> 词</p><p class="sub">这台设备现在是两边合并后的完整记录。如果另一台设备也要更新到最新，在这台点“① 生成同步码”再发回去合并一次。</p>`)},
   reset:()=>{if(!confirm('确定清空全部学习记录吗？此操作不可恢复，建议先导出备份。'))return;localStorage.removeItem(KEY);S=load();toast('已清空');render()},
 };
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const f=A[el.dataset.a];if(f){e.stopPropagation();f(el.dataset,el,e)}});

@@ -1,5 +1,5 @@
 // 网络优先：有网时拿最新版本并更新缓存，没网时用缓存
-const CACHE = 'cet6-v3';
+const CACHE = 'cet6-v4';
 const FILES = ['/cet6/', '/cet6/index.html', '/cet6/data.js', '/cet6/manifest.webmanifest', '/cet6/icon-180.png', '/cet6/icon-512.png'];
 
 self.addEventListener('install', e => {
