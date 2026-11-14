@@ -217,7 +217,7 @@ html.lock,html.lock body{overflow:hidden}
 <script>
 'use strict';
 const KEY = 'selfrestraint.v1';
-const APP_VERSION = 'v1.3';
+const APP_VERSION = 'v1.4';
 const DEFAULT_CATS = [
   {id:'food',   name:'餐饮',   emoji:'🍜', color:'#ff9f0a'},
   {id:'snack',  name:'零食饮料', emoji:'🧋', color:'#ff6482'},
@@ -342,9 +342,12 @@ function nextAllowance(after){
 }
 // 下一次有钱进账：生活费和固定收入里最近的那天；都没有就按月底算
 function nextIncome(after = today()){
-  const cands = [nextAllowance(after), ...S.recurring.filter(r => r.kind === 'in').map(r => monthlyAfter(r.day, after))].filter(Boolean);
+  const al = nextAllowance(after);
+  const cands = [al, ...S.recurring.filter(r => r.kind === 'in').map(r => monthlyAfter(r.day, after))].filter(Boolean);
   const a = parse(after);
-  return cands.length ? {date: cands.sort((x, y) => x - y)[0], known: true} : {date: new Date(a.getFullYear(), a.getMonth() + 1, 1), known: false};
+  if (!cands.length) return {date: new Date(a.getFullYear(), a.getMonth() + 1, 1), known: false, allowance: false};
+  const date = cands.sort((x, y) => x - y)[0];
+  return {date, known: true, allowance: !!al && al.getTime() === date.getTime()};
 }
 // 生活费到账日自动记一笔收入（只处理设置之后出现的到账日，之前的已经在你填的余额里了）
 function runIncome(){
@@ -384,16 +387,20 @@ function balanceInfo(){
   const bills = credit.map(a => ({a, ...creditDue(a)})).filter(b => b.amt > 0);
   // 下次到账之前就要还的钱，先从余额里扣出来
   const dueSoon = bills.filter(b => ymd(b.date) < nd).reduce((s, b) => s + b.amt, 0);
-  // 用「今天开始时」的余额来算每日额度，今天花钱不会让今天的额度跟着变
   const spentToday = sum(S.records.filter(r => r.d === t && cash.some(a => a.id === r.acct)));
-  const avail = cashTotal + spentToday - st.reserve - dueSoon;
+  const availNow = cashTotal - st.reserve - dueSoon;
+  // 两个「每天」：perDayNow 是现在手里的钱 ÷ 剩下的天数（首页大字显示这个）；
+  // perDay 用「今天开始时」的钱算，一整天都不变，只给日预算收紧用，避免今天越花额度越低
+  const avail = availNow + spentToday;
+  // 下一个周期只按「生活费 → 下一次生活费」算，固定收入（比如每月 25 号的补贴）不算周期的边界
   let cycle = null;
-  if (next.known && st.income.mode !== 'none' && st.income.amt) {
-    const end = nextIncome(nd), ed = ymd(end.date), dues = credit.reduce((s, a) => s + duesBetween(a, nd, ed), 0), len = Math.max(1, dayDiff(nd, ed));
-    cycle = {from: next.date, to: addDays(end.date, -1), len, dues, perDay: Math.max(0, Math.floor((st.income.amt - dues) / len))};
+  const al = st.income.amt ? nextAllowance(t) : null, al2 = al && nextAllowance(ymd(al));
+  if (al && al2) {
+    const from = ymd(al), to = ymd(al2), dues = credit.reduce((s, a) => s + duesBetween(a, from, to), 0), len = Math.max(1, dayDiff(from, to));
+    cycle = {from: al, to: addDays(al2, -1), len, dues, perDay: Math.max(0, Math.floor((st.income.amt - dues) / len))};
   }
-  return {cashTotal, owed, total: cashTotal - owed, bills, dueSoon, avail, availNow: cashTotal - st.reserve - dueSoon, next, days, cycle,
-    perDay: Math.max(0, Math.floor(avail / days))};
+  return {cashTotal, owed, total: cashTotal - owed, bills, dueSoon, avail, availNow, next, days, cycle, spentToday,
+    perDay: Math.max(0, Math.floor(avail / days)), perDayNow: Math.max(0, Math.floor(availNow / days))};
 }
 
 // 根据「已花 / 预算」以及「这个周期已经过去了多少」判断状态，返回 'none' | 'ok' | 'warn' | 'over'
@@ -532,7 +539,10 @@ function balanceCard(){
   const st = S.settings, lowLv = bi.availNow <= 0 ? 'over' : bi.availNow < st.lowBal ? 'warn' : '';
   const set = st.daily || (st.monthly ? Math.floor(st.monthly / daysIn(new Date())) : 0);
   const cash = S.accounts.filter(a => !isCredit(a)), credit = S.accounts.filter(isCredit);
-  const nextTxt = bi.next.known ? `${md(bi.next.date)} 生活费到账` : '月底';
+  const nextTxt = !bi.next.known ? '月底' : `${md(bi.next.date)} ${bi.next.allowance ? '生活费到账' : '下次进账'}`;
+  const lastDay = addDays(bi.next.date, -1);
+  const formula = `${fmt(bi.cashTotal)}${bi.dueSoon ? ` − 要还 ${fmt(bi.dueSoon)}` : ''}${st.reserve ? ` − 留着 ${fmt(st.reserve)}` : ''} ÷ ${bi.days} 天`;
+  const todayLeft = bi.perDay - bi.spentToday;
   let h = `<div class="card"><div class="split"><div><div class="muted">现在手里的钱${st.reserve ? `（含留着不动的 ${fmt(st.reserve)}）` : ''}</div>
       <div class="big2 ${bi.cashTotal < 0 ? 'red' : ''}">${fmt(bi.cashTotal)}</div></div>
       ${bi.owed ? `<div class="right"><div class="muted">分期/欠款共</div><b class="red">${fmt(bi.owed)}</b></div>` : ''}</div>
@@ -540,9 +550,13 @@ function balanceCard(){
     <div class="calc"><div class="split"><span>离 ${nextTxt}</span><b>还有 ${bi.days} 天</b></div>
       ${bi.dueSoon ? `<div class="split"><span>到账前要还</span><b class="red">−${fmt(bi.dueSoon)}</b></div>` : ''}
       ${st.reserve ? `<div class="split"><span>留着不动</span><b>−${fmt(st.reserve)}</b></div>` : ''}
-      <div class="split big-line"><span>每天最多花</span><b>${fmt(bi.perDay)}</b></div>
-      <div class="muted xs">（余额${bi.dueSoon ? ' − 要还的' : ''}${st.reserve ? ' − 留着的' : ''}）÷ ${bi.days} 天${bi.next.known ? '' : '。在设置里填生活费周期，会算得更准'}</div></div>
-    ${bi.cycle ? `<p class="muted">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：生活费 ${fmt(st.income.amt)}${bi.cycle.dues ? ` − 期间要还 ${fmt(bi.cycle.dues)}` : ''}，平均每天约 <b>${fmt(bi.cycle.perDay)}</b>。</p>` : ''}
+      <div class="split big-line"><span>从现在起每天最多花</span><b>${fmt(bi.perDayNow)}</b></div>
+      <div class="muted xs">${formula}（今天到 ${md(lastDay)}，含今天）${bi.next.known ? '' : '。在设置里填生活费周期，会算得更准'}</div>
+      ${bi.spentToday ? `<div class="muted xs">${todayLeft >= 0 ? `今天已花 ${fmt(bi.spentToday)}，按今天早上的余额，今天还能花 ${fmt(todayLeft)}。`
+        : `今天已花 ${fmt(bi.spentToday)}，比今天该花的 ${fmt(bi.perDay)} 多了 <b class="red">${fmt(-todayLeft)}</b>，所以后面每天能花的变少了。`}</div>` : ''}</div>
+    ${!bi.cycle ? '' : bi.cycle.dues >= st.income.amt
+      ? `<div class="warnline lv-over">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：期间要还 ${fmt(bi.cycle.dues)}，比生活费 ${fmt(st.income.amt)} 还多 ${fmt(bi.cycle.dues - st.income.amt)}。这次的生活费不够还款，现在手里的钱要尽量留着。</div>`
+      : `<p class="muted">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：生活费 ${fmt(st.income.amt)}${bi.cycle.dues ? ` − 期间要还 ${fmt(bi.cycle.dues)}` : ''} ÷ ${bi.cycle.len} 天，平均每天约 <b>${fmt(bi.cycle.perDay)}</b>。</p>`}
     ${lowLv ? `<div class="warnline lv-${lowLv}">${bi.availNow <= 0 ? `🛑 扣掉要还的钱，手里已经没有能花的了，${bi.next.known ? `撑到 ${md(bi.next.date)}` : '接下来'}只能花必要的钱。` : `⚠️ 扣掉要还的钱，能动用的只剩 ${fmt(bi.availNow)}，请只花必要的钱。`}</div>` : ''}
     ${set && bi.perDay < set ? `<div class="warnline lv-warn">你的日预算 ${fmt(set)} 比余额撑得住的 ${fmt(bi.perDay)} 高，${st.balanceGuard ? '今天已按余额收紧' : '照这样花撑不到下次到账'}。</div>` : ''}
     <div class="btnrow"><button class="btn2" data-act="flow" data-v="in">＋ 记收入</button><button class="btn2" data-act="flow" data-v="move">⇄ 转账</button></div>
