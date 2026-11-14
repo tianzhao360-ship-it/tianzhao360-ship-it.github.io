@@ -74,7 +74,7 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 <div id="toast"></div>
 <script src="/cet6/data.js"></script>
 <script>
-const VERSION='v1.3', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const VERSION='v1.4', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
 const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true,online:true}};
 let S=load();
 function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
@@ -282,13 +282,38 @@ function tokSheet(raw){const t=raw.toLowerCase().replace(/’/g,"'");if(IDX[t]!=
 /* ---------- sync code ---------- */
 const b64e=u=>{let s='';for(let i=0;i<u.length;i+=8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const b64d=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
-async function pack(o){const j=JSON.stringify(o);
-  if(window.CompressionStream){try{const b=await new Response(new Blob([j]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer();return 'CET6:'+b64e(new Uint8Array(b))}catch(e){}}
-  return 'CET6J:'+b64e(new TextEncoder().encode(j))}
-async function unpack(raw){const t=raw.trim(),c=t.replace(/\s+/g,'');
-  if(c.startsWith('CET6:')){if(!window.DecompressionStream)throw new Error('old');return JSON.parse(await new Response(new Blob([b64d(c.slice(5))]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text())}
+const B32='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const b32e=u=>{let o='',bits=0,v=0;for(let i=0;i<u.length;i++){v=(v<<8)|u[i];bits+=8;while(bits>=5){o+=B32[(v>>>(bits-5))&31];bits-=5}v&=(1<<bits)-1}if(bits)o+=B32[(v<<(5-bits))&31];return o};
+const b32d=t=>{const o=[];let bits=0,v=0;for(const ch of t){const k=B32.indexOf(ch);if(k<0)continue;v=(v<<5)|k;bits+=5;if(bits>=8){o.push((v>>>(bits-8))&255);bits-=8}v&=(1<<bits)-1}return new Uint8Array(o)};
+const sum16=u=>{let a=0;for(let i=0;i<u.length;i++)a=(a*31+u[i])&65535;return a};
+const D0=Date.UTC(2026,0,1),d2n=s=>{const [y,m,d]=s.split('-').map(Number);return Math.max(0,Math.min(65535,Math.round((Date.UTC(y,m-1,d)-D0)/864e5)))},n2d=n=>{const x=new Date(D0+n*864e5);return x.getUTCFullYear()+'-'+pad(x.getUTCMonth()+1)+'-'+pad(x.getUTCDate())};
+// 同步码 = CET6S + Base32(头 6 字节 + 数据)。只含大写字母和数字 2-7，转发时不会被聊天软件改动。
+// 头部：格式版本、数据长度（3 字节）、校验和（2 字节），用来区分“少了字符”和“被改动”。
+// 数据用紧凑的二进制（单元、单词都用编号），不依赖浏览器的压缩功能，所有设备都能解。
+async function pack(o){const b=[];
+  const L=Object.keys(o.learned).filter(k=>/^\d+-\d+$/.test(k));b.push(L.length);
+  for(const k of L){const [v,u]=k.split('-').map(Number),n=d2n(o.learned[k]);b.push(v,u,n>>8,n&255,Math.min(5,o.rev[k]||0))}
+  const ws={};for(const w in o.ok)ws[w]=1;for(const w in o.wrong)ws[w]=1;for(const w in o.star)ws[w]=1;
+  const E=Object.keys(ws).map(w=>[IDX[w.toLowerCase()],w]).filter(x=>x[0]!=null);b.push(E.length>>8,E.length&255);
+  for(const [i,w] of E)b.push(i>>8,i&255,(Math.min(15,o.ok[w]||0)<<4)|Math.min(15,o.wrong[w]||0),o.star[w]?1:0);
+  const G=Object.keys(o.log).filter(k=>/^\d{4}-\d\d-\d\d$/.test(k));b.push(G.length>>8,G.length&255);
+  for(const k of G){const n=d2n(k),c=Math.min(65535,o.log[k]||0);b.push(n>>8,n&255,c>>8,c&255)}
+  const d=Uint8Array.from(b),n=d.length,c=sum16(d),u=new Uint8Array(6+n);u.set([2,n>>16&255,n>>8&255,n&255,c>>8,c&255]);u.set(d,6);return 'CET6S'+b32e(u)}
+async function inflate(u){if(!window.DecompressionStream)throw new Error('old');return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()}
+async function unpack(raw){const t=raw.trim(),up=t.toUpperCase().replace(/[^A-Z0-9]/g,''),i=up.indexOf('CET6S');
+  if(i>=0&&!/^\s*CET6J?:/.test(t)){const u=b32d(up.slice(i+5));if(u.length<6)throw new Error('short');
+    const n=u[1]<<16|u[2]<<8|u[3],d=u.subarray(6,6+n);if(d.length<n)throw new Error('short:'+Math.ceil((n-d.length)*8/5));
+    if(sum16(d)!==(u[4]<<8|u[5]))throw new Error('sum');if(u[0]!==2)throw new Error('ver');
+    const o={learned:{},rev:{},star:{},wrong:{},ok:{},log:{}};let p=0;
+    for(let k=d[p++];k>0;k--){const key=d[p]+'-'+d[p+1];o.learned[key]=n2d(d[p+2]<<8|d[p+3]);if(d[p+4])o.rev[key]=d[p+4];p+=5}
+    for(let k=d[p]<<8|d[p+1],q=(p+=2);k>0;k--){const x=W[d[p]<<8|d[p+1]];if(x){if(d[p+2]>>4)o.ok[x.w]=d[p+2]>>4;if(d[p+2]&15)o.wrong[x.w]=d[p+2]&15;if(d[p+3])o.star[x.w]=1}p+=4}
+    for(let k=d[p]<<8|d[p+1],q=(p+=2);k>0;k--){o.log[n2d(d[p]<<8|d[p+1])]=d[p+2]<<8|d[p+3];p+=4}
+    return o}
+  const c=t.replace(/\s+/g,'').replace(/—/g,'--').replace(/–/g,'-');   // 旧格式（v1.3）
+  if(c.startsWith('CET6:'))return JSON.parse(await inflate(b64d(c.slice(5))));
   if(c.startsWith('CET6J:'))return JSON.parse(new TextDecoder().decode(b64d(c.slice(6))));
-  return JSON.parse(t)}
+  if(t.startsWith('{'))return JSON.parse(t);
+  throw new Error('fmt')}
 function mergeIn(o){
   const mx=(a,b,cap)=>{for(const k in b||{}){let n=+b[k]||0;if(cap)n=Math.min(cap,n);if(n>0&&(!(k in a)||n>a[k]))a[k]=n}};
   for(const k in o.learned||{}){const d=o.learned[k];if(typeof d==='string'&&/^\d{4}-\d\d-\d\d$/.test(d)&&(!S.learned[k]||d<S.learned[k]))S.learned[k]=d}
@@ -337,12 +362,14 @@ const A={
   import:()=>sheet(`<h3 style="font-size:20px">从备份恢复</h3><p class="sub">粘贴之前导出的文字。会覆盖当前的学习记录。</p><textarea id="bk" rows="6" placeholder="在这里粘贴"></textarea><button class="full pri" data-a="doImport">恢复</button>`),
   doImport:()=>{let o;try{o=JSON.parse($('#bk').value)}catch(e){return toast('内容不是有效的备份')}if(!o||typeof o!=='object'||!o.learned)return toast('内容不是有效的备份');localStorage.setItem(KEY,JSON.stringify(o));S=load();closeSheet();toast('已恢复');render()},
   syncOut:async()=>{const code=await pack({learned:S.learned,rev:S.rev,star:S.star,wrong:S.wrong,ok:S.ok,log:S.log});
-    sheet(`<h3 style="font-size:20px">同步码</h3><p class="sub">把这段同步码发到另一台设备（微信发给自己、隔空投送、备忘录都行），在那边打开“我的 → ② 粘贴同步码”。</p><textarea id="bk" rows="5" readonly class="en" style="font-size:12px">${esc(code)}</textarea><button class="full pri" data-a="copy">复制同步码</button>${navigator.share?'<button class="full" data-a="shareCode">发送到其他设备</button>':''}<div class="sub">共 ${code.length} 个字符 · 包含 ${Object.keys(S.learned).length} 个已学单元</div>`)},
+    sheet(`<h3 style="font-size:20px">同步码</h3><p class="sub">把这段同步码发到另一台设备（微信发给自己、隔空投送、备忘录都行），在那边打开“我的 → ② 粘贴同步码”。</p><textarea id="bk" rows="5" readonly class="en" style="font-size:12px">${esc(code)}</textarea><button class="full pri" data-a="copy">复制同步码</button>${navigator.share?'<button class="full" data-a="shareCode">发送到其他设备</button>':''}<div class="sub">共 ${code.length} 个字符，以 CET6S 开头，只含大写字母和数字 · 包含 ${Object.keys(S.learned).length} 个已学单元 · 两台设备都要是 ${VERSION}</div>`)},
   shareCode:()=>{navigator.share({text:$('#bk').value}).catch(()=>{})},
-  syncIn:()=>sheet(`<h3 style="font-size:20px">粘贴同步码</h3><p class="sub">粘贴另一台设备生成的同步码。已学单元、收藏、错词取两边的并集；复习次数、答对次数取较大的。这台设备原有的记录不会丢。</p><textarea id="bk" rows="5" class="en" style="font-size:12px" placeholder="在这里粘贴同步码" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>${navigator.clipboard&&navigator.clipboard.readText?'<button class="full" data-a="pasteClip">从剪贴板粘贴</button>':''}<button class="full pri" data-a="doMerge">合并到这台设备</button>`),
+  syncIn:()=>sheet(`<h3 style="font-size:20px">粘贴同步码</h3><p class="sub">粘贴另一台设备生成的同步码。已学单元、收藏、错词取两边的并集；复习次数、答对次数取较大的。这台设备原有的记录不会丢。</p><textarea id="bk" rows="5" class="en" style="font-size:12px" placeholder="在这里粘贴同步码" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>${navigator.clipboard&&navigator.clipboard.readText?'<button class="full" data-a="pasteClip">从剪贴板粘贴</button>':''}<div id="mergeErr" style="color:var(--red);font-size:14px;margin:6px 2px"></div><button class="full pri" data-a="doMerge">合并到这台设备</button>`),
   pasteClip:()=>{navigator.clipboard.readText().then(t=>{$('#bk').value=t},()=>toast('读不到剪贴板，请长按输入框粘贴'))},
-  doMerge:async()=>{let o;try{o=await unpack($('#bk').value)}catch(e){return toast(e.message==='old'?'这台设备系统较旧，无法解开同步码':'同步码无效或不完整')}
-    if(!o||typeof o!=='object'||!o.learned)return toast('同步码无效或不完整');
+  doMerge:async()=>{let o;const raw=$('#bk').value,fail=m=>{$('#mergeErr').innerHTML=m+`<br><span class="sub">收到 ${raw.replace(/\s/g,'').length} 个字符，开头是“${esc(raw.trim().slice(0,8))}”</span>`};
+    if(!raw.trim())return fail('还没有粘贴同步码。');
+    try{o=await unpack(raw)}catch(e){const m=e.message||'';return fail(m==='old'?'这台设备的系统较旧，解不开同步码。请在生成同步码的设备上更新到最新版后重试。':m.startsWith('short')?'同步码不完整'+(m.split(':')[1]?'，大约少了 '+m.split(':')[1]+' 个字符':'')+'。请回到另一台设备重新点“复制同步码”，完整粘贴。':m==='sum'?'同步码在转发过程中被改动了（有字符变了）。请重新复制，尽量用隔空投送或备忘录传，不要手动编辑。':m==='ver'?'两台设备的应用版本不一致，请把两边都更新到 '+VERSION+' 后重新生成同步码。':m==='fmt'?'这不是同步码。同步码以 CET6S 开头；请确认另一台设备的版本是 '+VERSION+'（旧版生成的码请重新生成）。':'同步码解不开，请在另一台设备重新生成后再试。')}
+    if(!o||typeof o!=='object'||!o.learned)return fail('同步码内容不对，请在另一台设备重新生成后再试。');
     const a=snap();mergeIn(o);S.syncAt=today();save();const b=snap();closeSheet();render();
     sheet(`<h3 style="font-size:20px">合并完成</h3><p>已学单元：${a.u} → <b>${b.u}</b><br>复习次数合计：${a.r} → <b>${b.r}</b><br>生词本：${a.b} → <b>${b.b}</b> 词<br>已掌握：${a.m} → <b>${b.m}</b> 词</p><p class="sub">这台设备现在是两边合并后的完整记录。如果另一台设备也要更新到最新，在这台点“① 生成同步码”再发回去合并一次。</p>`)},
   reset:()=>{if(!confirm('确定清空全部学习记录吗？此操作不可恢复，建议先导出备份。'))return;localStorage.removeItem(KEY);S=load();toast('已清空');render()},
