@@ -43,6 +43,12 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 .story .chip{font-style:normal;font-size:12px;color:var(--pri);background:var(--prib);border-radius:9px;padding:2px 6px;margin-left:4px;font-family:-apple-system,"PingFang SC",sans-serif;white-space:nowrap}
 .story .tr{display:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:14.5px;line-height:1.6;color:var(--soft);border-left:3px solid var(--pri);padding-left:9px;margin:4px 0 8px}
 .story .tr.on{display:block}
+.story .ix{text-decoration:underline dotted var(--warn);text-decoration-thickness:2px;text-underline-offset:4px}
+.story .gm{display:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:13.5px;line-height:1.6;border-left:3px solid var(--warn);background:var(--warnb);border-radius:0 8px 8px 0;padding:6px 9px;margin:4px 0 8px}
+.story .gm.on{display:block}.story .gm div{margin:2px 0}.story .gm b{font-family:"Helvetica Neue",Arial,sans-serif;color:var(--text)}.story .gm .lb{color:var(--warn);font-weight:600}
+.gnote{background:var(--warnb);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:15px}.gnote .lb{color:var(--warn);font-weight:700}
+.story .chip.pl{background:var(--pri);color:#fff}
+#ans.ok{border-color:var(--ok);background:var(--okb)}#ans.bad{border-color:var(--red);background:var(--redb)}
 .gl{font-size:13.5px;color:var(--soft);line-height:1.9}.gl b{color:var(--text);font-family:"Helvetica Neue",Arial,sans-serif;font-weight:600}
 .w{padding:11px 0;border-bottom:1px solid var(--line)}.w:last-child{border:0}.w.on{background:var(--prib);border-radius:10px;padding-left:8px;padding-right:8px}
 .w .hw{font-family:"Helvetica Neue",Arial,sans-serif;font-size:18px;font-weight:700;color:var(--pri)}
@@ -74,7 +80,7 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 <div id="toast"></div>
 <script src="/cet6/data.js"></script>
 <script>
-const VERSION='v1.4', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const VERSION='v1.5', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
 const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true,online:true}};
 let S=load();
 function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
@@ -99,7 +105,7 @@ function nextUnit(){for(let v=0;v<VOLS.length;v++)for(let u=0;u<VOLS[v].length;u
 const mastered=()=>W.filter(x=>(S.ok[x.w]||0)>=2&&!S.wrong[x.w]).length;
 
 /* ---------- speech ---------- */
-let voices=[],spk=0,playing=0;
+let voices=[],spk=0,RD=null;
 function loadVoices(){if(!('speechSynthesis' in window))return;voices=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang))}
 if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
 const GOOD=/Premium|Enhanced|高级|优化|Natural|Neural/i;
@@ -116,12 +122,12 @@ function tts(text,cb,my){
   if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,90)}else go();
 }
 function speak(text,cb,chain,src){
-  if(!chain&&playing){playing=0;updPlay()}
+  if(!chain&&RD&&!RD.paused)pauseRD();
   const my=++spk;AU.onended=AU.onerror=AU.onplaying=null;AU.pause();clearTimeout(speak.t);
   if('speechSynthesis' in window&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();
   if(src||(S.cfg.online&&navigator.onLine!==false&&isWord(text))){
     // 整句：播放预生成的自然语音文件；单词：有道词典美音真人发音。取不到时退回系统语音
-    let dead=false;const fall=()=>{if(dead||my!==spk)return;dead=true;clearTimeout(speak.t);AU.onended=AU.onerror=AU.onplaying=null;AU.pause();tts(text,cb,my)};
+    speak.mode='audio';let dead=false;const fall=()=>{if(dead||my!==spk)return;dead=true;speak.mode='tts';clearTimeout(speak.t);AU.onended=AU.onerror=AU.onplaying=null;AU.pause();tts(text,cb,my)};
     AU.src=src||'https://dict.youdao.com/dictvoice?type=2&audio='+encodeURIComponent(text.replace(/’/g,"'"));
     AU.defaultPlaybackRate=AU.playbackRate=src?S.cfg.rate:Math.max(0.75,Math.min(1.1,S.cfg.rate+0.1));
     AU.onplaying=()=>clearTimeout(speak.t);
@@ -130,10 +136,28 @@ function speak(text,cb,chain,src){
     const p=AU.play();if(p&&p.catch)p.catch(fall);
     return;
   }
-  tts(text,cb,my);
+  speak.mode='tts';tts(text,cb,my);
 }
-function stopAll(){playing=0;spk++;clearTimeout(speak.t);AU.onended=AU.onerror=AU.onplaying=null;AU.pause();if('speechSynthesis' in window)speechSynthesis.cancel();updPlay()}
-function updPlay(){const a=$('#btnRead'),b=$('#btnLoop');if(a)a.textContent=playing===1?'■ 停止':'▶ 朗读全文';if(b)b.textContent=playing===2?'■ 停止连播':'▶ 连播单词';if(!playing){document.querySelectorAll('.sen.hl,.w.on').forEach(e=>e.classList.remove('hl','on'))}}
+function stopAll(){if(RD)clearTimeout(RD.t);RD=null;spk++;clearTimeout(speak.t);AU.onended=AU.onerror=AU.onplaying=null;AU.pause();if('speechSynthesis' in window)speechSynthesis.cancel();updPlay()}
+// RD = 当前的连续播放：read 朗读全文 / sent 单句 / loop 连播单词；paused 时保留位置，点击继续从原处接着放
+function rdStep(){if(!RD||RD.paused||view.name!=='unit')return;const U=VOLS[view.v][view.u];
+  document.querySelectorAll('.sen.hl,.w.on').forEach(e=>e.classList.remove('hl','on'));
+  if(RD.kind==='loop'){const L=unitWords(view.v,view.u);if(RD.i>=L.length)return stopAll();const e=$('#w'+L[RD.i]);if(e){e.classList.add('on');e.scrollIntoView({block:'center',behavior:'smooth'})}
+    RD.src=null;updPlay();speak(W[L[RD.i]].w,()=>{if(!RD||RD.paused)return;RD.t=setTimeout(()=>{if(!RD||RD.paused)return;if(++RD.rep>=2){RD.rep=0;RD.i++}rdStep()},RD.rep?1400:600)},true);return}
+  if(RD.i>=U.s.length)return stopAll();const e=$('#s'+RD.i);if(e){e.classList.add('hl');if(RD.kind==='read')e.scrollIntoView({block:'center',behavior:'smooth'})}
+  RD.src=sau(view.v,view.u,RD.i);updPlay();
+  speak(U.s[RD.i][0].replace(/[\[\]]/g,''),()=>{if(!RD||RD.paused)return;if(RD.kind==='sent')return stopAll();RD.i++;RD.t=setTimeout(rdStep,350)},true,RD.src)}
+function pauseRD(){if(!RD||RD.paused)return;RD.paused=true;clearTimeout(RD.t);clearTimeout(speak.t);if(speak.mode==='audio')AU.pause();else{spk++;if('speechSynthesis' in window)speechSynthesis.cancel()}updPlay()}
+function resumeRD(){if(!RD||!RD.paused)return;RD.paused=false;
+  if(speak.mode==='audio'&&RD.src&&AU.src.endsWith(RD.src)&&AU.currentTime>0&&!AU.ended&&AU.onended){const p=AU.play();if(p&&p.catch)p.catch(()=>rdStep());updPlay()}
+  else rdStep()}
+function updPlay(){const a=$('#btnRead'),b=$('#btnLoop'),st=$('#btnStop'),k=RD&&RD.kind;
+  if(a)a.textContent=k==='read'?(RD.paused?'▶ 继续':'⏸ 暂停'):'▶ 朗读全文';
+  if(st)st.style.display=k==='read'||k==='sent'?'':'none';
+  if(b)b.textContent=k==='loop'?(RD.paused?'▶ 继续连播':'⏸ 暂停连播'):'▶ 连播单词';
+  document.querySelectorAll('.chip.pl').forEach(e=>{e.classList.remove('pl');e.textContent='🔊'});
+  if(k==='read'||k==='sent'){const c=$('#c'+RD.i);if(c){c.classList.add('pl');c.textContent=RD.paused?'▶':'⏸'}}
+  if(!RD)document.querySelectorAll('.sen.hl,.w.on').forEach(e=>e.classList.remove('hl','on'))}
 
 /* ---------- views ---------- */
 let view={name:'home'},stack=[];
@@ -175,12 +199,14 @@ function wordRow(i,loc){const x=W[i];return `<div class="w" id="w${i}" data-a="s
 function mask(t){return esc(t[0])+'＿＿＿'}
 VIEW.unit=()=>{
   const {v,u}=view,U=VOLS[v][u],k=key(v,u);let n=0;
-  const sents=U.s.map((p,si)=>{const html=p[0].replace(/\[([^\]]+)\]|([A-Za-zé][A-Za-zé'’-]*)/g,(m,t,o)=>{if(t){const i=UB[v][u]+n++;return `<b class="tg${view.cloze?' mk':''}" data-a="word" data-i="${i}" data-f="${esc(t)}">${view.cloze?mask(t):esc(t)}</b>`}return `<span data-a="tok" data-t="${esc(o)}">${esc(o)}</span>`});
-    return `<span class="sen" id="s${si}">${html}</span><i class="chip" data-a="say" data-si="${si}">🔊</i><i class="chip" data-a="tr" data-si="${si}">译</i><span class="tr${view.zh?' on':''}" id="t${si}">${esc(p[1])}</span>`}).join(' ');
+  const sents=U.s.map((p,si)=>{const NT={};(p[2]||[]).forEach(x=>NT[x[0]]=x);let k=0;
+    const html=p[0].replace(/\[([^\]]+)\]|([A-Za-zé][A-Za-zé'’-]*)/g,(m,t,o)=>{const nt=NT[k++],g=nt?` data-si="${si}" data-k="${nt[0]}"`:'',ix=nt?' ix':'';if(t){const i=UB[v][u]+n++;return `<b class="tg${ix}${view.cloze?' mk':''}" data-a="word" data-i="${i}" data-f="${esc(t)}"${g}>${view.cloze?mask(t):esc(t)}</b>`}return `<span class="${ix.trim()}" data-a="tok" data-t="${esc(o)}"${g}>${esc(o)}</span>`});
+    const gm=(p[2]||[]).length?(p[2]).map(x=>`<div><b>${esc(x[1])}</b>${x[1].toLowerCase()!==x[2]?' ← '+esc(x[2]):''} <span class="lb">${esc(x[3])}</span>：${esc(x[4])}</div>`).join(''):'<div>这句里的词都是原形，没有变化。</div>';
+    return `<span class="sen" id="s${si}">${html}</span><i class="chip" data-a="say" data-si="${si}" id="c${si}">🔊</i><i class="chip" data-a="tr" data-si="${si}">译</i><span class="tr${view.zh?' on':''}" id="t${si}">${esc(p[1])}</span><span class="gm${view.gram?' on':''}" id="g${si}"><div class="lb">这句话里为什么不是原形</div>${gm}</span>`}).join(' ');
   return `<button class="back" data-a="back">‹ 返回</button>
   <h1 style="margin-top:2px">${esc(U.t)} <span class="sub en" style="font-size:15px">${esc(U.e)}</span></h1>
-  <div class="sub" style="margin:-8px 2px 8px">第${CN[v+1]}册 · 第 ${u+1} 天 · 点任意单词看释义，点“译”看这句的翻译</div>
-  <div class="tools"><button id="btnRead" data-a="read">▶ 朗读全文</button><button class="${view.zh?'on':''}" data-a="zh">全文翻译</button><button class="${view.cloze?'on':''}" data-a="cloze">挖空</button><button data-a="rate">语速 ${S.cfg.rate}</button></div>
+  <div class="sub" style="margin:-8px 2px 8px">第${CN[v+1]}册 · 第 ${u+1} 天 · 点任意单词看释义；带橙色虚线的词不是原形，点它看原因；点“译”看这句的翻译和词形讲解</div>
+  <div class="tools"><button id="btnRead" data-a="read">▶ 朗读全文</button><button id="btnStop" data-a="stopRead" style="display:none">■ 停止</button><button class="${view.zh?'on':''}" data-a="zh">全文翻译</button><button class="${view.gram?'on':''}" data-a="gram">词形讲解</button><button class="${view.cloze?'on':''}" data-a="cloze">挖空</button><button data-a="rate">语速 ${S.cfg.rate}</button></div>
   <div class="card story">${sents}</div>
   ${U.g.length?`<div class="card gl"><span class="tag">其他生词</span> ${U.g.map(g=>`<b>${esc(g[0])}</b> ${esc(g[1])}`).join(' · ')}</div>`:''}
   <h2>本单元 ${U.w.length} 个词</h2>
@@ -216,15 +242,13 @@ function qType(){if(P.type)return P.type;return P.type=P.mode==='mix'?['en2zh','
 function options(i,field){if(P.opts)return P.opts;const x=W[i],pool=shuffle(W.map((_,j)=>j).filter(j=>j!==i&&W[j].v===x.v&&W[j][field]!==x[field])).slice(0,3);return P.opts=shuffle([i,...pool])}
 VIEW.quiz=()=>{
   const i=P.list[P.i],x=W[i],t=qType(),done=P.ans!==null;let body='';
-  const head=`<div class="row"><button class="back" data-a="quit">✕ 退出</button><div class="grow bar"><i style="width:${P.i/P.list.length*100}%"></i></div><span class="sub">${P.i+1}/${P.list.length}</span></div>`;
+  const head=`<div class="row"><button class="back" data-a="quit">✕ 退出</button><div class="grow bar"><i id="qbar" style="width:${P.i/P.list.length*100}%"></i></div><span class="sub" id="qprog">${P.i+1}/${P.list.length}</span></div>`;
   const fb=done?`<div class="fb ${P.ans?'':'x'}"><div class="row"><div class="grow"><b class="en" style="font-size:20px">${esc(x.w)}</b> <span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}">${S.star[x.w]?'★':'☆'}</button></div><div>${esc(x.m)}</div><div class="sub"><span class="en">${esc(x.c)}</span> ${esc(x.cz)}</div></div><button class="full pri" data-a="next">${P.i+1<P.list.length?'下一个':'看结果'}</button>`:'';
   if(t==='card'){
     body=`<div class="card q"><div class="big">${esc(x.w)}</div><div class="ipa">/${esc(x.ipa)}/</div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button></div>`+
       (P.shown?`<div class="card"><div>${esc(x.m)}</div><div class="sub"><span class="en">${esc(x.c)}</span> ${esc(x.cz)}</div>${x.h?`<div class="sub">${esc(x.h)}</div>`:''}</div><div class="grid2"><button class="bad" data-a="judge" data-ok="0">不认识</button><button class="ok" data-a="judge" data-ok="1">认识</button></div>`:`<button class="full pri" data-a="reveal">显示释义</button>`);
   }else if(t==='spell'||t==='dict'){
-    body=`<div class="card q">${t==='spell'?`<div class="zhq">${esc(x.m)}</div><div class="sub" style="margin-top:6px">${esc(x.cz)}</div><div class="sub en" style="margin-top:10px;font-size:18px;letter-spacing:3px">${esc(x.w[0])}${'_'.repeat(x.w.length-1)}</div>`:`<button class="pri" data-a="spk" data-t="${esc(x.w)}" style="font-size:22px;padding:16px 26px">🔊 再听一遍</button><div class="sub" style="margin-top:10px">${x.w.length} 个字母</div>`}</div>`+
-      (done?fb:`<input id="ans" class="en" placeholder="输入单词" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"><button class="full pri" data-a="check">确定</button><button class="full ghost" data-a="giveup">不会，看答案</button>`);
-    if(done)body=body.replace(fb,`<div class="sub" style="text-align:center">你的答案：<b class="en">${esc(P.typed||'（空）')}</b></div>`+fb);
+    body=`<div class="card q" id="qcard">${typingCard(x,t)}</div><input id="ans" class="en" placeholder="输入单词，按回车确定" enterkeyhint="go" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"><div id="qfb"></div><div id="qbtn"><button class="full pri" data-a="check">确定（回车）</button><button class="full ghost" data-a="giveup">不会，看答案</button></div>`;
   }else{
     const field=t==='zh2en'?'w':'m',op=options(i,field);
     const qh=t==='en2zh'?`<div class="big">${esc(x.w)}</div><div class="ipa">/${esc(x.ipa)}/</div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button>`:t==='zh2en'?`<div class="zhq">${esc(x.m)}</div><div class="sub" style="margin-top:6px">${esc(x.cz)}</div>`:`<button class="pri" data-a="spk" data-t="${esc(x.w)}" style="font-size:22px;padding:16px 26px">🔊 再听一遍</button>${done?`<div class="big" style="margin-top:10px">${esc(x.w)}</div>`:''}`;
@@ -232,8 +256,16 @@ VIEW.quiz=()=>{
   }
   return head+body;
 };
+const isTyping=()=>P&&(P.mode==='spell'||P.mode==='dict')&&!!$('#ans');
+function typingCard(x,t){return t==='spell'?`<div class="zhq">${esc(x.m)}</div><div class="sub" style="margin-top:6px">${esc(x.cz)}</div><div class="sub en" style="margin-top:10px;font-size:18px;letter-spacing:3px">${esc(x.w[0])}${'_'.repeat(x.w.length-1)}</div>`:`<button class="pri" data-a="spk" data-t="${esc(x.w)}" style="font-size:22px;padding:16px 26px">🔊 再听一遍</button><div class="sub" style="margin-top:10px">${x.w.length} 个字母</div>`}
+function quizFb(){const i=P.list[P.i],x=W[i],a=$('#ans');a.classList.add(P.ans?'ok':'bad');$('#qbtn').style.display='none';
+  $('#qfb').innerHTML=`${P.ans?'':`<div class="sub" style="text-align:center;margin-top:8px">你的答案：<b class="en">${esc(P.typed||'（空）')}</b></div>`}<div class="fb ${P.ans?'':'x'}"><div class="row"><div class="grow"><b class="en" style="font-size:20px">${esc(x.w)}</b> <span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}">${S.star[x.w]?'★':'☆'}</button></div><div>${esc(x.m)}</div><div class="sub"><span class="en">${esc(x.c)}</span> ${esc(x.cz)}</div></div><button class="full pri" data-a="next">${P.i+1<P.list.length?'下一个（再按回车）':'看结果（再按回车）'}</button>`;
+  a.focus()}
+function quizNextTyping(){const i=P.list[P.i],x=W[i],a=$('#ans');$('#qcard').innerHTML=typingCard(x,qType());$('#qfb').innerHTML='';$('#qbtn').style.display='';
+  $('#qprog').textContent=(P.i+1)+'/'+P.list.length;$('#qbar').style.width=(P.i/P.list.length*100)+'%';a.value='';a.classList.remove('ok','bad');a.focus();afterQuiz()}
 function afterQuiz(){const t=qType(),x=W[P.list[P.i]];if(P.ans===null&&!P.said){P.said=1;if(t==='listen'||t==='dict'||(S.cfg.auto&&(t==='en2zh'||t==='card')))speak(x.w)}const a=$('#ans');if(a)a.focus()}
-function answer(ok){const x=W[P.list[P.i]];P.ans=ok;if(ok){P.right++;S.ok[x.w]=(S.ok[x.w]||0)+1;if(S.wrong[x.w]){S.wrong[x.w]--;if(S.wrong[x.w]<=0)delete S.wrong[x.w]}}else{P.miss.push(P.list[P.i]);S.wrong[x.w]=(S.wrong[x.w]||0)+1;S.ok[x.w]=0}save();if(qType()!=='en2zh'&&qType()!=='card')speak(x.w);render()}
+// 错词：答错就进错词本并累计错的次数；之后要连续答对 3 次才自动移出（答错会把连续次数清零）
+function answer(ok){const x=W[P.list[P.i]];P.ans=ok;if(ok){P.right++;S.ok[x.w]=Math.min(15,(S.ok[x.w]||0)+1);if(S.wrong[x.w]&&S.ok[x.w]>=3)delete S.wrong[x.w]}else{if(!P.miss.includes(P.list[P.i]))P.miss.push(P.list[P.i]);S.wrong[x.w]=Math.min(15,(S.wrong[x.w]||0)+1);S.ok[x.w]=0}save();if(qType()!=='en2zh'&&qType()!=='card')speak(x.w);if(isTyping())quizFb();else render()}
 VIEW.done=()=>{const n=P.list.length,pc=Math.round(P.right/n*100);
   return `<h1>练习完成</h1><div class="card q"><div class="big">${P.right} / ${n}</div><div class="sub">正确率 ${pc}%${P.ctx&&P.ctx.msg?' · '+P.ctx.msg:''}</div></div>
   ${P.miss.length?`<h2>答错的 ${P.miss.length} 个（已进生词本）</h2><div class="card" style="padding:2px 14px">${P.miss.map(i=>wordRow(i,true)).join('')}</div><button class="full pri" data-a="redo">再练一遍错词</button>`:'<div class="card sub" style="text-align:center">全对，漂亮。</div>'}
@@ -243,7 +275,7 @@ function finish(){logStudy(P.list.length);if(P.ctx&&P.ctx.rev){const k=P.ctx.rev
 VIEW.words=()=>{const tab=view.wt||'wrong',src=tab==='wrong'?S.wrong:S.star,list=Object.keys(src).map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null);
   if(tab==='wrong')list.sort((a,b)=>(S.wrong[W[b].w]||0)-(S.wrong[W[a].w]||0));
   return `<h1>生词本</h1><div class="chips"><button class="${tab==='wrong'?'on':''}" data-a="wt" data-t="wrong">错词 ${Object.keys(S.wrong).length}</button><button class="${tab==='star'?'on':''}" data-a="wt" data-t="star">收藏 ${Object.keys(S.star).length}</button></div>
-  ${list.length?`<button class="full pri" data-a="pracBook">练习这 ${list.length} 个词</button><div class="card" style="padding:2px 14px">${list.map(i=>wordRow(i,true)).join('')}</div>`:`<div class="card sub">${tab==='wrong'?'练习中答错的词会自动出现在这里，答对一次减一次，减到 0 自动移出。':'在任何单词旁点 ☆ 即可收藏。'}</div>`}`};
+  ${list.length?`<button class="full pri" data-a="pracBook">练习这 ${list.length} 个词</button><div class="card" style="padding:2px 14px">${list.map(i=>wordRow(i,true)+(tab==='wrong'?`<div class="sub" style="margin:-6px 0 6px">连续答对 ${Math.min(3,S.ok[W[i].w]||0)}/3 · <a data-a="unwrong" data-w="${esc(W[i].w)}" style="color:var(--pri)">移出错词本</a></div>`:'')).join('')}</div>`:`<div class="card sub">${tab==='wrong'?'练习中答错的词会自动出现在这里，之后连续答对 3 次才会自动移出。':'在任何单词旁点 ☆ 即可收藏。'}</div>`}`};
 VIEW.me=()=>{const vs=voices.length?voices:[];
   return `<h1>我的</h1>
   <h2>发音</h2><div class="card">
@@ -264,19 +296,20 @@ VIEW.me=()=>{const vs=voices.length?voices:[];
 /* ---------- sheets ---------- */
 function sheet(html){const s=$('#sheet');s.innerHTML=`<div data-a="noop">${html}<button class="full ghost" data-a="closeSheet">关闭</button></div>`;s.classList.add('on')}
 function closeSheet(){$('#sheet').classList.remove('on')}
-function wordSheet(i,form){const x=W[i];if(S.cfg.auto)speak(x.w);
+function gnote(d){if(!d||d.si==null||view.name!=='unit')return '';const p=VOLS[view.v][view.u].s[+d.si],x=(p[2]||[]).find(n=>n[0]==d.k);return x?`<div class="gnote"><span class="lb">为什么是 ${esc(x[1])}${x[1].toLowerCase()!==x[2]?'（原形 '+esc(x[2])+'）':''}</span><br><b>${esc(x[3])}</b>：${esc(x[4])}</div>`:''}
+function wordSheet(i,form,d){const x=W[i];if(S.cfg.auto)speak(x.w);
   sheet(`<div class="row"><div class="grow"><h3>${esc(x.w)}</h3><span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}" style="font-size:26px">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}" style="font-size:26px">${S.star[x.w]?'★':'☆'}</button></div>
-  ${form&&form.toLowerCase()!==x.w.toLowerCase()?`<div class="sub">文中形式：<span class="en">${esc(form)}</span></div>`:''}
+  ${form&&form.toLowerCase()!==x.w.toLowerCase()?`<div class="sub">文中形式：<span class="en">${esc(form)}</span></div>`:''}${gnote(d)}
   <p style="font-size:18px;margin:10px 0 6px">${esc(x.m)}</p>
   <div class="row"><div class="grow"><span class="en">${esc(x.c)}</span> <span class="sub">${esc(x.cz)}</span></div><button class="ic" data-a="spk" data-t="${esc(x.c)}" data-s="/cet6/audio/c-${esc(x.w.toLowerCase())}.mp3">🔊</button></div>
   ${x.h?`<p class="sub">💡 ${esc(x.h)}</p>`:''}
   <div class="sub">第${CN[x.v+1]}册 · 第 ${x.u+1} 天 · ${esc(VOLS[x.v][x.u].t)}</div>
   ${view.name==='unit'&&view.v===x.v&&view.u===x.u?'':`<button class="full" data-a="open" data-v="${x.v}" data-u="${x.u}">去这个单元看短文</button>`}`)}
-function tokSheet(raw){const t=raw.toLowerCase().replace(/’/g,"'");if(IDX[t]!=null)return wordSheet(IDX[t],raw);
+function tokSheet(raw,dd){const t=raw.toLowerCase().replace(/’/g,"'");if(IDX[t]!=null)return wordSheet(IDX[t],raw,dd);
   const d=DICT[t],U=view.name==='unit'?VOLS[view.v][view.u]:null,gl=U?U.g.filter(g=>g[0].toLowerCase().split(/\s+/).includes(t)):[];
   if(S.cfg.auto)speak(raw);
   sheet(`<div class="row"><div class="grow"><h3>${esc(raw)}</h3>${d&&d[1]?`<span class="ipa">/${esc(d[1])}/</span>`:''}</div><button class="ic" data-a="spk" data-t="${esc(raw)}" style="font-size:26px">🔊</button></div>
-  ${gl.map(g=>`<p style="font-size:17px;margin:10px 0 4px"><span class="tag">本文中</span> <span class="en">${esc(g[0])}</span> ${esc(g[1])}</p>`).join('')}
+  ${gnote(dd)}${gl.map(g=>`<p style="font-size:17px;margin:10px 0 4px"><span class="tag">本文中</span> <span class="en">${esc(g[0])}</span> ${esc(g[1])}</p>`).join('')}
   ${d?`${d[0]!==t?`<div class="sub">原形：<span class="en">${esc(d[0])}</span></div>`:''}<p style="font-size:17px;margin:8px 0">${d[2]?esc(d[2])+' ':''}${esc(d[3])}</p><div class="sub">词典释义为自动摘录，以“本文中”的注释为准</div>`:(gl.length?'':'<p class="sub">词典里没有这个词，可能是人名或地名。</p>')}`)}
 
 /* ---------- sync code ---------- */
@@ -329,16 +362,18 @@ const A={
   open:d=>{closeSheet();warm();const v={name:'unit',v:+d.v,u:+d.u};if(view.name==='unit')go(v,false);else{view.y=window.scrollY;go(v,true)}},
   vol:d=>{view.v=+d.v;render()},
   spk:d=>speak(d.t,null,false,d.s),
-  word:(d,el)=>{if(el.classList.contains('mk')){el.classList.remove('mk');el.textContent=d.f;return}wordSheet(+d.i,d.f)},
-  tok:d=>tokSheet(d.t),
+  word:(d,el)=>{if(el.classList.contains('mk')){el.classList.remove('mk');el.textContent=d.f;return}wordSheet(+d.i,d.f,d)},
+  tok:d=>tokSheet(d.t,d),
   showw:(d,el)=>{if(view.hide)el.classList.toggle('show')},
   star:(d,el)=>{const w=W[+d.i].w;if(S.star[w])delete S.star[w];else S.star[w]=1;save();el.classList.toggle('on',!!S.star[w]);el.textContent=S.star[w]?'★':'☆';toast(S.star[w]?'已收藏':'已取消收藏')},
-  say:d=>{const p=VOLS[view.v][view.u].s[+d.si];speak(p[0].replace(/[\[\]]/g,''),null,false,sau(view.v,view.u,+d.si))},
-  tr:d=>$('#t'+d.si).classList.toggle('on'),
+  say:d=>{const si=+d.si;if(RD&&(RD.kind==='sent'||RD.kind==='read')&&RD.i===si)return RD.paused?resumeRD():pauseRD();if(RD&&RD.kind==='read'){stopAll();RD={kind:'read',i:si};return rdStep()}stopAll();RD={kind:'sent',i:si};rdStep()},
+  tr:d=>{const on=!$('#t'+d.si).classList.contains('on');$('#t'+d.si).classList.toggle('on',on);$('#g'+d.si).classList.toggle('on',on)},
+  gram:()=>{view.gram=!view.gram;render()},
   zh:()=>{view.zh=!view.zh;render()},cloze:()=>{view.cloze=!view.cloze;render()},hide:()=>{view.hide=!view.hide;render()},
   rate:()=>{const r=[0.7,0.8,0.9,1,1.1];S.cfg.rate=r[(r.indexOf(S.cfg.rate)+1)%r.length]||0.9;save();render()},
-  read:()=>{if(playing===1)return stopAll();stopAll();playing=1;updPlay();const U=VOLS[view.v][view.u];let i=0;const nx=()=>{document.querySelectorAll('.sen.hl').forEach(e=>e.classList.remove('hl'));if(playing!==1||i>=U.s.length){if(playing===1)stopAll();return}const e=$('#s'+i);if(e){e.classList.add('hl');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(U.s[i][0].replace(/[\[\]]/g,''),()=>{i++;setTimeout(nx,350)},true,sau(view.v,view.u,i))};nx()},
-  loop:()=>{if(playing===2)return stopAll();stopAll();playing=2;updPlay();const L=unitWords(view.v,view.u);let i=0,rep=0;const nx=()=>{document.querySelectorAll('.w.on').forEach(e=>e.classList.remove('on'));if(playing!==2||i>=L.length){if(playing===2)stopAll();return}const e=$('#w'+L[i]);if(e){e.classList.add('on');e.scrollIntoView({block:'center',behavior:'smooth'})}speak(W[L[i]].w,()=>setTimeout(()=>{if(playing!==2)return;if(++rep>=2){rep=0;i++}nx()},rep?1400:600),true)};nx()},
+  read:()=>{if(RD&&RD.kind==='read')return RD.paused?resumeRD():pauseRD();const from=RD&&RD.kind==='sent'?RD.i:0;stopAll();RD={kind:'read',i:from};rdStep()},
+  stopRead:()=>stopAll(),
+  loop:()=>{if(RD&&RD.kind==='loop')return RD.paused?resumeRD():pauseRD();stopAll();RD={kind:'loop',i:0,rep:0};rdStep()},
   learn:()=>{const k=key(view.v,view.u);if(S.learned[k]){if(!confirm('取消“已学”会清除这个单元的复习进度，确定吗？'))return;delete S.learned[k];delete S.rev[k]}else{S.learned[k]=today();logStudy(VOLS[view.v][view.u].w.length);toast('已加入复习计划：明天第一次复习')}save();render()},
   pracUnit:()=>{view.y=window.scrollY;startPractice(unitWords(view.v,view.u),'mix')},
   review:d=>startPractice(unitWords(+d.v,+d.u),'mix',{rev:key(+d.v,+d.u)}),
@@ -347,12 +382,13 @@ const A={
   start:d=>{const sc=view.scope||'due',due=dueUnits();startPractice(scopeList(),d.m,sc==='due'&&due.length===1?{rev:key(due[0].v,due[0].u)}:null)},
   pracBook:()=>{const src=(view.wt||'wrong')==='wrong'?S.wrong:S.star;startPractice(Object.keys(src).map(w=>IDX[w.toLowerCase()]).filter(i=>i!=null),'mix')},
   wt:d=>{view.wt=d.t;render()},
+  unwrong:d=>{delete S.wrong[d.w];save();toast('已移出错词本');render()},
   reveal:()=>{P.shown=1;render()},
   judge:d=>{answer(d.ok==='1');A.next()},
   pick:d=>{if(P.ans!==null)return;P.pick=+d.j;answer(+d.j===P.list[P.i])},
-  check:()=>{const a=$('#ans');P.typed=a.value.trim();answer(P.typed.toLowerCase()===W[P.list[P.i]].w.toLowerCase())},
-  giveup:()=>{P.typed='';answer(false)},
-  next:()=>{P.i++;P.ans=null;P.type=null;P.opts=null;P.pick=null;P.shown=0;P.said=0;P.typed='';if(P.i>=P.list.length)finish();else{render();window.scrollTo(0,0)}},
+  check:()=>{if(P.ans!==null)return A.next();const a=$('#ans');P.typed=a.value.trim();if(!P.typed){toast('先输入单词，或点“不会”');a.focus();return}answer(P.typed.toLowerCase()===W[P.list[P.i]].w.toLowerCase())},
+  giveup:()=>{if(P.ans!==null)return;P.typed='';answer(false)},
+  next:()=>{if(!P||P.ans===null)return;P.i++;P.ans=null;P.type=null;P.opts=null;P.pick=null;P.shown=0;P.said=0;P.typed='';if(P.i>=P.list.length)finish();else if(isTyping())quizNextTyping();else{render();window.scrollTo(0,0)}},
   quit:()=>{if(P.i>0&&!confirm('退出后本次练习不计入复习，确定吗？'))return;back()},
   redo:()=>startPractice(P.miss,'mix'),
   auto:()=>{S.cfg.auto=!S.cfg.auto;save();render()},
@@ -382,7 +418,11 @@ document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='voice'){S.cfg.voice=t.value;save();speak('Hello, this is my voice.')}
   if(t.id==='pv'){view.pv=+t.value;view.pu=0;render()}
   if(t.id==='pu'){view.pu=+t.value}});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ans')A.check()});
+document.addEventListener('keydown',e=>{if(e.isComposing||view.name!=='quiz'||!P)return;
+  if(e.key==='Enter'){e.preventDefault();if(e.target.id==='ans')return A.check();if(P.ans!==null)return A.next();if(qType()==='card'&&!P.shown)return A.reveal();return}
+  if(e.target.id==='ans')return;
+  if(P.ans===null&&/^[1-4]$/.test(e.key)){const b=document.querySelectorAll('.opt')[+e.key-1];if(b)b.click()}
+  if(qType()==='card'&&P.shown&&P.ans===null&&(e.key==='ArrowLeft'||e.key==='ArrowRight'))A.judge({ok:e.key==='ArrowRight'?'1':'0'})});
 render();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/cet6/sw.js',{scope:'/cet6/'});
 </script>
