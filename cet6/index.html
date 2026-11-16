@@ -46,7 +46,11 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 .story .ix{text-decoration:underline dotted var(--warn);text-decoration-thickness:2px;text-underline-offset:4px}
 .story .gm{display:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:13.5px;line-height:1.6;border-left:3px solid var(--warn);background:var(--warnb);border-radius:0 8px 8px 0;padding:6px 9px;margin:4px 0 8px}
 .story .gm.on{display:block}.story .gm div{margin:2px 0}.story .gm b{font-family:"Helvetica Neue",Arial,sans-serif;color:var(--text)}.story .gm .lb{color:var(--warn);font-weight:600}
-.gnote{background:var(--warnb);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:15px}.gnote .lb{color:var(--warn);font-weight:700}
+.gnote{background:var(--warnb);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:15px;line-height:1.6}.gnote .lb{color:var(--warn);font-weight:700}
+.clink{color:var(--pri);font-weight:600;white-space:nowrap;cursor:pointer;margin-left:4px}
+.gcard h3{font-family:-apple-system,"PingFang SC",sans-serif;font-size:21px;margin:0 0 8px}.gcard .blk{margin:10px 0;line-height:1.65}.gcard .blk b{color:var(--warn)}
+.gcard .exs{background:var(--bg);border-radius:10px;padding:4px 10px}.gcard .exr{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}.gcard .exr:last-child{border:0}
+.gcard .exr .en{font-size:16px}.gcard .sm{font-size:13.5px;color:var(--soft)}.gcard .hit{color:var(--red);font-weight:700}
 .story .chip.pl{background:var(--pri);color:#fff}
 #ans.ok{border-color:var(--ok);background:var(--okb)}#ans.bad{border-color:var(--red);background:var(--redb)}
 .gl{font-size:13.5px;color:var(--soft);line-height:1.9}.gl b{color:var(--text);font-family:"Helvetica Neue",Arial,sans-serif;font-weight:600}
@@ -80,7 +84,7 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 <div id="toast"></div>
 <script src="/cet6/data.js"></script>
 <script>
-const VERSION='v1.5', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const VERSION='v1.6', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
 const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true,online:true}};
 let S=load();
 function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
@@ -201,7 +205,7 @@ VIEW.unit=()=>{
   const {v,u}=view,U=VOLS[v][u],k=key(v,u);let n=0;
   const sents=U.s.map((p,si)=>{const NT={};(p[2]||[]).forEach(x=>NT[x[0]]=x);let k=0;
     const html=p[0].replace(/\[([^\]]+)\]|([A-Za-zé][A-Za-zé'’-]*)/g,(m,t,o)=>{const nt=NT[k++],g=nt?` data-si="${si}" data-k="${nt[0]}"`:'',ix=nt?' ix':'';if(t){const i=UB[v][u]+n++;return `<b class="tg${ix}${view.cloze?' mk':''}" data-a="word" data-i="${i}" data-f="${esc(t)}"${g}>${view.cloze?mask(t):esc(t)}</b>`}return `<span class="${ix.trim()}" data-a="tok" data-t="${esc(o)}"${g}>${esc(o)}</span>`});
-    const gm=(p[2]||[]).length?(p[2]).map(x=>`<div><b>${esc(x[1])}</b>${x[1].toLowerCase()!==x[2]?' ← '+esc(x[2]):''} <span class="lb">${esc(x[3])}</span>：${esc(x[4])}</div>`).join(''):'<div>这句里的词都是原形，没有变化。</div>';
+    const gm=(p[2]||[]).length?(p[2]).map(x=>`<div><b>${esc(x[1])}</b>${x[1].toLowerCase()!==x[2]?' ← '+esc(x[2]):''} <span class="lb">${esc(x[3])}</span>：${esc(x[4])}${x[5]?`<a class="clink" data-a="card" data-c="${x[5]}">举一反三 ›</a>`:''}</div>`).join(''):'<div>这句里的词都是原形，没有变化。</div>';
     return `<span class="sen" id="s${si}">${html}</span><i class="chip" data-a="say" data-si="${si}" id="c${si}">🔊</i><i class="chip" data-a="tr" data-si="${si}">译</i><span class="tr${view.zh?' on':''}" id="t${si}">${esc(p[1])}</span><span class="gm${view.gram?' on':''}" id="g${si}"><div class="lb">这句话里为什么不是原形</div>${gm}</span>`}).join(' ');
   return `<button class="back" data-a="back">‹ 返回</button>
   <h1 style="margin-top:2px">${esc(U.t)} <span class="sub en" style="font-size:15px">${esc(U.e)}</span></h1>
@@ -293,10 +297,22 @@ VIEW.me=()=>{const vs=voices.length?voices:[];
   <button class="full" data-a="export">导出备份</button><button class="full" data-a="import">从备份恢复（覆盖）</button><button class="full bad" data-a="reset">清空全部学习记录</button></div>
   <div class="sub" style="text-align:center;margin:16px 0">六级语境词汇 ${VERSION} · 7 册 ${NU} 单元 ${W.length} 词<br>音标与点词释义取自 macOS 自带牛津英汉词典，释义为自动摘录，仅供参考<br>单词发音来自有道词典在线接口，整句语音由微软神经网络语音预先生成</div>`};
 
+/* ---------- grammar card: rule + examples + real sentences from the books ---------- */
+function cardSheet(c){const g=GRAM[c];if(!g)return;const same=[];
+  for(let v=0;v<VOLS.length;v++)for(let u=0;u<VOLS[v].length;u++)VOLS[v][u].s.forEach((p,si)=>{(p[2]||[]).forEach(x=>{if(x[5]===c)same.push([v,u,si,x])})});
+  const pick=shuffle(same).slice(0,6),plain=p=>p.replace(/[\[\]]/g,'');
+  const hl=(p,x)=>{let k=0;return esc(plain(p)).replace(/([A-Za-zé][A-Za-zé'’-]*)/g,m=>k++===x[0]?`<span class="hit">${m}</span>`:m)};
+  sheet(`<div class="gcard"><h3>${esc(g.t)}</h3>
+  <div class="blk"><b>规则</b><br>${esc(g.rule)}</div>
+  <div class="blk"><b>和中文对照</b><br>${esc(g.cn)}</div>
+  <div class="blk"><b>举一反三</b><div class="exs">${g.ex.map(e=>`<div class="exr"><div class="grow"><div class="en">${esc(e[0])}</div><div class="sm">${esc(e[1])}</div></div><button class="ic" data-a="spk" data-t="${esc(e[0])}">🔊</button></div>`).join('')}</div></div>
+  <div class="blk"><b>易错点</b><br>${esc(g.trap)}</div>
+  ${pick.length?`<div class="blk"><b>课本里的同类句子</b>（共 ${same.length} 处，随机列 ${pick.length} 句）<div class="exs">${pick.map(([v,u,si,x])=>`<div class="exr" data-a="open" data-v="${v}" data-u="${u}"><div class="grow"><div class="en">${hl(VOLS[v][u].s[si][0],x)}</div><div class="sm">${esc(x[1])} ← ${esc(x[2])}：${esc(x[4])}</div><div class="sm">第${CN[v+1]}册 · ${esc(VOLS[v][u].t)} ›</div></div></div>`).join('')}</div></div>`:''}</div>`)}
+
 /* ---------- sheets ---------- */
 function sheet(html){const s=$('#sheet');s.innerHTML=`<div data-a="noop">${html}<button class="full ghost" data-a="closeSheet">关闭</button></div>`;s.classList.add('on')}
 function closeSheet(){$('#sheet').classList.remove('on')}
-function gnote(d){if(!d||d.si==null||view.name!=='unit')return '';const p=VOLS[view.v][view.u].s[+d.si],x=(p[2]||[]).find(n=>n[0]==d.k);return x?`<div class="gnote"><span class="lb">为什么是 ${esc(x[1])}${x[1].toLowerCase()!==x[2]?'（原形 '+esc(x[2])+'）':''}</span><br><b>${esc(x[3])}</b>：${esc(x[4])}</div>`:''}
+function gnote(d){if(!d||d.si==null||view.name!=='unit')return '';const p=VOLS[view.v][view.u].s[+d.si],x=(p[2]||[]).find(n=>n[0]==d.k);return x?`<div class="gnote"><span class="lb">为什么是 ${esc(x[1])}${x[1].toLowerCase()!==x[2]?'（原形 '+esc(x[2])+'）':''}</span><br><b>${esc(x[3])}</b>：${esc(x[4])}${x[5]?`<br><a class="clink" data-a="card" data-c="${x[5]}">举一反三：看这条语法的规则和例句 ›</a>`:''}</div>`:''}
 function wordSheet(i,form,d){const x=W[i];if(S.cfg.auto)speak(x.w);
   sheet(`<div class="row"><div class="grow"><h3>${esc(x.w)}</h3><span class="ipa">/${esc(x.ipa)}/</span></div><button class="ic" data-a="spk" data-t="${esc(x.w)}" style="font-size:26px">🔊</button><button class="star ${S.star[x.w]?'on':''}" data-a="star" data-i="${i}" style="font-size:26px">${S.star[x.w]?'★':'☆'}</button></div>
   ${form&&form.toLowerCase()!==x.w.toLowerCase()?`<div class="sub">文中形式：<span class="en">${esc(form)}</span></div>`:''}${gnote(d)}
@@ -369,6 +385,7 @@ const A={
   say:d=>{const si=+d.si;if(RD&&(RD.kind==='sent'||RD.kind==='read')&&RD.i===si)return RD.paused?resumeRD():pauseRD();if(RD&&RD.kind==='read'){stopAll();RD={kind:'read',i:si};return rdStep()}stopAll();RD={kind:'sent',i:si};rdStep()},
   tr:d=>{const on=!$('#t'+d.si).classList.contains('on');$('#t'+d.si).classList.toggle('on',on);$('#g'+d.si).classList.toggle('on',on)},
   gram:()=>{view.gram=!view.gram;render()},
+  card:d=>cardSheet(d.c),
   zh:()=>{view.zh=!view.zh;render()},cloze:()=>{view.cloze=!view.cloze;render()},hide:()=>{view.hide=!view.hide;render()},
   rate:()=>{const r=[0.7,0.8,0.9,1,1.1];S.cfg.rate=r[(r.indexOf(S.cfg.rate)+1)%r.length]||0.9;save();render()},
   read:()=>{if(RD&&RD.kind==='read')return RD.paused?resumeRD():pauseRD();const from=RD&&RD.kind==='sent'?RD.i:0;stopAll();RD={kind:'read',i:from};rdStep()},
