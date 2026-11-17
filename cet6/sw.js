@@ -1,5 +1,5 @@
 // 网络优先：有网时拿最新版本并更新缓存，没网时用缓存
-const CACHE = 'cet6-v10';
+const CACHE = 'cet6-v11';
 const FILES = ['/cet6/', '/cet6/index.html', '/cet6/data.js', '/cet6/manifest.webmanifest', '/cet6/icon-180.png', '/cet6/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -14,6 +14,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return; // 在线发音等跨站请求不经过缓存
+  if (url.pathname.startsWith('/cet6/pack/')) return; // 离线包由页面自己拆开存进发音缓存，这里不再重复缓存
   if (url.pathname.startsWith('/cet6/audio/') && url.pathname.endsWith('.mp3')) { e.respondWith(audio(e.request, url)); return; }
   e.respondWith(
     fetch(e.request).then(r => {

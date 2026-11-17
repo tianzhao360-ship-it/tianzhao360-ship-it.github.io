@@ -84,7 +84,7 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--card);bord
 <div id="toast"></div>
 <script src="/cet6/data.js"></script>
 <script>
-const VERSION='v1.9', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
+const VERSION='v1.10', KEY='cet6v1', OFF=[1,2,4,7,15], CN='零一二三四五六七';
 const DEF={learned:{},rev:{},star:{},wrong:{},ok:{},log:{},cfg:{rate:0.9,voice:'',auto:true,online:true}};
 let S=load();
 function load(){let o={};try{o=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}const s=Object.assign({},DEF,o);s.cfg=Object.assign({},DEF.cfg,o.cfg||{});return s}
@@ -389,13 +389,21 @@ async function apkHave(){if(!('caches' in window))return new Set();const c=await
 async function apkStat(){const el=$('#apk');if(!el||apkRun||!('caches' in window))return;try{const h=await apkHave(),all=await apkList(),n=all.filter(u=>h.has(u)).length;
   el.textContent=n>=all.length?`离线发音包已下载（${n} 个音频），没网也能听。`:n?`已下载 ${n} / ${all.length} 个音频，点下面的按钮继续。`:'单词、整句、搭配全部是美式真人女声。下载一次后，没网也能听。'}catch(e){}}
 async function apkGet(){if(apkRun)return;if(!('caches' in window))return toast('这个浏览器不支持离线保存');
-  let all;try{all=await apkList()}catch(e){return toast('需要联网才能下载')}
+  // 下载十几个合并好的大包（每个约 8 MB），在手机上拆回一个个音频存进缓存；几千个小文件逐个请求太慢
+  let idx;try{idx=await fetch('/cet6/pack/index.json',{cache:'no-store'}).then(r=>r.json());await apkList()}catch(e){return toast('需要联网才能下载')}
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
-  apkRun=true;const c=await caches.open(AC),h=await apkHave(),todo=all.filter(u=>!h.has(u));let done=all.length-todo.length,bad=0,i=0;
-  const show=()=>{const el=$('#apk');if(el)el.textContent=`正在下载 ${done} / ${all.length}${bad?`，失败 ${bad} 个`:''}…（可以继续学习，别关掉应用）`};show();
-  const worker=async()=>{while(i<todo.length){const u=todo[i++];try{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw 0;await c.put(u,r);done++}catch(e){bad++}if((done+bad)%20===0)show()}};
-  await Promise.all(Array.from({length:6},worker));apkRun=false;
-  toast(bad?`下载完成，${bad} 个失败，再点一次补齐`:'离线发音包已下载完成');apkStat()}
+  apkRun=true;const c=await caches.open(AC),h=await apkHave(),url=k=>'/cet6/audio/'+encodeURIComponent(k)+'.mp3';
+  const todo=idx.packs.filter(p=>p.items.some(it=>!h.has(url(it[0])))),total=idx.packs.reduce((a,p)=>a+p.size,0);
+  let got=total-todo.reduce((a,p)=>a+p.size,0),bad=0,i=0;const mb=x=>(x/1e6).toFixed(0);
+  const show=()=>{const el=$('#apk');if(el)el.textContent=`正在下载 ${mb(got)} / ${mb(total)} MB${bad?`，${bad} 个包失败`:''}…（可以继续学习，别关掉应用）`};show();
+  const one=async p=>{for(let t=0;t<3;t++){let n=0;try{const r=await fetch('/cet6/pack/'+p.f);if(!r.ok)throw 0;let blob;
+      if(r.body&&r.body.getReader){const rd=r.body.getReader(),parts=[];for(;;){const x=await rd.read();if(x.done)break;parts.push(x.value);n+=x.value.length;got+=x.value.length;show()}blob=new Blob(parts)}
+      else{blob=await r.blob();n=blob.size;got+=n}
+      if(blob.size!==p.size)throw 0;
+      await Promise.all(p.items.map(([k,o,l])=>c.put(url(k),new Response(blob.slice(o,o+l),{headers:{'Content-Type':'audio/mpeg','Content-Length':String(l)}}))));show();return}
+    catch(e){got-=n;show()}}bad++};
+  await Promise.all(Array.from({length:3},async()=>{while(i<todo.length)await one(todo[i++])}));apkRun=false;
+  toast(bad?`下载完成，${bad} 个包失败，再点一次补齐`:'离线发音包已下载完成');apkStat()}
 const A={
   tab:d=>go({name:d.t}),noop:()=>{},closeSheet:closeSheet,back:back,
   open:d=>{closeSheet();warm();const v={name:'unit',v:+d.v,u:+d.u};if(view.name==='unit')go(v,false);else{view.y=window.scrollY;go(v,true)}},
