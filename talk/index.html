@@ -211,7 +211,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.4.0';
+const VER='1.5.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -362,23 +362,29 @@ async function askAI(system,user,onText,signal){let t='';for await(const c of st
 function sysPrompt(sess){
  const sc=SCENES.find(x=>x.id===sess.scene)||SCENES[0];
  const scene=sess.scene==='custom'?'Role-play this situation the learner described (in Chinese or English): '+sess.custom+'. Stay in character.':sc.p;
- return `You are Sam, a warm, upbeat American from California and an English conversation partner for a Chinese learner who wants to practice speaking. ${LEVELS[S.cfg.level].p}
+ return `You are Sam, a warm, patient, upbeat American from California. You are the English speaking partner of a Chinese university student. Their spoken English is still limited: they speak slowly, in fragments, with fillers (um, uh), repeated words, wrong tenses, Chinese word order, and sometimes switch to Chinese in the middle of a sentence. Your job is to make them feel understood, keep them talking, and help them say it better. ${LEVELS[S.cfg.level].p} Keep your own English simple, clear and friendly.
 ${scene}
 
-Every response MUST use exactly this plain-text format, one item per line, no markdown and nothing else:
-REPLY: <what you say out loud, in natural spoken American English, 1-3 short sentences; usually end with a question to keep the conversation going>
+Every response MUST use exactly this plain-text format, one item per line, nothing else:
+REPLY: <what you say out loud in natural spoken American English, 1-3 short sentences>
 ZH: <natural Chinese translation of REPLY>
-FIX: <the learner's wrong or unnatural words> => <how an American would naturally say it> || <一句简短的中文说明>
+MEAN: <用一句中文、以“你想说”开头，写出你理解的对方这句话的意思>
+BETTER: <the learner's whole latest message, rewritten as a native American would naturally say it, keeping their meaning>
+FIX: <the learner's wrong or unnatural words> => <the natural way to say it> || <一句简短的中文说明>
 SAY: <useful English expression> || <中文意思> || <简短中文用法提示，可省略>
 
-Rules:
-- FIX: only when the learner's latest message is in English and has a real grammar or word-choice error, or sounds clearly unnatural. 0-2 FIX lines. Never correct Chinese input. Ignore punctuation and capitalization, the input comes from speech recognition.
-- SAY: 0-3 lines, only genuinely useful expressions.
-- If the learner writes in Chinese or asks how to say something (e.g. "…怎么说", "用英语", "how do I say"): in REPLY give the single most natural way an American would actually say it (e.g. You could say: "..."), then invite them to try saying it. Put 2-3 alternatives in SAY lines (casual / neutral / formal) with Chinese meaning and when to use each.
-- If the learner asks any question (about English, facts, advice, anything at all), answer it helpfully and briefly in REPLY in simple spoken English, then keep the conversation going.
-- If the learner's text looks like garbled speech recognition, guess what they meant.
+How to help this learner:
+- Always work out what they are trying to say, even from broken English, mixed Chinese, fillers or speech-recognition mistakes. Never say you don't understand unless it is truly impossible; make your best guess.
+- If their message was broken or hard to follow, start REPLY by briefly checking your understanding in natural English (e.g. "Oh, you mean you love all kinds of food, like fruit, veggies and beef?"), so they hear the correct way to say it. Then respond and ask one simple follow-up question.
+- If they get stuck or say they can't explain something, reassure them and tell them they can say that part in Chinese; then teach them the English for it.
+- MEAN: always include it when the latest message is from the learner.
+- BETTER: include it whenever their English had any mistake or sounded unnatural; skip it if it was already natural or written in Chinese.
+- FIX: 0-3 lines for the most useful corrections only (grammar, word choice, unnatural phrasing). Never correct Chinese. Ignore punctuation, capitalization, fillers and repeated words: the input is speech recognition.
+- SAY: 0-3 genuinely useful expressions.
+- If they write in Chinese or ask how to say something ("…怎么说", "用英语", "how do I say"): in REPLY give the most natural way an American would say it (You could say: "..."), then invite them to try saying it. Put 2-3 alternatives in SAY (casual / neutral / formal) with Chinese meaning and when to use each.
+- If they ask any question (English, facts, advice, anything), answer helpfully and briefly in simple spoken English, then keep the conversation going.
 - Start REPLY with a short natural reaction of 2-6 words that ends with punctuation (e.g. "Oh nice!", "Got it.", "Ha, that's funny."), then continue.
-- REPLY must be easy to read aloud: no lists, emojis, brackets or stage directions.`;
+- REPLY is read aloud: plain words only. No emojis, no asterisks or other markdown, no lists, no brackets, no stage directions.`;
 }
 const SYS_HINT=`You help a Chinese learner who is stuck in an English conversation. Based on the conversation, suggest 3 things the learner could say next, from simple to more advanced, in natural spoken American English. Output exactly 3 lines, nothing else:
 OPT: <English sentence> || <中文意思>`;
@@ -392,22 +398,25 @@ Give up to 6 FIX lines (most important first, only real problems in the learner'
 const SYS_EXPLAIN='你是耐心的美式英语老师。用中文简洁讲解用户给的英语句子：先给整句意思，再讲 2-4 个关键词或短语（意思和用法），最后一句说明口语里的语气或什么时候用。纯文本，不要用 markdown 符号，不要 * 或 #。';
 
 function parseOut(t){
- const o={reply:'',zh:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
+ const o={reply:'',zh:'',mean:'',better:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
  for(const raw of t.replace(/\*\*/g,'').split('\n')){
   const line=raw.trim();if(!line)continue;
-  const m=line.match(/^[-•]?\s*(REPLY|ZH|FIX|SAY|OPT|SUMMARY|GOOD|NEXT)\s*[:：]\s*(.*)$/i);
+  const m=line.match(/^[-•]?\s*(REPLY|ZH|MEAN|BETTER|FIX|SAY|OPT|SUMMARY|GOOD|NEXT)\s*[:：]\s*(.*)$/i);
   if(m){cur=m[1].toUpperCase();const v=m[2];
    if(cur==='FIX'||cur==='SAY'||cur==='OPT')o[cur.toLowerCase()].push(v);else o[cur.toLowerCase()]=v;}
+  else if(cur==='FIX'&&/=>/.test(line))o.fix.push(line.replace(/^FIX\s*[:：]\s*/i,''));
+  else if((cur==='SAY'||cur==='OPT')&&/\|\|/.test(line))o[cur.toLowerCase()].push(line);
   else if(cur===null||cur==='REPLY')o.reply+=(o.reply?' ':'')+line;
-  else if(['ZH','SUMMARY','GOOD','NEXT'].includes(cur))o[cur.toLowerCase()]+=line;
+  else if(['ZH','MEAN','BETTER','SUMMARY','GOOD','NEXT'].includes(cur))o[cur.toLowerCase()]+=line;
  }
  const sp=s=>s.split(/\s*\|\|\s*/).map(x=>x.trim().replace(/^["“]|["”]$/g,''));
  o.fix=o.fix.map(s=>{const [a,rest='']=s.split(/\s*=>\s*/);const [b,why='']=sp(rest);return {from:a.trim().replace(/^["“]|["”]$/g,''),to:b,why}}).filter(f=>f.to);
  o.say=o.say.map(s=>{const [en,zh='',note='']=sp(s);return {en,zh,note}}).filter(s=>s.en&&!/^[<（(]/.test(s.en));
  o.opt=o.opt.map(s=>{const [en,zh='']=sp(s);return {en,zh}}).filter(s=>s.en);
- o.reply=o.reply.trim();return o;
+ const tidy=x=>x.replace(/\p{Extended_Pictographic}\uFE0F?/gu,'').replace(/[*_`#]+/g,'').replace(/\s{2,}/g,' ').trim();
+ o.reply=tidy(o.reply);o.zh=tidy(o.zh);o.better=tidy(o.better).replace(/^["“]|["”]$/g,'');o.mean=tidy(o.mean);return o;
 }
-const replyDone=t=>/\n\s*(ZH|FIX|SAY)\s*[:：]/i.test(t);
+const replyDone=t=>/\n\s*(ZH|MEAN|BETTER|FIX|SAY)\s*[:：]/i.test(t);
 
 /* ---------- 发音 ---------- */
 const AU=new Audio();AU.playsInline=true;
@@ -617,6 +626,7 @@ async function recordWav(onInterim){
  const status=()=>{const t=Math.floor(el/1000);return `正在听 ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')} · `+(tap?'停顿没关系，说完再点一下':'停顿 '+(PAUSE[S.cfg.pause]||2500)/1000+' 秒自动发送')};
  onInterim&&onInterim('',status());
  proc.onaudioprocess=e=>{
+  if(!fin)return;
   const d=e.inputBuffer.getChannelData(0);chunks.push(new Float32Array(d));
   let s=0;for(let i=0;i<d.length;i++)s+=d[i]*d[i];const rms=Math.sqrt(s/d.length),dt=d.length/rate*1000;el+=dt;MIC_LEVEL=rms;
   if(el<300){floor+=rms;nf++;return}
@@ -688,6 +698,7 @@ async function runAI(s,hiddenUser){
  if(hiddenUser)s.msgs.push({role:'user',text:hiddenUser,hidden:true});
  const m={role:'ai',text:'',t:Date.now(),live:true};s.msgs.push(m);renderChat(true);
  const hist=s.msgs.filter(x=>x!==m&&x.role!=='err'&&x.role!=='note').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
+ if(hist.length&&hist[hist.length-1].role==='user')hist[hist.length-1]={role:'user',content:hist[hist.length-1].content+'\n\n(Answer in the REPLY / ZH / MEAN / BETTER / FIX / SAY line format. No emojis or markdown.)'};
  let raw='',sp=null,fed=0,fin=false;const want=S.cfg.autoplay||CALL;callState('think');
  /* 回复一写完一句就交给发音，不等整段 */
  const feed=(reply,final)=>{
@@ -702,7 +713,8 @@ async function runAI(s,hiddenUser){
   }
   const o=parseOut(raw);
   Object.assign(m,{text:o.reply||raw.trim(),zh:o.zh,say:o.say});delete m.live;
-  if(o.fix.length){const u=[...s.msgs].reverse().find(x=>x.role==='user'&&!x.hidden&&x!==m);if(u)u.fix=o.fix}
+  {const u=[...s.msgs].reverse().find(x=>x.role==='user'&&!x.hidden&&x!==m);
+   if(u&&!u.hidden&&s.msgs.indexOf(u)===s.msgs.indexOf(m)-1){if(o.fix.length)u.fix=o.fix;if(o.mean)u.mean=o.mean;if(o.better&&o.better.toLowerCase()!==u.text.trim().toLowerCase()&&!hasZh(o.better))u.better=o.better}}
   save();busy=false;renderChat(true);
   feed(m.text,true);
   if(CALL){callCap(m);if(sp)await sp.done;callNext()}
@@ -721,6 +733,8 @@ function sayCard(x,src){
  <button class="ib" data-a="p" aria-label="播放">${I.play}</button><button class="ib" data-a="sh" aria-label="跟读">${I.mic}</button><button class="ib ${inBook(x.en)?'on':''}" data-a="fav" aria-label="收藏">${I.star}</button></div>`;
 }
 const zhShown=m=>m.zhOn!=null?m.zhOn:S.cfg.showZh;
+/* 模型偶尔漏写中文翻译：点“中文”时现翻 */
+async function ensureZh(m){if(m.zh)return m.zh;const t=await askAI('把用户给的英文翻译成自然的简体中文口语。只输出译文，不要任何解释。',m.text);m.zh=t.replace(/^(ZH|译文)\s*[:：]\s*/i,'').trim();save();return m.zh}
 const inBook=en=>S.book.some(b=>b.en.toLowerCase()===String(en).toLowerCase());
 function renderChat(scroll){
  const s=curSess(),el=$('#chatv');
@@ -737,12 +751,12 @@ function renderChat(scroll){
   <div class="chips"><button class="chip" data-a="call" style="border-color:var(--pri);color:var(--pri);font-weight:600">📞 给 Sam 打电话，像真打电话一样聊</button></div></div>`;
  }else el.innerHTML=s.msgs.map((m,i)=>{
   if(m.hidden)return '';
-  if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${(m.fix||[]).map(f=>`<div class="card fix"><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span> <button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px;vertical-align:middle">${I.play}</button>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
+  if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${m.mean||m.better?`<div class="card fix">${m.mean?`<div class="why" style="font-size:13.5px">Sam 理解的：${esc(m.mean)}</div>`:''}${m.better?`<div class="say" data-en="${esc(m.better)}" data-zh="${esc(m.mean||'')}" style="margin-top:4px"><div class="t"><span style="color:var(--sub);font-size:12.5px;display:block">完整地道说法</span><b style="color:var(--ok)">${esc(m.better)}</b></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib ${inBook(m.better)?'on':''}" data-a="fav">${I.star}</button></div>`:''}</div>`:''}${(m.fix||[]).map(f=>`<div class="card fix"><button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px">${I.play}</button><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
   if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}</div>`;
   if(m.role==='err')return `<div class="msg ai"><div class="bub err">${esc(m.text)}<div class="tools"><button data-a="retry">重试</button><button data-a="toset">去设置</button></div></div></div>`;
   return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}><div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${esc(m.text)}</div>
    ${m.zh?`<div class="zh" ${zhShown(m)?'':'hidden'}>${esc(m.zh)}</div>`:''}
-   ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button>${m.zh?`<button data-a="zh" class="${zhShown(m)?'act':''}">中文</button>`:''}<button data-a="ex">讲解</button><button data-a="sh">跟读</button><button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
+   ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button><button data-a="zh" class="${zhShown(m)&&m.zh?'act':''}">中文</button><button data-a="ex">讲解</button><button data-a="sh">跟读</button><button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
    ${(m.say||[]).map(x=>sayCard(x)).join('')}</div>`;
  }).join('');
  renderBar2();if(!vis.length&&!busy)$('#main').scrollTop=0;else if(scroll)scrollEnd();
@@ -942,7 +956,9 @@ function callCap(m,opts){
  const i=s.msgs.indexOf(m),u=[...s.msgs.slice(0,i)].reverse().find(x=>x.role==='user'&&!x.hidden);
  const fix=u&&u.fix&&u.fix[0];
  el.classList.toggle('hidecap',!capOn);
- el.innerHTML=`<div class="en">${esc(m.text)}</div>${(S.cfg.showZh||m.zhOn)&&m.zh?`<small>${esc(m.zh)}</small>`:''}${fix?`<div class="tip">更地道：${esc(fix.to)}</div>`:''}`;
+ const tip=u&&u.better?u.better:fix&&fix.to;
+ el.innerHTML=`<div class="en">${esc(m.text)}</div>${zhShown(m)&&m.zh?`<small>${esc(m.zh)}</small>`:''}${tip?`<div class="tip">更地道：${esc(tip)}</div>`:''}`;
+ $('#czh').classList.toggle('on',!!(zhShown(m)&&m.zh));
 }
 function tickCall(){const t=Math.floor((Date.now()-callT0)/1000);$('#ctime').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
 /* 说话时圆球跟着音量跳 */
@@ -955,7 +971,7 @@ async function enterCall(){
  let s=curSess();if(!s)s=newSession();
  if(REC)REC.abort();stopSpeak();
  CALL=true;callT0=Date.now();callTurns=0;callMiss=0;capOn=!S.cfg.blurEn;
- $('#ccapbtn').classList.toggle('on',capOn);$('#czh').classList.toggle('on',!!S.cfg.showZh);
+ $('#ccapbtn').classList.toggle('on',capOn);
  $('#call').classList.add('on');$('#cscene').textContent=sessTitle(s);updLangBtn();
  $('#cme').textContent='';callCap();tickCall();callTimer=setInterval(tickCall,1000);levelLoop();keepAwake();
  callState('wait');go('chatv');
@@ -979,7 +995,7 @@ async function callNext(){
  if(document.hidden)return callState('idle');
  callState('listen');
  try{
-  const t=await listen(S.cfg.lang,(x,st)=>{if(!CALL)return;if(st)$('#cstate').textContent=st;else $('#cme').textContent=x});
+  const t=await listen(S.cfg.lang,(x,st)=>{if(!CALL||!/listen/.test($('#call').className))return;if(st)$('#cstate').textContent=st;else $('#cme').textContent=x});
   if(!CALL)return;
   if(!t){if(document.hidden||++callMiss>=2){callMiss=0;return callState('idle','没听到声音，点圆圈再说')}return callNext()}
   callMiss=0;callTurns++;$('#cme').textContent='你：'+t;await sendText(t);
@@ -992,7 +1008,9 @@ $('#ccapbtn').onclick=()=>{capOn=!capOn;$('#ccapbtn').classList.toggle('on',capO
 $('#call .tools2').onclick=e=>{
  const b=e.target.closest('[data-c]');if(!b||!CALL)return;const c=b.dataset.c,m=lastAI();
  if(c==='hint'){if(REC)REC.abort();stopSpeak();return openHint()}
- if(c==='zh'){S.cfg.showZh=!S.cfg.showZh;save();b.classList.toggle('on',S.cfg.showZh);return callCap()}
+ if(c==='zh'){if(!m)return;if(zhShown(m)&&m.zh){m.zhOn=false;save();return callCap()}
+  $('#ccap').insertAdjacentHTML('beforeend','<small id="ztmp">翻译中…</small>');
+  return ensureZh(m).then(()=>{m.zhOn=true;save();callCap()},err=>{const z=$('#ztmp');if(z)z.textContent=err.message})}
  if(!m)return;
  if(REC)REC.abort();
  callState('speak');speak(m.text,c==='slow').then(()=>{if(CALL&&!busy&&!REC&&!LISTENING)callNext()});
@@ -1061,7 +1079,7 @@ document.body.addEventListener('click',async e=>{
   case 'play':return speak(m.text);
   case 'slow':return speak(m.text,true);
   case 'reveal':if(m&&!m.shown&&S.cfg.blurEn){m.shown=true;t.classList.remove('blur');save()}return;
-  case 'zh':m.zhOn=!zhShown(m);save();return renderChat();
+  case 'zh':{if(m.zh){m.zhOn=!zhShown(m);save();return renderChat()}t.textContent='翻译中…';try{await ensureZh(m);m.zhOn=true;save()}catch(err){toast(err.message,4000)}return renderChat()}
   case 'ex':return openExplain(m.text);
   case 'sh':return card?openShadow(card.dataset.en,card.dataset.zh):openShadow(m.text,m.zh);
   case 'favm':addBook({en:m.text,zh:m.zh});return renderChat();
