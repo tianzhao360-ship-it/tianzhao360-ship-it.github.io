@@ -211,7 +211,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.5.0';
+const VER='1.6.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -259,7 +259,7 @@ const SCENES=[
  {id:'custom',t:'自定义场景',d:'自己描述一个想练的场景',p:null}
 ];
 const ALI_VOICES=[['Jennifer','Jennifer · 美式女声'],['Aiden','Aiden · 美式男声'],['Cherry','Cherry · 中英双语女声'],['Ethan','Ethan · 中英双语男声']];
-const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',send:'tap',pause:'mid',aliRoot:'',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
+const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',send:'tap',sayFix:true,pause:'mid',aliRoot:'',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 S=Object.assign(structuredClone(DEF),S||{});S.cfg=Object.assign(structuredClone(DEF.cfg),S.cfg||{});
@@ -366,7 +366,7 @@ function sysPrompt(sess){
 ${scene}
 
 Every response MUST use exactly this plain-text format, one item per line, nothing else:
-REPLY: <what you say out loud in natural spoken American English, 1-3 short sentences>
+REPLY: <what you say out loud in natural spoken American English, 2-4 short sentences>
 ZH: <natural Chinese translation of REPLY>
 MEAN: <用一句中文、以“你想说”开头，写出你理解的对方这句话的意思>
 BETTER: <the learner's whole latest message, rewritten as a native American would naturally say it, keeping their meaning>
@@ -375,7 +375,9 @@ SAY: <useful English expression> || <中文意思> || <简短中文用法提示�
 
 How to help this learner:
 - Always work out what they are trying to say, even from broken English, mixed Chinese, fillers or speech-recognition mistakes. Never say you don't understand unless it is truly impossible; make your best guess.
-- If their message was broken or hard to follow, start REPLY by briefly checking your understanding in natural English (e.g. "Oh, you mean you love all kinds of food, like fruit, veggies and beef?"), so they hear the correct way to say it. Then respond and ask one simple follow-up question.
+- CORRECT OUT LOUD. This is the most important rule. If the learner's latest message (in English) has any real grammar or word-choice mistake, your REPLY must correct it out loud, every single time, before moving on: after your short reaction, say the corrected sentence and a very short reason, in a friendly way. For example: "Quick tip: we say 'I went to the library yesterday', because it already happened." or "Small fix: it's 'there are so many kinds of food'." Correct only the single most important mistake out loud (the rest go in FIX lines). Never just guess their meaning and continue as if nothing was wrong.${S.cfg.sayFix===false?' (The learner turned off spoken corrections: do NOT correct out loud in REPLY; put corrections only in FIX lines.)':''}
+- If their message was broken or hard to follow, also briefly check your understanding in natural English (e.g. "Oh, you mean you love all kinds of food, like fruit, veggies and beef?"), so they hear the correct way to say it.
+- After correcting, respond to what they said and ask one simple follow-up question.
 - If they get stuck or say they can't explain something, reassure them and tell them they can say that part in Chinese; then teach them the English for it.
 - MEAN: always include it when the latest message is from the learner.
 - BETTER: include it whenever their English had any mistake or sounded unnatural; skip it if it was already natural or written in Chinese.
@@ -384,7 +386,7 @@ How to help this learner:
 - If they write in Chinese or ask how to say something ("…怎么说", "用英语", "how do I say"): in REPLY give the most natural way an American would say it (You could say: "..."), then invite them to try saying it. Put 2-3 alternatives in SAY (casual / neutral / formal) with Chinese meaning and when to use each.
 - If they ask any question (English, facts, advice, anything), answer helpfully and briefly in simple spoken English, then keep the conversation going.
 - Start REPLY with a short natural reaction of 2-6 words that ends with punctuation (e.g. "Oh nice!", "Got it.", "Ha, that's funny."), then continue.
-- REPLY is read aloud: plain words only. No emojis, no asterisks or other markdown, no lists, no brackets, no stage directions.`;
+- REPLY is read aloud: plain words only (single quotes around a corrected sentence are fine). No emojis, no asterisks or other markdown, no lists, no brackets, no stage directions.`;
 }
 const SYS_HINT=`You help a Chinese learner who is stuck in an English conversation. Based on the conversation, suggest 3 things the learner could say next, from simple to more advanced, in natural spoken American English. Output exactly 3 lines, nothing else:
 OPT: <English sentence> || <中文意思>`;
@@ -563,8 +565,14 @@ function playUrl(url,slow){
   AU.play().catch(e=>{if(speakEnd===done)speakEnd=null;rej(e)});
  });
 }
-let ACTX=null;
+let ACTX=null,actxStale=false;
 function actx(){if(!ACTX){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ACTX=new C()}if(ACTX.state!=='running')ACTX.resume().catch(()=>{});return ACTX}
+/* iPhone 切到后台会暂停网页的音频系统，回来后不一定能恢复：在用户点按时检查，不行就新建一个 */
+function freshAudio(force){
+ if(ACTX&&(force||actxStale||ACTX.state!=='running')){try{ACTX.close()}catch(e){}ACTX=null}
+ actxStale=false;return actx();
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)actxStale=true});
 function unlockAudio(){
  const n=800,b=new ArrayBuffer(44+n*2),d=new DataView(b);const w=(o,s)=>[...s].forEach((c,i)=>d.setUint8(o+i,c.charCodeAt(0)));
  w(0,'RIFF');d.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,16000,true);d.setUint32(28,32000,true);d.setUint16(32,2,true);d.setUint16(34,16,true);w(36,'data');d.setUint32(40,n*2,true);
@@ -619,14 +627,15 @@ async function recordWav(onInterim){
  let stream;
  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}
  catch(e){setSession('playback');throw new Error('没有麦克风权限：请在 iPhone 设置里允许，或再点一次麦克风')}
- const ac=actx();try{await ac.resume()}catch(e){}
+ let ac=actx();try{await ac.resume()}catch(e){}
+ if(ac.state!=='running'){ac=freshAudio(true);try{await ac.resume()}catch(e){}}
  const src=ac.createMediaStreamSource(stream),proc=ac.createScriptProcessor(4096,1,1),rate=ac.sampleRate;
  const chunks=[];let heard=false,quiet=0,el=0,floor=0,nf=0,cancelled=false,manual=false,fin,sec=-1;
  const finished=new Promise(r=>fin=r),tap=S.cfg.send!=='auto';
  const status=()=>{const t=Math.floor(el/1000);return `正在听 ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')} · `+(tap?'停顿没关系，说完再点一下':'停顿 '+(PAUSE[S.cfg.pause]||2500)/1000+' 秒自动发送')};
  onInterim&&onInterim('',status());
  proc.onaudioprocess=e=>{
-  if(!fin)return;
+  if(!fin)return;got=true;
   const d=e.inputBuffer.getChannelData(0);chunks.push(new Float32Array(d));
   let s=0;for(let i=0;i<d.length;i++)s+=d[i]*d[i];const rms=Math.sqrt(s/d.length),dt=d.length/rate*1000;el+=dt;MIC_LEVEL=rms;
   if(el<300){floor+=rms;nf++;return}
@@ -637,9 +646,11 @@ async function recordWav(onInterim){
   else if((heard&&quiet>(PAUSE[S.cfg.pause]||2500))||el>120000||(!heard&&el>12000))stop();
  };
  src.connect(proc);proc.connect(ac.destination);
+ let got=false;const dog=setTimeout(()=>{if(!got&&fin){dead=true;actxStale=true;stop()}},1500);let dead=false;
  function stop(){if(!fin)return;const f=fin;fin=null;MIC_LEVEL=0;try{proc.disconnect();src.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());setSession('playback');f()}
  REC={stop:()=>{manual=true;stop()},abort:()=>{cancelled=true;stop()}};
- await finished;REC=null;
+ await finished;REC=null;clearTimeout(dog);
+ if(dead)throw new Error('麦克风没收到声音（切过后台时常见），再点一下就好');
  if(cancelled)return null;
  if(!heard&&!(manual&&el>800))return null;
  return wavBlob(chunks,rate);
@@ -829,7 +840,8 @@ function renderMe(){
   <label><span>总显示中文</span><input type="checkbox" id="c-zh" ${c.showZh?'checked':''}></label>
   <label><span>听力挑战</span><input type="checkbox" id="c-blur" ${c.blurEn?'checked':''}></label>
  </div>
- <div class="note">听力挑战：Sam 的英文先打码，听不懂再点开看。</div>
+ <div class="set" style="margin-top:8px"><label><span>开口纠错</span><input type="checkbox" id="c-sayfix" ${c.sayFix!==false?'checked':''}></label></div>
+ <div class="note">听力挑战：Sam 的英文先打码，听不懂再点开看。开口纠错：你说错时，Sam 会先口头纠正最重要的一处，再接着聊。</div>
  <div class="sec">数据</div>
  <div class="btns"><button class="btn g" data-a="export">备份到文件</button><button class="btn g" data-a="import">从备份恢复</button></div>
  <div class="note">数据只存在这台手机的这个 App 里。备份文件不含密钥。版本 ${VER}</div>`;
@@ -1001,7 +1013,7 @@ async function callNext(){
   callMiss=0;callTurns++;$('#cme').textContent='你：'+t;await sendText(t);
  }catch(e){callState('idle',String(e.message||e).slice(0,70))}
 }
-$('#orb').onclick=()=>{if(!CALL)return;if(SPEAKING){stopSpeak();return}if(busy)return;if(REC){REC.stop();return}if(LISTENING)return;callNext()};
+$('#orb').onclick=()=>{if(!CALL)return;if(!REC)freshAudio();if(SPEAKING){stopSpeak();return}if(busy)return;if(REC){REC.stop();return}if(LISTENING)return;callNext()};
 $('#cend').onclick=exitCall;
 $('#clang').onclick=toggleLang;
 $('#ccapbtn').onclick=()=>{capOn=!capOn;$('#ccapbtn').classList.toggle('on',capOn);$('#ccap').classList.toggle('hidecap',!capOn)};
@@ -1023,13 +1035,14 @@ function autoGrow(){txt.style.height='auto';txt.style.height=Math.min(txt.scroll
 txt.addEventListener('input',autoGrow);
 txt.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendText(txt.value)}});
 $('#send').onclick=()=>sendText(txt.value);
-$('#callbtn').onclick=()=>enterCall();
+$('#callbtn').onclick=()=>{freshAudio();enterCall()};
 let recCancel=false;
 $('#lang').onclick=()=>{if($('#composer').classList.contains('recording')){recCancel=true;if(REC)REC.abort();return}toggleLang()};
 updLangBtn();
 const MIC_SVG=$('#mic').innerHTML,OK_SVG='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';
 $('#mic').onclick=async()=>{
  if(REC){REC.stop();return}
+ freshAudio();
  if(LISTENING)return;
  if(busy)return toast('Sam 还在回复…');
  stopSpeak();recCancel=false;
@@ -1146,6 +1159,7 @@ $('#mev').addEventListener('change',e=>{
  if(id==='c-auto')S.cfg.autoplay=e.target.checked;
  if(id==='c-zh')S.cfg.showZh=e.target.checked;
  if(id==='c-blur')S.cfg.blurEn=e.target.checked;
+ if(id==='c-sayfix')S.cfg.sayFix=e.target.checked;
  save();
 });
 $('#mev').addEventListener('input',e=>{if(e.target.id==='c-rate'){S.cfg.rate=+e.target.value;$('#ratev').textContent=S.cfg.rate.toFixed(2);save()}});
