@@ -182,7 +182,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.2.0';
+const VER='1.2.1';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -248,11 +248,19 @@ const base=()=>(S.cfg.prov==='custom'?S.cfg.base:S.cfg.prov==='qwen'?aliRoot()+'
 /* 新的千问平台密钥和老的百炼密钥走不同域名：哪个认这个密钥就用哪个 */
 async function detectAli(){
  const k=aliKey();if(!k)return;
+ const res=[];
  for(const root of ALI_ROOTS){
-  try{const r=await fetch(root+'/compatible-mode/v1/models',{headers:{authorization:'Bearer '+k}});if(r.ok){if(S.cfg.aliRoot!==root){S.cfg.aliRoot=root;save()}return root}}catch(e){}
+  try{const r=await fetchR(root+'/compatible-mode/v1/models',{headers:{authorization:'Bearer '+k}});if(r.ok){if(S.cfg.aliRoot!==root){S.cfg.aliRoot=root;save()}return root}res.push(r.status)}
+  catch(e){res.push('net')}
  }
- throw new Error('阿里云密钥在两个接口地址上都不能用，请检查密钥');
+ const info=`（已填 ${k.length} 位，开头 ${k.slice(0,3)}）`;
+ if(res.every(x=>x==='net'))throw new Error('手机连不上阿里云服务器：请检查网络，或让加速器对国内网站直连'+info);
+ if(res.some(x=>x===401||x===403))throw new Error('阿里云拒绝了这个密钥：多半是粘贴的内容不对，请重新复制粘贴'+info);
+ throw new Error('阿里云接口出错 '+res.join('/')+info);
 }
+/* 粘贴的密钥：去掉空白、引号和不可见字符；夹在别的文字里也能取出来 */
+function cleanKey(v){v=String(v||'').replace(/[\s\u200b-\u200d\ufeff"'“”‘’]/g,'');const m=v.match(/sk-[A-Za-z0-9_\-]{8,}/);return m?m[0]:v}
+const keyInfo=k=>k?`<small style="display:block;color:var(--sub);font-size:12px;text-align:right">已填 ${k.length} 位 · 开头 ${esc(k.slice(0,3))}</small>`:'';
 const apiKey=()=>(S.cfg.keys[S.cfg.prov]||'').trim();
 const oaiKey=()=>(S.cfg.prov==='openai'?apiKey():'')||(S.cfg.oaiKey||'').trim();
 const aliKey=()=>(S.cfg.prov==='qwen'?apiKey():'')||(S.cfg.aliKey||'').trim();
@@ -744,7 +752,7 @@ function renderMe(){
  <div class="set">
   <label><span>服务商</span><select id="c-prov">${Object.entries(PROV).map(([k,v])=>`<option value="${k}" ${k===c.prov?'selected':''}>${v.name}</option>`).join('')}</select></label>
   ${c.prov==='custom'?`<label><span>接口地址</span><input type="text" id="c-base" value="${esc(c.base)}" placeholder="https://…/v1" autocomplete="off" autocapitalize="off"></label>`:''}
-  <label><span>API 密钥</span><input type="password" id="c-key" value="${esc(c.keys[c.prov]||'')}" placeholder="粘贴 sk-… 密钥" autocomplete="off" autocapitalize="off"></label>
+  <label><span>API 密钥</span><input type="password" id="c-key" value="${esc(c.keys[c.prov]||'')}" placeholder="粘贴 sk-… 密钥" autocomplete="off" autocapitalize="off"></label>${keyInfo(c.keys[c.prov])?`<div class="li" style="padding-top:0;padding-bottom:8px;border-bottom:1px solid var(--line)">${keyInfo(c.keys[c.prov])}</div>`:''}
   <label><span>模型</span><input type="text" id="c-model" value="${esc(c.model[c.prov]||'')}" placeholder="留空自动选择" autocomplete="off" autocapitalize="off"></label>
  </div>
  <div class="btns"><button class="btn g" data-a="test">测试连接</button><button class="btn g" data-a="models">选择模型</button></div>
@@ -1014,11 +1022,11 @@ document.body.addEventListener('click',async e=>{
 document.body.addEventListener('input',e=>{if(e.target.id==='search'){renderBook.q=e.target.value;const p=e.target.selectionStart;renderBook();const n=$('#search');n.focus();n.setSelectionRange(p,p)}});
 function readCfg(){
  const g=id=>{const el=$('#'+id);return el?el.value.trim():null};
- const k=g('c-key');if(k!==null)S.cfg.keys[S.cfg.prov]=k;
+ const k=g('c-key');if(k!==null)S.cfg.keys[S.cfg.prov]=cleanKey(k);
  const m=g('c-model');if(m!==null)S.cfg.model[S.cfg.prov]=m;
  const b=g('c-base');if(b!==null)S.cfg.base=b;
- const ok=$('#c-okey');if(ok&&!ok.disabled)S.cfg.oaiKey=ok.value.trim();
- const ak=$('#c-akey');if(ak&&!ak.disabled)S.cfg.aliKey=ak.value.trim();
+ const ok=$('#c-okey');if(ok&&!ok.disabled)S.cfg.oaiKey=cleanKey(ok.value);
+ const ak=$('#c-akey');if(ak&&!ak.disabled)S.cfg.aliKey=cleanKey(ak.value);
  save();
 }
 $('#mev').addEventListener('change',e=>{
