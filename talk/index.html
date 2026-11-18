@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="口语陪练">
 <meta name="theme-color" content="#4f5bd5">
 <link rel="manifest" href="/talk/manifest.webmanifest">
+<link rel="preconnect" href="https://maas.qianwenaiapi.com" crossorigin>
+<link rel="preconnect" href="https://dashscope.aliyuncs.com" crossorigin>
 <link rel="apple-touch-icon" href="/talk/icon-180.png">
 <title>口语陪练</title>
 <style>
@@ -180,7 +182,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.1.0';
+const VER='1.2.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -206,6 +208,7 @@ const PROV={
  anthropic:{name:'Claude（需代理）',type:'anthropic',base:'https://api.anthropic.com/v1',pick:[/haiku/i,/sonnet/i],fallback:'claude-haiku-5-5',url:'console.anthropic.com'},
  custom:{name:'其他 OpenAI 兼容接口',type:'openai',base:'',pick:[],fallback:'',url:''}
 };
+const FAST={qwen:[['qwen-plus','推荐：回复快，纠错质量好'],['qwen-flash','最省钱，速度差不多'],['deepseek-v4.1-flash-1017','DeepSeek，已自动关掉深度思考']]};
 const OAI_VOICES=['marin','cedar','coral','nova','shimmer','sage','alloy','ash','ballad','echo','fable','onyx','verse'];
 const LEVELS={easy:{n:'入门',p:'The learner is a beginner (about CEFR A2). Use very common words and short sentences (under 12 words each). Avoid idioms.'},mid:{n:'中级',p:'The learner is intermediate (about CEFR B1-B2). Use everyday vocabulary and natural but clear sentences; an occasional common idiom is fine.'},high:{n:'高级',p:'The learner is advanced (about CEFR C1). Talk like a native American adult would: idioms, phrasal verbs and slang are welcome.'}};
 const SCENES=[
@@ -227,7 +230,7 @@ const SCENES=[
  {id:'custom',t:'自定义场景',d:'自己描述一个想练的场景',p:null}
 ];
 const ALI_VOICES=[['Jennifer','Jennifer · 美式女声'],['Aiden','Aiden · 美式男声'],['Cherry','Cherry · 中英双语女声'],['Ethan','Ethan · 中英双语男声']];
-const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
+const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',pause:'mid',aliRoot:'',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 S=Object.assign(structuredClone(DEF),S||{});S.cfg=Object.assign(structuredClone(DEF.cfg),S.cfg||{});
@@ -239,12 +242,27 @@ function toast(t,ms=2200){const el=$('#toast');el.textContent=t;el.style.display
 
 /* ---------- AI 接口 ---------- */
 const P=()=>PROV[S.cfg.prov];
-const base=()=>(S.cfg.prov==='custom'?S.cfg.base:P().base).replace(/\/+$/,'');
+const ALI_ROOTS=['https://maas.qianwenaiapi.com','https://dashscope.aliyuncs.com'];
+const aliRoot=()=>S.cfg.aliRoot||ALI_ROOTS[0];
+const base=()=>(S.cfg.prov==='custom'?S.cfg.base:S.cfg.prov==='qwen'?aliRoot()+'/compatible-mode/v1':P().base).replace(/\/+$/,'');
+/* 新的千问平台密钥和老的百炼密钥走不同域名：哪个认这个密钥就用哪个 */
+async function detectAli(){
+ const k=aliKey();if(!k)return;
+ for(const root of ALI_ROOTS){
+  try{const r=await fetch(root+'/compatible-mode/v1/models',{headers:{authorization:'Bearer '+k}});if(r.ok){if(S.cfg.aliRoot!==root){S.cfg.aliRoot=root;save()}return root}}catch(e){}
+ }
+ throw new Error('阿里云密钥在两个接口地址上都不能用，请检查密钥');
+}
 const apiKey=()=>(S.cfg.keys[S.cfg.prov]||'').trim();
 const oaiKey=()=>(S.cfg.prov==='openai'?apiKey():'')||(S.cfg.oaiKey||'').trim();
 const aliKey=()=>(S.cfg.prov==='qwen'?apiKey():'')||(S.cfg.aliKey||'').trim();
 const ENG_NAME={ali:'阿里云',openai:'OpenAI',system:'手机自带'};
 class NeedKey extends Error{}
+/* 网络抖动（连接被重置）时立刻再试一次；服务端返回的错误不重试 */
+async function fetchR(url,opt){
+ try{return await fetch(url,opt)}
+ catch(e){if(e.name==='AbortError'||(opt&&opt.signal&&opt.signal.aborted))throw e;return fetch(url,opt)}
+}
 
 function authHeaders(){
  const k=apiKey();
@@ -284,8 +302,9 @@ async function* streamAI(system,msgs,signal){
  if(!base())throw new Error('请先填写接口地址');
  const model=await ensureModel();msgs=fixRoles(msgs);
  const anth=P().type==='anthropic';
- const body=anth?{model,max_tokens:1000,system,messages:msgs,stream:true}:{model,messages:[{role:'system',content:system},...msgs],stream:true};
- const r=await fetch(base()+(anth?'/messages':'/chat/completions'),{method:'POST',headers:authHeaders(),body:JSON.stringify(body),signal});
+ const body=anth?{model,max_tokens:1000,system,messages:msgs,stream:true}:{model,messages:[{role:'system',content:system},...msgs],stream:true,max_tokens:700};
+ if(S.cfg.prov==='qwen')body.enable_thinking=false;
+ const r=await fetchR(base()+(anth?'/messages':'/chat/completions'),{method:'POST',headers:authHeaders(),body:JSON.stringify(body),signal});
  if(!r.ok)throw await apiErr(r,true);
  const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
  for(;;){
@@ -321,6 +340,7 @@ Rules:
 - If the learner writes in Chinese or asks how to say something (e.g. "…怎么说", "用英语", "how do I say"): in REPLY give the single most natural way an American would actually say it (e.g. You could say: "..."), then invite them to try saying it. Put 2-3 alternatives in SAY lines (casual / neutral / formal) with Chinese meaning and when to use each.
 - If the learner asks any question (about English, facts, advice, anything at all), answer it helpfully and briefly in REPLY in simple spoken English, then keep the conversation going.
 - If the learner's text looks like garbled speech recognition, guess what they meant.
+- Start REPLY with a short natural reaction of 2-6 words that ends with punctuation (e.g. "Oh nice!", "Got it.", "Ha, that's funny."), then continue.
 - REPLY must be easy to read aloud: no lists, emojis, brackets or stage directions.`;
 }
 const SYS_HINT=`You help a Chinese learner who is stuck in an English conversation. Based on the conversation, suggest 3 things the learner could say next, from simple to more advanced, in natural spoken American English. Output exactly 3 lines, nothing else:
@@ -354,7 +374,7 @@ const replyDone=t=>/\n\s*(ZH|FIX|SAY)\s*[:：]/i.test(t);
 
 /* ---------- 发音 ---------- */
 const AU=new Audio();AU.playsInline=true;
-let voices=[],UTT=null,speakEnd=null,speakTok=0;
+let voices=[],UTT=null,speakEnd=null,speakTok=0,SPEAKING=false;
 const GOOD=/Premium|Enhanced|高级|优化|Natural|Neural|Siri/i;
 const NICE=/Ava|Samantha|Evan|Zoe|Nathan|Allison|Tom|Susan|Joelle|Noelle/;
 function loadVoices(){if(!('speechSynthesis' in window))return;voices=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang)).sort((a,b)=>(GOOD.test(b.name)-GOOD.test(a.name))||(NICE.test(b.name)-NICE.test(a.name)))}
@@ -367,12 +387,51 @@ function ttsEngine(){
  if(t==='ali'&&aliKey())return 'ali';if(t==='openai'&&oaiKey())return 'openai';if(t==='system')return 'system';
  if(aliKey())return 'ali';if(oaiKey())return 'openai';return 'system';
 }
-function stopSpeak(){speakTok++;if(speakEnd){const f=speakEnd;speakEnd=null;f()}try{AU.pause()}catch(e){}if('speechSynthesis' in window)speechSynthesis.cancel()}
-function speak(text,slow=false){
- stopSpeak();text=clean(text);if(!text)return Promise.resolve();
- setSession('playback');
- const eng=ttsEngine();
- return eng==='system'?speakSys(text,slow):speakCloud(text,slow,eng);
+/* 可被“停止”立刻唤醒的等待 */
+const waiters=new Set();
+function nap(ms){return new Promise(r=>{const f=()=>{clearTimeout(h);waiters.delete(f);r()};const h=setTimeout(f,Math.max(0,ms));waiters.add(f)})}
+/* Web Audio 顺序播放流式 PCM */
+const PL={t:0,srcs:[]};
+function schedule(buf){
+ const ac=actx(),s=ac.createBufferSource();s.buffer=buf;s.connect(ac.destination);
+ const at=Math.max(ac.currentTime+.02,PL.t);s.start(at);PL.t=at+buf.duration;PL.srcs.push(s);
+ s.onended=()=>{const i=PL.srcs.indexOf(s);if(i>=0)PL.srcs.splice(i,1)};
+}
+const playedOut=()=>nap((PL.t-actx().currentTime)*1000+30);
+function stopSpeak(){
+ speakTok++;SPEAKING=false;
+ PL.srcs.splice(0).forEach(s=>{try{s.stop()}catch(e){}});PL.t=0;
+ if(speakEnd){const f=speakEnd;speakEnd=null;f()}
+ [...waiters].forEach(f=>f());
+ try{AU.pause()}catch(e){}if('speechSynthesis' in window)speechSynthesis.cancel();
+}
+/* 句子边界：. ! ? 后面跟空白 */
+const BOUND=/[.!?]+["”’')]*(?=\s)/g;
+function sentences(t){t=clean(t);const out=[];let a=0,m;BOUND.lastIndex=0;while((m=BOUND.exec(t))){out.push(t.slice(a,m.index+m[0].length).trim());a=m.index+m[0].length}const rest=t.slice(a).trim();if(rest)out.push(rest);return out.filter(Boolean).flatMap(s=>s.length>500?s.match(/.{1,500}(\s|$)/g):[s])}
+function lastBound(t,from){let m,end=from;BOUND.lastIndex=from;while((m=BOUND.exec(t)))end=m.index+m[0].length;return end}
+/* 一次说话：可以边生成边往里加句子，按顺序播放；每句的合成在加入时就开始 */
+function newSpeech(slow){
+ stopSpeak();setSession('playback');
+ const tok=speakTok,eng=ttsEngine(),q=[];let ended=false,wake=null;SPEAKING=true;
+ const sp={push(t){for(const s of sentences(t)){q.push(makeJob(s,eng,slow,tok))}wake&&wake()},end(){ended=true;wake&&wake()}};
+ sp.done=(async()=>{
+  for(;;){
+   if(tok!==speakTok)return;
+   if(!q.length){if(ended)break;await new Promise(r=>wake=r);wake=null;continue}
+   const j=q.shift();
+   try{await j.play()}
+   catch(e){if(tok!==speakTok)return;toast(ENG_NAME[eng]+'发音没成功，改用手机声音：'+String(e&&e.message||e).slice(0,40),3500);await speakSys(j.text,slow)}
+  }
+  if(tok===speakTok)SPEAKING=false;
+ })();
+ return sp;
+}
+function speak(text,slow=false){const sp=newSpeech(slow);sp.push(text);sp.end();return sp.done}
+function makeJob(text,eng,slow,tok){
+ if(eng==='system')return {text,play:()=>speakSys(text,slow)};
+ if(eng==='ali'&&!slow&&Math.abs(S.cfg.rate-1)<.01&&actx())return aliStreamJob(text,tok);
+ const p=synth(text,eng);p.catch(()=>{});
+ return {text,play:async()=>{const u=await p;if(tok===speakTok)await playUrl(u,slow)}};
 }
 function speakSys(text,slow){
  return new Promise(res=>{
@@ -384,12 +443,53 @@ function speakSys(text,slow){
   speakEnd=done;u.onend=done;u.onerror=done;speechSynthesis.speak(u);
  });
 }
-/* 云端真人发音：按句切开、同时合成、依次播放，第一句好了就开口 */
-function splitSent(t){
- const raw=t.match(/[^.!?]+[.!?]+["”’']?|[^.!?]+$/g)||[t];const out=[];
- for(let s of raw){s=s.trim();if(!s)continue;if(out.length&&(out[out.length-1].length<25||s.length<12))out[out.length-1]+=' '+s;else out.push(s)}
- return out.flatMap(s=>s.length>550?s.match(/.{1,550}(\s|$)/g):[s]);
+/* 阿里云流式发音：边收边播，第一块音频到了就开口 */
+const streamCache=new Map();
+function aliStreamJob(text,tok){
+ const key=S.cfg.aliVoice+'|'+text;let j=streamCache.get(key);
+ if(!j||j.err){
+  j={text,bufs:[],done:false,err:null,ls:[]};const J=j;
+  const note=()=>J.ls.splice(0).forEach(f=>f());
+  (async()=>{try{for await(const b of aliStream(text))(J.bufs.push(b),note())}catch(e){J.err=e}J.done=true;note()})();
+  streamCache.set(key,j);if(streamCache.size>120)streamCache.delete(streamCache.keys().next().value);
+ }
+ const J=j;
+ return {text,play:async()=>{
+  let i=0;
+  for(;;){
+   if(tok!==speakTok)return;
+   while(i<J.bufs.length)schedule(J.bufs[i++]);
+   if(J.done){if(J.err&&!i)throw J.err;break}
+   await new Promise(r=>{J.ls.push(r);waiters.add(r)});
+  }
+  if(tok===speakTok)await playedOut();
+ }};
 }
+async function* aliStream(text){
+ const r=await fetchR(aliRoot()+'/api/v1/services/aigc/multimodal-generation/generation',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+aliKey(),'X-DashScope-SSE':'enable'},body:JSON.stringify({model:'qwen3-tts-flash',input:{text,voice:S.cfg.aliVoice,language_type:'English'}})});
+ if(!r.ok)throw await apiErr(r);
+ const rd=r.body.getReader(),dec=new TextDecoder(),ac=actx();let buf='',rate=24000,odd=null;
+ for(;;){
+  const {done,value}=await rd.read();if(done)break;
+  buf+=dec.decode(value,{stream:true});let i;
+  while((i=buf.indexOf('\n'))>=0){
+   const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+   if(!line.startsWith('data:'))continue;
+   let j;try{j=JSON.parse(line.slice(5))}catch(e){continue}
+   if(j.code&&!j.output)throw new Error(j.message||j.code);
+   const d=j.output&&j.output.audio&&j.output.audio.data;if(!d)continue;
+   let bytes=Uint8Array.from(atob(d),c=>c.charCodeAt(0));
+   if(bytes[0]===82&&bytes[1]===73&&bytes[2]===70&&bytes[3]===70){const dv=new DataView(bytes.buffer);rate=dv.getUint32(24,true);let p=12;while(p+8<=bytes.length){const id=String.fromCharCode(...bytes.slice(p,p+4)),sz=dv.getUint32(p+4,true);if(id==='data'){p+=8;break}p+=8+sz}bytes=bytes.slice(p)}
+   if(odd){const m=new Uint8Array(bytes.length+1);m[0]=odd;m.set(bytes,1);bytes=m;odd=null}
+   if(bytes.length%2){odd=bytes[bytes.length-1];bytes=bytes.slice(0,-1)}
+   const n=bytes.length/2;if(!n)continue;
+   const ab=ac.createBuffer(1,n,rate),ch=ab.getChannelData(0),dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+   for(let k=0;k<n;k++)ch[k]=dv.getInt16(k*2,true)/32768;
+   yield ab;
+  }
+ }
+}
+/* 非流式：慢速播放、OpenAI 用（音频元素可变速不变调） */
 const ttsCache=new Map();
 function synth(text,eng){
  const voice=eng==='ali'?S.cfg.aliVoice:S.cfg.oaiVoice,k=eng+'|'+voice+'|'+text;
@@ -398,7 +498,7 @@ function synth(text,eng){
  ttsCache.set(k,p);p.catch(()=>ttsCache.delete(k));return p;
 }
 async function synthAli(text,voice){
- const r=await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+aliKey()},body:JSON.stringify({model:'qwen3-tts-flash',input:{text,voice,language_type:'English'}})});
+ const r=await fetchR(aliRoot()+'/api/v1/services/aigc/multimodal-generation/generation',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+aliKey()},body:JSON.stringify({model:'qwen3-tts-flash',input:{text,voice,language_type:'English'}})});
  if(!r.ok)throw await apiErr(r);
  const j=await r.json(),u=j.output&&j.output.audio&&j.output.audio.url;
  if(!u)throw new Error(j.message||'没有返回音频');
@@ -416,18 +516,6 @@ function playUrl(url,slow){
   AU.src=url;AU.playbackRate=Math.max(.5,S.cfg.rate*(slow?.75:1));
   AU.play().catch(e=>{if(speakEnd===done)speakEnd=null;rej(e)});
  });
-}
-async function speakCloud(text,slow,eng){
- const tok=speakTok,parts=splitSent(text),jobs=parts.map(p=>synth(p,eng));
- for(let i=0;i<parts.length;i++){
-  try{const url=await jobs[i];if(tok!==speakTok)return;await playUrl(url,slow)}
-  catch(e){
-   if(tok!==speakTok)return;
-   toast(ENG_NAME[eng]+'发音没成功，先用手机声音读：'+String(e.message||e).slice(0,40),3500);
-   return speakSys(parts.slice(i).join(' '),slow);
-  }
-  if(tok!==speakTok)return;
- }
 }
 let ACTX=null;
 function actx(){if(!ACTX){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ACTX=new C()}if(ACTX.state!=='running')ACTX.resume().catch(()=>{});return ACTX}
@@ -495,7 +583,7 @@ async function recordWav(onInterim){
   if(el<300){floor+=rms;nf++;return}
   const th=Math.max(.012,(nf?floor/nf:0)*3);
   if(rms>th){if(!heard)onInterim&&onInterim('','在听…');heard=true;quiet=0}else if(heard)quiet+=dt;
-  if((heard&&quiet>1300)||el>60000||(!heard&&el>9000))stop();
+  if((heard&&quiet>PAUSE[S.cfg.pause||'mid'])||el>60000||(!heard&&el>9000))stop();
  };
  src.connect(proc);proc.connect(ac.destination);
  function stop(){if(!fin)return;const f=fin;fin=null;try{proc.disconnect();src.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());setSession('playback');f()}
@@ -512,12 +600,13 @@ function wavBlob(chunks,rate){
  for(let i=0;i<n;i++){const a=Math.floor(i*ratio),z=Math.min(len,Math.floor((i+1)*ratio));let s=0;for(let j=a;j<z;j++)s+=all[j];const v=Math.max(-1,Math.min(1,s/Math.max(1,z-a)));d.setInt16(44+i*2,v<0?v*0x8000:v*0x7fff,true)}
  return new Blob([b],{type:'audio/wav'});
 }
+const PAUSE={fast:700,mid:1000,slow:1600};
 const toDataURL=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(blob)});
 async function listenCloud(eng,onInterim){
  const wav=await recordWav(onInterim);if(!wav)return '';
  onInterim&&onInterim('','识别中…');
  if(eng==='ali'){
-  const r=await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+aliKey()},body:JSON.stringify({model:'qwen3-asr-flash',messages:[{role:'user',content:[{type:'input_audio',input_audio:{data:await toDataURL(wav)}}]}],stream:false,asr_options:{enable_itn:false}})});
+  const r=await fetchR(aliRoot()+'/compatible-mode/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+aliKey()},body:JSON.stringify({model:'qwen3-asr-flash',messages:[{role:'user',content:[{type:'input_audio',input_audio:{data:await toDataURL(wav)}}]}],stream:false,asr_options:{enable_itn:false}})});
   if(!r.ok)throw await apiErr(r);
   const j=await r.json(),c=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
   return (Array.isArray(c)?c.map(x=>x.text||'').join(''):String(c||'')).trim();
@@ -557,25 +646,30 @@ async function runAI(s,hiddenUser){
  if(hiddenUser)s.msgs.push({role:'user',text:hiddenUser,hidden:true});
  const m={role:'ai',text:'',t:Date.now(),live:true};s.msgs.push(m);renderChat(true);
  const hist=s.msgs.filter(x=>x!==m&&x.role!=='err').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
- let raw='',spoke=null;callState('think');
+ let raw='',sp=null,fed=0,fin=false;const want=S.cfg.autoplay||CALL;callState('think');
+ /* 回复一写完一句就交给发音，不等整段 */
+ const feed=(reply,final)=>{
+  if(!want||fin||!reply)return;
+  const cut=final?reply.length:lastBound(reply,fed);
+  if(cut>fed){if(!sp){sp=newSpeech(false);if(CALL)callState('speak')}sp.push(reply.slice(fed,cut));fed=cut}
+  if(final){fin=true;if(sp)sp.end()}
+ };
  try{
   for await(const c of streamAI(sysPrompt(s),hist,ctrl.signal)){
-   raw+=c;const o=parseOut(raw);m.text=o.reply;updLive(m);
-   if(!spoke&&replyDone(raw)&&o.reply&&(S.cfg.autoplay||CALL))spoke=say(o.reply);
+   raw+=c;const o=parseOut(raw);m.text=o.reply;updLive(m);feed(o.reply,replyDone(raw));
   }
   const o=parseOut(raw);
   Object.assign(m,{text:o.reply||raw.trim(),zh:o.zh,say:o.say});delete m.live;
   if(o.fix.length){const u=[...s.msgs].reverse().find(x=>x.role==='user'&&!x.hidden&&x!==m);if(u)u.fix=o.fix}
   save();busy=false;renderChat(true);
-  if(!spoke&&m.text&&(S.cfg.autoplay||CALL))spoke=say(m.text);
-  if(CALL){callCap(m);await spoke;callNext()}
+  feed(m.text,true);
+  if(CALL){callCap(m);if(sp)await sp.done;callNext()}
  }catch(e){
   busy=false;s.msgs.splice(s.msgs.indexOf(m),1);
   if(e.name!=='AbortError'){s.msgs.push({role:'err',text:e.message||String(e)});if(e instanceof NeedKey)setTimeout(()=>{go('mev');toast('先在这里填好 AI 密钥')},600)}
   save();renderChat(true);if(CALL&&e.name!=='AbortError'){callState('idle','出错了：'+(e.message||e).slice(0,60))}
  }
 }
-function say(t){if(CALL)callState('speak');return speak(t)}
 function updLive(m){const el=document.querySelector('.msg.ai[data-live] .en');if(el){el.textContent=m.text;el.classList.add('typing')}scrollEnd()}
 function scrollEnd(){const mn=$('#main');requestAnimationFrame(()=>mn.scrollTop=mn.scrollHeight)}
 
@@ -665,7 +759,8 @@ function renderMe(){
   <label><span>语速 <b id="ratev">${c.rate.toFixed(2)}</b></span><input type="range" id="c-rate" min="0.6" max="1.3" step="0.05" value="${c.rate}"></label>
   <label><span>自动朗读</span><input type="checkbox" id="c-auto" ${c.autoplay?'checked':''}></label>
   <label><span>语音识别</span><select id="c-asr">${[['auto','自动'],['ali','阿里云（中英文自动分辨）'],['openai','OpenAI'],['system','手机系统识别']].map(([k,n])=>`<option value="${k}" ${k===c.asr?'selected':''}>${n}</option>`).join('')}</select></label>
-  <div class="li"><span>现在在用</span><div style="flex:1;text-align:right;font-size:14px">发音 ${ENG_NAME[te]} · 识别 ${ae?ENG_NAME[ae]:'<b style="color:var(--bad)">不可用</b>'}</div></div>
+  <div class="li"><span>说完多久发</span><div class="seg" id="c-pause">${[['fast','0.7 秒'],['mid','1 秒'],['slow','1.6 秒']].map(([k,n])=>`<button data-v="${k}" class="${k===(c.pause||'mid')?'on':''}">${n}</button>`).join('')}</div></div>
+  <div class="li"><span>现在在用</span><div style="flex:1;text-align:right;font-size:14px">发音 ${ENG_NAME[te]} · 识别 ${ae?ENG_NAME[ae]:'<b style="color:var(--bad)">不可用</b>'}${aliKey()?`<br><small style="color:var(--sub)">${esc(aliRoot().replace('https://',''))}</small>`:''}</div></div>
   <div class="li"><span>试听</span><button class="hb" data-a="testv">Hey! How's it going? What are you up to today?</button></div>
  </div>
  <div class="note">${te==='system'?'现在用的是手机自带声音，听起来偏机器。填上阿里云百炼密钥就会换成真人美式声音（Jennifer 女声 / Aiden 男声）。':te==='ali'?'阿里云真人声音：Jennifer、Aiden 是地道美式口音；国内直连。':'OpenAI 声音需要代理，它的发音模型官方计划 2027 年 1 月停用。'}${!ae||ae==='system'?`<br><b>${STANDALONE?'从主屏幕打开时，iPhone 不让网页用系统语音识别，':''}想直接开口说，请填阿里云百炼密钥。</b>`:''}</div>
@@ -813,7 +908,7 @@ async function callNext(){
   callMiss=0;$('#cme').textContent='你：'+t;await sendText(t);
  }catch(e){callState('idle',e.message.slice(0,60))}
 }
-$('#orb').onclick=()=>{if(!CALL)return;if(speakEnd){stopSpeak();return}if(busy)return;if(REC){REC.stop();return}if(LISTENING)return;callNext()};
+$('#orb').onclick=()=>{if(!CALL)return;if(SPEAKING){stopSpeak();return}if(busy)return;if(REC){REC.stop();return}if(LISTENING)return;callNext()};
 $('#cend').onclick=exitCall;
 $('#clang').onclick=toggleLang;
 $('#chint').onclick=()=>{stopSpeak();openHint()};
@@ -901,8 +996,13 @@ document.body.addEventListener('click',async e=>{
   case 'bdel':{const id=t.closest('[data-id]').dataset.id;S.book=S.book.filter(b=>b.id!==id);save();return renderBook()}
   case 'open':{S.cur=t.closest('[data-sid]').dataset.sid;save();return go('chatv')}
   case 'sdel':{const id=t.closest('[data-sid]').dataset.sid;if(!confirm('删除这段对话？'))return;S.sessions=S.sessions.filter(x=>x.id!==id);if(S.cur===id)S.cur=null;save();return renderMe()}
-  case 'test':{readCfg();toast('连接中…',8000);try{const r=await askAI('Reply with exactly: OK','ping');toast('连接成功：'+(S.cfg.model[S.cfg.prov])+' 回复 '+r.trim().slice(0,20),3500);renderMe()}catch(err){toast(err.message,5000)}return}
-  case 'models':{readCfg();try{const ids=(await listModels()).sort();sheet(sheetHead('选择模型')+ids.map(i=>`<button class="row" style="width:100%;text-align:left" data-a="pickm" data-m="${esc(i)}"><div class="t"><div>${esc(i)}${i===S.cfg.model[S.cfg.prov]?' ✓':''}</div></div></button>`).join(''))}catch(err){toast(err.message,5000)}return}
+  case 'test':{readCfg();toast('连接中…',8000);try{if(aliKey())await detectAli();const r=await askAI('Reply with exactly: OK','ping');toast('连接成功：'+(S.cfg.model[S.cfg.prov])+' 回复 '+r.trim().slice(0,20),3500);renderMe()}catch(err){toast(err.message,5000)}return}
+  case 'models':{readCfg();try{
+   if(S.cfg.prov==='qwen')await detectAli();
+   const all=(await listModels()).sort(),rec=(FAST[S.cfg.prov]||[]).filter(([id])=>all.includes(id));
+   const rest=all.filter(id=>!rec.some(([r])=>r===id)).map(id=>[id,'']);
+   sheet(sheetHead('选择模型')+(rec.length?'<div class="note">前几个是推荐的，实测首字最快约 1.4 秒</div>':'')+rec.concat(rest).map(([id,tip])=>`<button class="row" style="width:100%;text-align:left" data-a="pickm" data-m="${esc(id)}"><div class="t"><div>${esc(id)}${id===S.cfg.model[S.cfg.prov]?' ✓':''}</div>${tip?`<small>${tip}</small>`:''}</div></button>`).join(''));
+  }catch(err){toast(err.message,5000)}return}
   case 'pickm':S.cfg.model[S.cfg.prov]=t.dataset.m;save();closeSheet();renderMe();return toast('已选择 '+t.dataset.m);
   case 'testv':return speak(t.textContent);
   case 'export':{const d=structuredClone(S);d.cfg.keys={};d.cfg.oaiKey='';d.cfg.aliKey='';const name='口语陪练备份-'+today()+'.json';const file=new File([JSON.stringify(d)],name,{type:'application/json'});
@@ -924,9 +1024,9 @@ function readCfg(){
 $('#mev').addEventListener('change',e=>{
  const id=e.target.id;
  if(id==='c-prov'){readCfg();S.cfg.prov=e.target.value;save();updLangBtn();return renderMe()}
- if(id==='c-key'){readCfg();updLangBtn();return renderMe()}
+ if(id==='c-key'){readCfg();updLangBtn();renderMe();if(S.cfg.prov==='qwen'&&aliKey()){S.cfg.model.qwen='';detectAli().then(renderMe,err=>toast(err.message,4000))}return}
  if(['c-model','c-base'].includes(id))return readCfg();
- if(['c-okey','c-akey'].includes(id)){readCfg();updLangBtn();return renderMe()}
+ if(['c-okey','c-akey'].includes(id)){readCfg();updLangBtn();renderMe();if(id==='c-akey'&&aliKey())detectAli().then(renderMe,err=>toast(err.message,4000));return}
  if(id==='c-tts'||id==='c-asr'){S.cfg[id.slice(2)]=e.target.value;save();updLangBtn();renderMe();
   const want=e.target.value,got=id==='c-tts'?ttsEngine():asrEngine();
   if(want!=='auto'&&want!==got)toast((want==='ali'?'先填阿里云百炼密钥':want==='openai'?'先填 OpenAI 密钥':'这个浏览器不支持系统识别')+'，现在用的是'+(got?ENG_NAME[got]:'无'),3500);return}
@@ -942,6 +1042,7 @@ $('#mev').addEventListener('input',e=>{if(e.target.id==='c-rate'){S.cfg.rate=+e.
 $('#mev').addEventListener('click',e=>{
  const b=e.target.closest('.seg button');if(!b)return;const seg=b.parentElement.id;
  if(seg==='c-level')S.cfg.level=b.dataset.v;
+ if(seg==='c-pause')S.cfg.pause=b.dataset.v;
  save();renderMe();
 });
 $('#impf').onchange=async e=>{
@@ -956,6 +1057,16 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){if(REC)REC
 
 if(!S.cur||!curSess()){const s=S.sessions.find(x=>x.msgs.length===0);S.cur=s?s.id:null}
 go('chatv');
+/* 预热连接：打开或切回应用时先和服务器握好手，第一句话就不用等建连 */
+let warmAt=0;
+function warm(){
+ if(!apiKey()&&!aliKey())return;const n=Date.now();if(n-warmAt<60000)return;warmAt=n;
+ (aliKey()&&!S.cfg.aliRoot?detectAli():Promise.resolve()).catch(()=>{}).then(()=>{
+  if(apiKey())fetch(base()+'/models',{headers:authHeaders()}).catch(()=>{});
+  if(aliKey()&&base().indexOf(aliRoot())!==0)fetch(aliRoot()+'/compatible-mode/v1/models',{headers:{authorization:'Bearer '+aliKey()}}).catch(()=>{});
+ });
+}
+warm();document.addEventListener('visibilitychange',()=>{if(!document.hidden)warm()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/talk/sw.js',{scope:'/talk/'}).catch(()=>{});
 </script>
 </body>
