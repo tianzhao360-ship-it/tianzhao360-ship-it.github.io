@@ -182,7 +182,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.2.1';
+const VER='1.3.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -230,7 +230,7 @@ const SCENES=[
  {id:'custom',t:'自定义场景',d:'自己描述一个想练的场景',p:null}
 ];
 const ALI_VOICES=[['Jennifer','Jennifer · 美式女声'],['Aiden','Aiden · 美式男声'],['Cherry','Cherry · 中英双语女声'],['Ethan','Ethan · 中英双语男声']];
-const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',pause:'mid',aliRoot:'',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
+const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',send:'tap',pause:'mid',aliRoot:'',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 S=Object.assign(structuredClone(DEF),S||{});S.cfg=Object.assign(structuredClone(DEF.cfg),S.cfg||{});
@@ -558,7 +558,7 @@ async function listen(lang,onInterim){
 }
 function listenSys(lang,onInterim){
  return new Promise((resolve,reject)=>{
-  const r=new SR();r.lang=lang==='zh'?'zh-CN':'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+  const r=new SR();r.lang=lang==='zh'?'zh-CN':'en-US';r.interimResults=true;r.continuous=S.cfg.send!=='auto';r.maxAlternatives=1;
   let fin='',inter='',err='';
   onInterim&&onInterim('',lang==='zh'?'请说中文…':'Speak English…');
   r.onresult=e=>{fin='';inter='';for(const x of e.results){if(x.isFinal)fin+=x[0].transcript;else inter+=x[0].transcript}onInterim&&onInterim((fin+inter).trim())};
@@ -573,7 +573,8 @@ function listenSys(lang,onInterim){
   try{r.start()}catch(e){REC=null;reject(e)}
  });
 }
-/* 自己录音：16kHz 单声道 WAV；检测到说话后停顿约 1.3 秒自动结束 */
+/* 自己录音：16kHz 单声道 WAV。默认“点一下发送”：中途停顿多久都继续听，再点一下才结束；
+   也可以选“停顿自动发”，停顿 1.5 / 2.5 / 4 秒后自动结束 */
 async function recordWav(onInterim){
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('这个浏览器不能录音');
  setSession('play-and-record');
@@ -582,22 +583,26 @@ async function recordWav(onInterim){
  catch(e){setSession('playback');throw new Error('没有麦克风权限：请在 iPhone 设置里允许，或再点一次麦克风')}
  const ac=actx();try{await ac.resume()}catch(e){}
  const src=ac.createMediaStreamSource(stream),proc=ac.createScriptProcessor(4096,1,1),rate=ac.sampleRate;
- const chunks=[];let heard=false,quiet=0,el=0,floor=0,nf=0,cancelled=false,fin;
- const finished=new Promise(r=>fin=r);
- onInterim&&onInterim('','正在听…说完停一下就会自动发送');
+ const chunks=[];let heard=false,quiet=0,el=0,floor=0,nf=0,cancelled=false,manual=false,fin,sec=-1;
+ const finished=new Promise(r=>fin=r),tap=S.cfg.send!=='auto';
+ const status=()=>{const t=Math.floor(el/1000);return `正在听 ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')} · `+(tap?'说完再点一下发送，中间停顿没关系':'停顿 '+(PAUSE[S.cfg.pause]||2500)/1000+' 秒自动发送')};
+ onInterim&&onInterim('',status());
  proc.onaudioprocess=e=>{
   const d=e.inputBuffer.getChannelData(0);chunks.push(new Float32Array(d));
   let s=0;for(let i=0;i<d.length;i++)s+=d[i]*d[i];const rms=Math.sqrt(s/d.length),dt=d.length/rate*1000;el+=dt;
   if(el<300){floor+=rms;nf++;return}
   const th=Math.max(.012,(nf?floor/nf:0)*3);
-  if(rms>th){if(!heard)onInterim&&onInterim('','在听…');heard=true;quiet=0}else if(heard)quiet+=dt;
-  if((heard&&quiet>PAUSE[S.cfg.pause||'mid'])||el>60000||(!heard&&el>9000))stop();
+  if(rms>th){heard=true;quiet=0}else if(heard)quiet+=dt;
+  if(Math.floor(el/1000)!==sec){sec=Math.floor(el/1000);onInterim&&onInterim('',status())}
+  if(tap){if(el>180000||(!heard&&el>60000))stop()}
+  else if((heard&&quiet>(PAUSE[S.cfg.pause]||2500))||el>120000||(!heard&&el>12000))stop();
  };
  src.connect(proc);proc.connect(ac.destination);
  function stop(){if(!fin)return;const f=fin;fin=null;try{proc.disconnect();src.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());setSession('playback');f()}
- REC={stop,abort:()=>{cancelled=true;stop()}};
+ REC={stop:()=>{manual=true;stop()},abort:()=>{cancelled=true;stop()}};
  await finished;REC=null;
- if(cancelled||!heard)return null;
+ if(cancelled)return null;
+ if(!heard&&!(manual&&el>800))return null;
  return wavBlob(chunks,rate);
 }
 function wavBlob(chunks,rate){
@@ -608,7 +613,7 @@ function wavBlob(chunks,rate){
  for(let i=0;i<n;i++){const a=Math.floor(i*ratio),z=Math.min(len,Math.floor((i+1)*ratio));let s=0;for(let j=a;j<z;j++)s+=all[j];const v=Math.max(-1,Math.min(1,s/Math.max(1,z-a)));d.setInt16(44+i*2,v<0?v*0x8000:v*0x7fff,true)}
  return new Blob([b],{type:'audio/wav'});
 }
-const PAUSE={fast:700,mid:1000,slow:1600};
+const PAUSE={short:1500,mid:2500,long:4000};
 const toDataURL=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(blob)});
 async function listenCloud(eng,onInterim){
  const wav=await recordWav(onInterim);if(!wav)return '';
@@ -698,7 +703,7 @@ function renderChat(scroll){
    1. 打开 bailian.console.aliyun.com，用支付宝或阿里云账号登录，开通百炼<br>
    2. 找到“API-Key”页面，创建一个并复制<br>
    3. 点下面按钮粘贴进去，再点“测试连接”
-   <div class="btns"><button class="btn" data-a="toset">去填密钥</button></div></div>`)+`<div class="empty"><h2>Hi, I'm Sam 👋</h2><div><b>点一下麦克风</b>开口说，说完停一下就会自动发送。<br>用英语聊天，或者用中文问“…用英语怎么说”。</div>
+   <div class="btns"><button class="btn" data-a="toset">去填密钥</button></div></div>`)+`<div class="empty"><h2>Hi, I'm Sam 👋</h2><div><b>点一下麦克风</b>开口说，说完<b>再点一下</b>发送，中间想多久都行。<br>用英语聊天，或者用中文问“…用英语怎么说”。</div>
   <div class="chips">${['“我现在在桌子前用电脑呢”用英语怎么说？','Can we just chat for a bit?','“我有点社恐”地道的说法是什么？','帮我练一下点咖啡','How do Americans say “加油”?'].map(t=>`<button class="chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}</div>
   <div class="chips"><button class="chip" data-a="call" style="border-color:var(--pri);color:var(--pri);font-weight:600">进入通话模式，像打电话一样连续对话</button></div></div>`;
  }else el.innerHTML=s.msgs.map((m,i)=>{
@@ -767,7 +772,8 @@ function renderMe(){
   <label><span>语速 <b id="ratev">${c.rate.toFixed(2)}</b></span><input type="range" id="c-rate" min="0.6" max="1.3" step="0.05" value="${c.rate}"></label>
   <label><span>自动朗读</span><input type="checkbox" id="c-auto" ${c.autoplay?'checked':''}></label>
   <label><span>语音识别</span><select id="c-asr">${[['auto','自动'],['ali','阿里云（中英文自动分辨）'],['openai','OpenAI'],['system','手机系统识别']].map(([k,n])=>`<option value="${k}" ${k===c.asr?'selected':''}>${n}</option>`).join('')}</select></label>
-  <div class="li"><span>说完多久发</span><div class="seg" id="c-pause">${[['fast','0.7 秒'],['mid','1 秒'],['slow','1.6 秒']].map(([k,n])=>`<button data-v="${k}" class="${k===(c.pause||'mid')?'on':''}">${n}</button>`).join('')}</div></div>
+  <div class="li"><span>说完怎么发</span><div class="seg" id="c-send">${[['tap','点一下发送'],['auto','停顿自动发']].map(([k,n])=>`<button data-v="${k}" class="${k===(c.send||'tap')?'on':''}">${n}</button>`).join('')}</div></div>
+  ${c.send==='auto'?`<div class="li"><span>停顿多久算说完</span><div class="seg" id="c-pause">${[['short','1.5 秒'],['mid','2.5 秒'],['long','4 秒']].map(([k,n])=>`<button data-v="${k}" class="${k===(PAUSE[c.pause]?c.pause:'mid')?'on':''}">${n}</button>`).join('')}</div></div>`:''}
   <div class="li"><span>现在在用</span><div style="flex:1;text-align:right;font-size:14px">发音 ${ENG_NAME[te]} · 识别 ${ae?ENG_NAME[ae]:'<b style="color:var(--bad)">不可用</b>'}${aliKey()?`<br><small style="color:var(--sub)">${esc(aliRoot().replace('https://',''))}</small>`:''}</div></div>
   <div class="li"><span>试听</span><button class="hb" data-a="testv">Hey! How's it going? What are you up to today?</button></div>
  </div>
@@ -892,7 +898,7 @@ function drillMark(ok){
 
 /* ---------- 通话模式 ---------- */
 let CALL=false;
-function callState(st,txt){if(!CALL)return;$('#call').className='on '+st;$('#cstate').textContent=txt||{listen:'在听你说…',think:'Sam 在想…',speak:'Sam 在说（点圆圈打断）',idle:'点圆圈开始说'}[st]||''}
+function callState(st,txt){if(!CALL)return;$('#call').className='on '+st;$('#cstate').textContent=txt||{listen:'在听你说…说完点圆圈发送',think:'Sam 在想…',speak:'Sam 在说（点圆圈打断）',idle:'点圆圈开始说'}[st]||''}
 function callCap(m,opts){if(!CALL)return;const s=curSess();m=m||[...s.msgs].reverse().find(x=>x.role==='ai'&&!x.live);
  if(opts)return $('#ccap').innerHTML=`<small>卡住了？可以这样说：</small>`+(typeof opts==='string'?esc(opts):opts.map(o=>`<div style="margin-top:8px">${esc(o.en)}<small>${esc(o.zh)}</small></div>`).join(''));
  $('#ccap').innerHTML=m?`${S.cfg.blurEn&&!m.shown?'<small>听力挑战：字幕已隐藏</small>':esc(m.text)}${S.cfg.showZh&&m.zh?`<small>${esc(m.zh)}</small>`:''}`:''}
@@ -1051,6 +1057,7 @@ $('#mev').addEventListener('click',e=>{
  const b=e.target.closest('.seg button');if(!b)return;const seg=b.parentElement.id;
  if(seg==='c-level')S.cfg.level=b.dataset.v;
  if(seg==='c-pause')S.cfg.pause=b.dataset.v;
+ if(seg==='c-send')S.cfg.send=b.dataset.v;
  save();renderMe();
 });
 $('#impf').onchange=async e=>{
