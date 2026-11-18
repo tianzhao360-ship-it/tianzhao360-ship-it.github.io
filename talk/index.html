@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" href="/talk/icon-180.png">
 <title>口语陪练</title>
 <style>
-:root{--bg:#f4f5fb;--card:#fff;--ink:#1d2033;--sub:#6b7085;--line:#e3e5ef;--pri:#4f5bd5;--pri2:#eceefd;--ok:#16a06b;--bad:#d9483b;--warn:#c98a12;--me:#4f5bd5;--meink:#fff;--top:env(safe-area-inset-top);--bot:env(safe-area-inset-bottom)}
-@media (prefers-color-scheme:dark){:root{--bg:#111320;--card:#1b1e2e;--ink:#e9ebf5;--sub:#9aa0b8;--line:#2c3045;--pri:#8a94ff;--pri2:#262a48;--me:#5560dd;--meink:#fff}}
+:root{--lkc:#e8590c;--bg:#f4f5fb;--card:#fff;--ink:#1d2033;--sub:#6b7085;--line:#e3e5ef;--pri:#4f5bd5;--pri2:#eceefd;--ok:#16a06b;--bad:#d9483b;--warn:#c98a12;--me:#4f5bd5;--meink:#fff;--top:env(safe-area-inset-top);--bot:env(safe-area-inset-bottom)}
+@media (prefers-color-scheme:dark){:root{--lkc:#ff8c42;--bg:#111320;--card:#1b1e2e;--ink:#e9ebf5;--sub:#9aa0b8;--line:#2c3045;--pri:#8a94ff;--pri2:#262a48;--me:#5560dd;--meink:#fff}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;overscroll-behavior:none}
 button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
@@ -160,6 +160,16 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .note-msg{align-self:center;text-align:center;font-size:13px;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:7px 12px;margin:12px auto;max-width:92%}
 .note-msg button{color:var(--pri);font-weight:600;margin-left:6px}
 .hide{display:none!important}
+.w.lk{text-decoration:underline;text-decoration-color:var(--lkc);text-decoration-thickness:2px;text-underline-offset:3px}
+.lkm{color:var(--lkc);font-weight:700;cursor:pointer;padding:0 1px;margin:0 -1px;display:inline-block;transform:translateY(3px)}
+.lkph{color:var(--lkc);font-weight:700}
+.tools .lkbtn{background:#fff1e8;color:var(--lkc)}
+@media (prefers-color-scheme:dark){.tools .lkbtn{background:#3b2414}}
+#ccap .w.lk{text-decoration-color:#ffb380}
+#ccap .lkm{color:#ffb380}
+#vsearch{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;outline:none;margin:2px 0 8px;font-size:16px}
+.vrow{padding:7px 10px;margin-bottom:5px;gap:6px}.vrow .ib{width:30px;height:30px}.vrow .t b{display:inline;font-size:16px}.vrow .t span{margin-left:6px;font-size:14px}.vrow .t small{display:block;margin-top:1px}
+.bar{height:8px;border-radius:4px;background:var(--pri2);margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);border-radius:4px}
 .sn{border-radius:6px;transition:background .15s}
 .say .sn{color:inherit;font-size:inherit}
 .sn.on{background:var(--pri2)}
@@ -188,6 +198,8 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
     <section class="view on" id="chatv"></section>
     <section class="view" id="scenev"></section>
     <section class="view" id="gramv"></section>
+    <section class="view" id="vocv"></section>
+    <section class="view" id="lkv"></section>
     <section class="view" id="bookv"></section>
     <section class="view" id="mev"></section>
   </main>
@@ -204,7 +216,8 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
     <button data-v="chatv" class="on"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>对话</button>
     <button data-v="scenev"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>场景</button>
     <button data-v="gramv"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>语法</button>
-    <button data-v="bookv"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>表达本</button>
+    <button data-v="vocv"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M14 17.5h7M17.5 14v7"/></svg>词汇</button>
+    <button data-v="lkv"><svg viewBox="0 0 24 24"><path d="M4 14c2-4 4-4 6 0s4 4 6 0 3-4 4-2"/><circle cx="4" cy="14" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>连读</button>
     <button data-v="mev"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>我的</button>
   </nav>
 </div>
@@ -222,6 +235,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
     <button data-c="again"><span><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></svg></span>重听</button>
     <button data-c="slow"><span><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></svg></span>慢速</button>
     <button data-c="zh" id="czh"><span><svg viewBox="0 0 24 24"><path d="M4 5h16M12 3v2M7 5c0 6 4 10 10 12M17 5c-1 5-5 9-11 12"/></svg></span>中文</button>
+    <button data-c="lk"><span><svg viewBox="0 0 24 24"><path d="M4 14c2-4 4-4 6 0s4 4 6 0 3-4 4-2"/></svg></span>连读</button>
     <button data-c="hint"><span><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></span>提示</button>
   </div>
   <div class="cbtns">
@@ -232,7 +246,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.7.0';
+const VER='1.8.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -877,7 +891,7 @@ function newSession(scene='free',custom=''){
  const s={id:uid(),scene,custom,created:Date.now(),msgs:[]};S.sessions.unshift(s);
  if(S.sessions.length>60)S.sessions.length=60;S.cur=s.id;save();return s;
 }
-function sessTitle(s){if((s.scene||'').startsWith('g:'))return '语法对话 · '+((GRAM_BY[s.scene.slice(2)]||{}).n||'');const sc=SCENE_BY[s.scene];if(s.scene==='custom')return s.custom.slice(0,18)||'自定义场景';return sc?sc.t:'对话'}
+function sessTitle(s){if((s.scene||'').startsWith('v:'))return '词汇对话 · '+((s.vocab||{}).zh||'');if((s.scene||'').startsWith('g:'))return '语法对话 · '+((GRAM_BY[s.scene.slice(2)]||{}).n||'');const sc=SCENE_BY[s.scene];if(s.scene==='custom')return s.custom.slice(0,18)||'自定义场景';return sc?sc.t:'对话'}
 let lastAct=0;
 function tickTime(){lastInput=Date.now()}
 let busy=false,ctrl=null;
@@ -916,7 +930,7 @@ async function runAI(s,hiddenUser){
   if(o.step)handleStep(s,o.step);
   save();busy=false;renderChat(true);
   feed(m.text,true);
-  if(CALL){callCap(m);if(sp)await sp.done;if(!CALL)return;if(S.cfg.autoListen)callNext();else callState('idle','轮到你了：可以先跟读，想回答时点圆圈')}
+  if(CALL){callCap(m);if(sp)await sp.done;if(!CALL)return;if(S.cfg.autoListen)callNext();else{const n=lkOn()?lkList(m.text).length:0;callState('idle',n?`这句有 ${n} 处连读（橙色），点“连读”跟读；想回答时点圆圈`:'轮到你了：可以先跟读，想回答时点圆圈')}}
  }catch(e){
   busy=false;s.msgs.splice(s.msgs.indexOf(m),1);
   if(e.name!=='AbortError'){s.msgs.push({role:'err',text:e.message||String(e)});if(e instanceof NeedKey)setTimeout(()=>{go('mev');toast('先在这里填好 AI 密钥')},600)}
@@ -951,11 +965,11 @@ function renderChat(scroll){
  }else el.innerHTML=s.msgs.map((m,i)=>{
   if(m.hidden)return '';
   if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${m.mean||m.better?`<div class="card fix">${m.mean?`<div class="why" style="font-size:13.5px">Sam 理解的：${esc(m.mean)}</div>`:''}${m.better?`<div class="say" data-en="${esc(m.better)}" data-zh="${esc(m.mean||'')}" style="margin-top:4px"><div class="t"><span style="color:var(--sub);font-size:12.5px;display:block">完整地道说法</span><b style="color:var(--ok)">${esc(m.better)}</b></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib ${inBook(m.better)?'on':''}" data-a="fav">${I.star}</button></div>`:''}</div>`:''}${(m.fix||[]).map(f=>`<div class="card fix"><button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px">${I.play}</button><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
-  if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}${m.kind==='done'?'<button data-a="review">复盘</button><button data-a="nextscene">下一课</button>':''}${m.kind==='gdone'?'<button data-a="review">复盘</button><button data-a="gagain">再来一轮</button>':''}</div>`;
+  if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}${m.kind==='done'?'<button data-a="review">复盘</button><button data-a="nextscene">下一课</button>':''}${m.kind==='gdone'?'<button data-a="review">复盘</button><button data-a="gagain">再来一轮</button>':''}${m.kind==='vdone'?'<button data-a="review">复盘</button><button data-a="vagain">再来一轮</button>':''}</div>`;
   if(m.role==='err')return `<div class="msg ai"><div class="bub err">${esc(m.text)}<div class="tools"><button data-a="retry">重试</button><button data-a="toset">去设置</button></div></div></div>`;
   return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}><div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${m.live?esc(m.text):richText(m.text)}</div>
    ${m.zh?`<div class="zh" ${zhShown(m)?'':'hidden'}>${esc(m.zh)}</div>`:''}
-   ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button><button data-a="zh" class="${zhShown(m)&&m.zh?'act':''}">中文</button><button data-a="ex">讲解</button><button data-a="sh">跟读</button><button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
+   ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button><button data-a="zh" class="${zhShown(m)&&m.zh?'act':''}">中文</button><button data-a="ex">讲解</button><button data-a="sh">跟读</button>${lkOn()&&lkList(m.text).length?`<button data-a="lkall" class="lkbtn">连读 ${lkList(m.text).length}</button>`:''}<button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
    ${(m.say||[]).map(x=>sayCard(x)).join('')}</div>`;
  }).join('');
  renderBar2();if(!vis.length&&!busy)$('#main').scrollTop=0;else if(scroll)scrollEnd();
@@ -969,10 +983,13 @@ function renderBar2(){
 function renderHeader(v){
  const h=$('#hbtns');
  const cs=curSess();
- if(v==='chatv')h.innerHTML=`${cs&&cs.step?`<span class="hb" style="background:${cs.passed?'var(--ok)':'var(--pri2)'};color:${cs.passed?'#fff':'var(--pri)'}">${cs.scene.startsWith('g:')?'已答':'任务'} ${cs.step[0]}/${cs.step[1]}</span> `:''}${cs&&(cs.scene||'free').match(/^(free|daily|topic|debate|custom)$/)||!cs?`<button class="hb" data-a="level">${LEVELS[S.cfg.level].n}</button> `:''}<button class="hb" data-a="new">新对话</button>`;
+ if(v==='chatv')h.innerHTML=`${cs&&cs.step?`<span class="hb" style="background:${cs.passed?'var(--ok)':'var(--pri2)'};color:${cs.passed?'#fff':'var(--pri)'}">${cs.scene.startsWith('g:')?'已答':cs.scene.startsWith('v:')?'用对':'任务'} ${cs.step[0]}/${cs.step[1]}</span> `:''}${cs&&(cs.scene||'free').match(/^(free|daily|topic|debate|custom)$/)||!cs?`<button class="hb" data-a="level">${LEVELS[S.cfg.level].n}</button> `:''}<button class="hb" data-a="new">新对话</button>`;
  else if(v==='gramv'&&gramCur)h.innerHTML='<button class="hb" data-a="gback">返回</button>';
+ else if((v==='vocv'&&vocCur)||(v==='lkv'&&lkCur)||v==='bookv')h.innerHTML=`<button class="hb" data-a="back" data-v="${v}">返回</button>`;
  else h.innerHTML='';
  if(v==='gramv')$('#title').textContent=gramCur?GRAM_BY[gramCur].n:'语法';
+ if(v==='vocv')$('#title').textContent='词汇';
+ if(v==='lkv')$('#title').textContent=lkCur?LK_BY[lkCur].n:'连读';
  if(v==='scenev')$('#title').textContent='选一个场景';
  if(v==='bookv')$('#title').textContent='表达本';
  if(v==='mev')$('#title').textContent='我的';
@@ -992,7 +1009,9 @@ function renderMe(){
  const mins=Math.round((S.days[today()]||0)/60);
  const te=ttsEngine(),ae=asrEngine();
  const vs=voices.length?voices.map(v=>`<option value="${esc(v.name)}" ${v.name===(pickVoice()||{}).name?'selected':''}>${esc(v.name)}${GOOD.test(v.name)?' ★':''}</option>`).join(''):'<option>系统暂未提供美式声音</option>';
+ const goal=c.goal||20,pct=Math.min(100,Math.round(100*mins/goal));
  $('#mev').innerHTML=`<div class="stats"><div class="stat"><b>${mins}</b><span>今日分钟</span></div><div class="stat"><b>${streak()}</b><span>连续天数</span></div><div class="stat"><b>${S.turns}</b><span>累计开口</span></div><div class="stat"><b>${S.book.length}</b><span>收藏表达</span></div></div>
+ <div class="card"><div style="display:flex;justify-content:space-between;font-size:14px"><b>今天 ${mins} / ${goal} 分钟</b><span style="color:var(--sub)">${mins>=goal?'今天的目标完成了 ✓':`还差 ${goal-mins} 分钟`}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>
  <div class="sec">历史对话</div>
  ${S.sessions.filter(s=>s.msgs.some(m=>!m.hidden)).slice(0,8).map(s=>{const l=s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').slice(-1)[0];return `<div class="row" data-sid="${s.id}"><div class="t" data-a="open"><div><b>${esc(sessTitle(s))}</b></div><small>${new Date(s.created).toLocaleDateString('zh-CN')} · ${esc((l&&l.text||'').slice(0,40))}</small></div><button class="ib" data-a="sdel">${I.del}</button></div>`}).join('')||'<div class="note">还没有对话记录。</div>'}
  <div class="sec">AI 服务</div>
@@ -1027,6 +1046,8 @@ function renderMe(){
   <label><span>总显示中文</span><input type="checkbox" id="c-zh" ${c.showZh?'checked':''}></label>
   <label><span>听力挑战</span><input type="checkbox" id="c-blur" ${c.blurEn?'checked':''}></label>
  </div>
+ <div class="set" style="margin-top:8px"><label><span>标出连读</span><input type="checkbox" id="c-lk" ${c.lkOn!==false?'checked':''}></label>
+  <div class="li"><span>每日目标</span><div class="seg">${[10,20,30,60].map(n=>`<button data-a="goal" data-m="${n}" class="${(c.goal||20)===n?'on':''}">${n} 分</button>`).join('')}</div></div></div>
  <div class="set" style="margin-top:8px"><label><span>通话自动接听</span><input type="checkbox" id="c-autolisten" ${c.autoListen?'checked':''}></label><label><span>开口纠错</span><input type="checkbox" id="c-sayfix" ${c.sayFix!==false?'checked':''}></label></div>
  <div class="note">听力挑战：Sam 的英文先打码，听不懂再点开看。开口纠错：你说错时，Sam 会先口头纠正最重要的一处，再接着聊。通话自动接听：默认关，Sam 说完会停下等你，你可以先跟读，点圆圈才开始听你说。</div>
  <div class="sec">数据</div>
@@ -1091,7 +1112,7 @@ function compare(target,said){
  return {score,html};
 }
 function openShadow(en,zh){
- sheet(sheetHead('跟读')+`<div class="card" style="text-align:center"><div class="words" id="sw">${esc(en)}</div>${zh?`<div class="zh">${esc(zh)}</div>`:''}</div>
+ sheet(sheetHead('跟读')+`<div class="card" style="text-align:center"><div class="words" id="sw">${richText(en,false)}</div>${zh?`<div class="zh">${esc(zh)}</div>`:''}</div>
  <div class="btns"><button class="btn g" data-a="sp">${'听原声'}</button><button class="btn g" data-a="sps">慢速听</button></div>
  <div id="sres" class="note" style="text-align:center;min-height:70px;margin-top:12px">先听一遍，再点下面的按钮跟着说</div>
  <button class="btn" data-a="srec" id="srec">开始跟读</button>`);
@@ -1207,6 +1228,7 @@ $('#ccapbtn').onclick=()=>{capOn=!capOn;$('#ccapbtn').classList.toggle('on',capO
 $('#call .tools2').onclick=e=>{
  const b=e.target.closest('[data-c]');if(!b||!CALL)return;const c=b.dataset.c,m=lastAI();
  if(c==='hint'){if(REC)REC.abort();stopSpeak();return openHint()}
+ if(c==='lk'){if(REC)REC.abort();stopSpeak();return m?lkAll(m.text):null}
  if(c==='zh'){if(!m)return;if(zhShown(m)&&m.zh){m.zhOn=false;save();return callCap()}
   $('#ccap').insertAdjacentHTML('beforeend','<small id="ztmp">翻译中…</small>');
   return ensureZh(m).then(()=>{m.zhOn=true;save();callCap()},err=>{const z=$('#ztmp');if(z)z.textContent=err.message})}
@@ -1249,7 +1271,6 @@ $('#mic').onclick=async()=>{
 };
 
 /* ---------- 点句子播放、点单词查词 ---------- */
-function wrapWords(s){return s.split(/(\s+)/).map(tok=>{const m=tok.match(/^([^A-Za-z0-9]*)([A-Za-z0-9](?:[A-Za-z0-9'’\-]*[A-Za-z0-9])?)([^A-Za-z0-9]*)$/);return m?`${esc(m[1])}<i class="w">${esc(m[2])}</i>${esc(m[3])}`:esc(tok)}).join('')}
 function richText(t,btn=true){
  const ss=sentences(t);if(!ss.length)return esc(t);
  return ss.map(s=>`<span class="sn">${btn?`<button class="sp" data-a="psn" data-s="${esc(s)}" aria-label="播放这句">${I.play}</button>`:''}${wrapWords(s)}</span>`).join(' ');
@@ -1316,6 +1337,7 @@ function sceneIntro(id){
 function openerFor(s,call){
  const id=s.scene||'free';
  if(id.startsWith('g:'))return '(Start the grammar practice: greet me in one short sentence, then ask your first question.)';
+ if(id.startsWith('v:'))return '(Start the vocabulary practice: set the scene in one short sentence, then ask your first question.)';
  const sc=SCENE_BY[id];
  if(sc&&sc.tasks)return '(Start the role-play now: say your short opening line in character and lead me to the first task.)';
  if(id==='topic')return '(Pick a fun, random everyday topic and start chatting about it with a short opener and a question.)';
@@ -1332,9 +1354,10 @@ function handleStep(s,step){
  const n=+m[1],t=+m[2];if(!t)return;s.step=[Math.min(n,t),t];
  if(n>=t&&!s.passed){
   s.passed=true;
-  if(!s.scene.startsWith('g:')){S.done=S.done||{};S.done[s.scene]=Date.now()}
-  s.msgs.push({role:'note',kind:s.scene.startsWith('g:')?'gdone':'done',text:s.scene.startsWith('g:')?'这一轮语法对话完成了！':'这个场景完成了！你做到了。',t:Date.now()});
-  toast(s.scene.startsWith('g:')?'这一轮完成了！':'场景完成 ✓');
+  const kind=s.scene.startsWith('g:')?'gdone':s.scene.startsWith('v:')?'vdone':'done';
+  if(kind==='done'){S.done=S.done||{};S.done[s.scene]=Date.now()}
+  s.msgs.push({role:'note',kind,text:kind==='done'?'这个场景完成了！你做到了。':kind==='gdone'?'这一轮语法对话完成了！':'这一轮词汇对话完成了！',t:Date.now()});
+  toast(kind==='done'?'场景完成 ✓':'这一轮完成了！');
  }
  save();if($('#chatv').classList.contains('on'))renderHeader('chatv');
 }
@@ -1347,6 +1370,12 @@ function sysPrompt(sess){
   return corePrompt(LEVELS[S.cfg.level].p,`This is a FOCUSED GRAMMAR PRACTICE conversation on ONE grammar point only: ${g.en} (${g.n}). Use: ${g.use} Structure: ${g.form.join(' / ')}. Typical signal words: ${g.sig}.
 RULES FOR THIS PRACTICE: Ask short, everyday questions (daily life, study, research, food, travel, friends) that the learner can only answer well by using ${g.en}; include the right time words in your questions. Ask ONE question at a time. Never drift to other topics or other grammar points. Check every answer: if the learner made a mistake with ${g.en}, correct it out loud first (say the correct sentence and a very short reason) and ask them to say the corrected sentence once. If it was correct, praise them in a few words and ask the next question. Keep your own sentences simple. After 8 answers, give a short summary of what they did well and one thing to remember.
 Also output this line: STEP: <number of answers the learner has given so far>/8`);
+ }
+ if(id.startsWith('v:')){
+  const v=sess.vocab||{zh:'',en:'',words:[]};
+  return corePrompt(LEVELS[S.cfg.level].p,`This is a FOCUSED VOCABULARY PRACTICE conversation about ONE category: ${v.en} (${v.zh}). Words to practice: ${v.words.join(', ')}.
+RULES FOR THIS PRACTICE: Set up one realistic everyday situation where these words are naturally used (for example shopping for them, cooking with them, describing your home). Use these words in your own sentences and ask questions that make the learner use them. Ask ONE question at a time. If the learner does not know a word or says it in Chinese, teach the English word the way Americans say it and ask them to say it once. Stay on this category; never drift to unrelated topics.
+Also output this line: STEP: <number of different category words the learner has used correctly so far>/8`);
  }
  const sc=SCENE_BY[id]||SCENE_BY.free;
  const levelP=sc.lv===4||!SCENE_LV[sc.lv].p?LEVELS[S.cfg.level].p:SCENE_LV[sc.lv].p;
@@ -1469,16 +1498,255 @@ async function drillMic(){
  if($('#gmic'))$('#gmic').textContent='🎤 说出来';
 }
 
+/* ---------- 连读：自动找出句子里的连读 ---------- */
+const LKN={cv:'辅音连元音',vy:'元音连读（滑出 y）',vw:'元音连读（滑出 w）',same:'相同辅音只读一次',ty:'t / d + you 变音',flap:'美式 t 弹舌',drop:'t / d 吞音',h:'h 不发音',reduce:'口语缩读'};
+const LK_WHY={
+ cv:'前一个词以辅音结尾、后一个词以元音开头，辅音直接“搬”到后面，两个词听起来像一个词。',
+ vy:'前一个词以 i、ee、ay、y 这类咧嘴的元音结尾，后面又是元音，中间自然滑出一个很轻的 y。',
+ vw:'前一个词以 o、oo、ow、u 这类圆嘴的元音结尾，后面又是元音，中间自然滑出一个很轻的 w。',
+ same:'前一个词结尾和后一个词开头是同一个辅音，只发一次，稍微拉长一点。',
+ ty:'t 后面接 you 常变成 ch，d 后面接 you 常变成 j。',
+ flap:'美式英语里，t 夹在两个元音之间（包括跨两个词），读成很轻很快的 d，舌尖一弹就过去。',
+ drop:'t 或 d 夹在两个辅音之间时几乎不发音，只是轻轻停一下。',
+ h:'him、her、his、have、has、had、them 在句子中间弱读时，开头的 h（或 th）常常不发，再和前一个词连起来。',
+ reduce:'口语里一些固定组合会被压缩成一个词，美国人日常说话几乎都这么说。'};
+const LK_RED=[
+ [['going','to'],'gonna'],[['want','to'],'wanna'],[['wants','to'],'wantsta'],[['got','to'],'gotta'],[['have','to'],'hafta'],[['has','to'],'hasta'],[['kind','of'],'kinda'],[['sort','of'],'sorta'],[['out','of'],'outta'],[['lot','of'],'lotta'],[['let','me'],'lemme'],[['give','me'],'gimme'],[["don't",'know'],'dunno'],
+ [['what','are','you'],'whatcha'],[['what','do','you'],'whaddaya'],[['did','you'],'didja'],[['would','you'],'wouldja'],[['could','you'],'couldja'],[['should','you'],'shouldja'],[["don't",'you'],'donchu'],[['got','you'],'gotcha'],[['bet','you'],'betcha'],[['need','to'],'needa'],[['used','to'],'useta'],[['supposed','to'],'supposta'],[['ought','to'],'oughta'],[['a','lot','of'],'a lotta']];
+const LK_NOGONNA=new Set(['the','a','an','my','your','his','her','our','their','this','that','school','work','bed','church','class','town','sleep']);
+const lkW=w=>w.toLowerCase().replace(/[’]/g,"'").replace(/[^a-z']/g,'');
+function lkStartsV(w){
+ if(/^(hour|honest|honor|heir)/.test(w))return true;
+ if(/^(one|once|eu|ewe)/.test(w))return false;
+ if(/^u/.test(w))return !/^(uni|use|usu|uti|ute|ura|uri|uro|uku)/.test(w);
+ return /^[aeio]/.test(w);
+}
+function lkEnd(w){/* 返回 C=辅音 y/w=元音并滑出 y/w 0=元音不滑 */
+ if(!w)return null;
+ if(/(ee|ey|ay|oy|uy|y|i)$/.test(w))return 'y';
+ if(/(ow|ew|ue|oo|ou|o|u)$/.test(w))return 'w';
+ if(/e$/.test(w))return /^(the|be|he|she|we|me)$/.test(w)?'y':'C';
+ if(/gh$/.test(w))return null;
+ if(/a$/.test(w))return '0';
+ if(/h$/.test(w))return /(sh|ch|th|ph)$/.test(w)?'C':'0';
+ return /[bcdfgjklmnpqrstvxz']$/.test(w)?'C':null;
+}
+function lkPair(a,b){
+ const A=lkW(a),B=lkW(b);if(!A||!B)return null;
+ const ca=a.replace(/[^A-Za-z']/g,''),cb=b.replace(/[^A-Za-z']/g,'').replace(/'/g,'');
+ const pa=ca.replace(/n't$/,'nt').replace(/'/g,'');            /* 提示里用的写法：保留大小写、去掉撇号 */
+ const cut=(x)=>/[^aeiouAEIOU]e$/.test(x)&&x.length>2?x.slice(0,-1):x;   /* 去掉不发音的 e */
+ const move=(x,y)=>{const base=cut(x),ck=/ck$/i.test(base);return base.slice(0,base.length-(ck?2:1))+'-'+(ck?'k':base.slice(-1).toLowerCase())+y};
+ if(/[td]$/.test(A.replace(/'$/,''))&&/^(you|your|you're|yourself|you'll|you've|you'd)$/.test(B)){
+  const d=/d$/.test(A);return {k:'ty',h:pa.replace(/[td]$/,'')+'-'+(d?'ju':'chu')+cb.slice(3).toLowerCase()};
+ }
+ if(/^(him|her|his|have|has|had|them)$/.test(B)&&lkEnd(A)==='C')return {k:'h',h:move(pa,B==='them'?'em':B.slice(1))};
+ const e=lkEnd(A),v=lkStartsV(B);
+ if(e==='C'&&v&&/([aeiouy]|r)t$/.test(A))return {k:'flap',h:pa.slice(0,-1)+'-d'+cb.toLowerCase()};
+ if(e==='C'&&v)return {k:'cv',h:move(pa,cb.toLowerCase())};
+ if((e==='y'||e==='w')&&v)return {k:e==='y'?'vy':'vw',h:pa+' ('+e+') '+cb.toLowerCase()};
+ if(e==='C'){const la=cut(A).slice(-1),fb=B[0];
+  if(la===fb&&!/[aeiouyhw']/.test(la))return {k:'same',h:cut(pa).slice(0,-1)+'-'+cb.toLowerCase()};
+  if(/([^aeiou][td]|n't)$/.test(A)&&!/[aeiouyhw]/.test(fb))return {k:'drop',h:pa.replace(/[td]$/,'')+' '+cb.toLowerCase()};
+ }
+ return null;
+}
+/* 把一句话拆成词，标出连读：返回 [{w,trail,link}]，link 连着下一个词 */
+function lkAnalyze(s){
+ const toks=String(s).trim().split(/\s+/).filter(Boolean);
+ const W=toks.map(t=>{const m=t.match(/^(.*?)([,.!?;:"”)\]…—]*)$/);return {w:m[1],trail:m[2],link:null}});
+ for(let i=0;i<W.length;i++){
+  if(W[i].link)continue;
+  let hit=null;
+  for(const [seq,red] of LK_RED){
+   if(i+seq.length>W.length)continue;
+   let ok=true;for(let j=0;j<seq.length;j++){if(lkW(W[i+j].w)!==seq[j]||(j<seq.length-1&&W[i+j].trail)){ok=false;break}}
+   if(!ok)continue;
+   if(seq[0]==='going'){const nx=W[i+2];if(!nx||LK_NOGONNA.has(lkW(nx.w)))continue}
+   hit={seq,red};break;
+  }
+  if(hit){const ph=W.slice(i,i+hit.seq.length).map(x=>x.w).join(' ');for(let j=0;j<hit.seq.length-1;j++)W[i+j].link={k:'reduce',h:hit.red,ph};i+=hit.seq.length-2;continue}
+  if(i<W.length-1&&!W[i].trail){const p=lkPair(W[i].w,W[i+1].w);if(p)W[i].link={...p,ph:W[i].w+' '+W[i+1].w}}
+ }
+ return W;
+}
+/* ---------- 连读课程 ---------- */
+/* ex: [英文, 读成, 中文] */
+const LK_LESSONS=[
+ {id:'cv',n:'辅音连元音',en:'Consonant + Vowel',how:'先找到前一个词最后的辅音，读的时候把它当成下一个词的开头，中间不要停。',
+  ex:[['Pick it up.','pi-ki-tup','把它捡起来。'],['Turn it off.','tur-ni-doff','把它关掉。'],['Check it out.','che-ki-dout','看看这个。'],['an apple','a-napple','一个苹果'],['Come on!','co-mon','快点！/ 得了吧！'],['Hold on.','hol-don','等一下。'],['Look at this.','loo-kat this','看看这个。'],['First of all,','firs-to-fall','首先，'],['Can I ask?','ca-nai-yask','我能问一下吗？'],['Is it open?','i-zi-dopen','开门了吗？']]},
+ {id:'vy',n:'元音连读（滑出 y）',en:'Vowel + Vowel /j/',how:'前一个词结尾嘴是咧开的（i、ee、ay、y），直接滑到下一个元音，中间带出一个很轻的 y，不要停顿。',
+  ex:[['I am ready.','I-yam ready','我准备好了。'],['the end','the-yend','结尾'],['Say it again.','say-yi-dagain','再说一遍。'],['Be on time.','be-yon time','要准时。'],['very easy','very-yeasy','很简单'],['my uncle','my-yuncle','我叔叔'],['He is busy.','he-yis busy','他很忙。'],['Why are you here?','why-yar you here','你为什么在这？']]},
+ {id:'vw',n:'元音连读（滑出 w）',en:'Vowel + Vowel /w/',how:'前一个词结尾嘴是圆的（o、oo、ow、u），直接滑到下一个元音，中间带出一个很轻的 w。',
+  ex:[['Go out.','go-wout','出去。'],['Do it.','do-wit','去做吧。'],['You are right.','you-ware right','你说得对。'],['How about you?','how-wabout you','你呢？'],['So I said...','so-wI said','所以我说……'],['two apples','two-wapples','两个苹果'],['Who is it?','who-wi-zit','是谁？'],['No idea.','no-widea','不知道。']]},
+ {id:'same',n:'相同辅音只读一次',en:'Same Consonants',how:'两个一样的辅音挨在一起，只发一次，但稍微停长一点，让人听出是两个词。',
+  ex:[['the bus stop','bu-stop','公交站'],['a big game','bi-game','一场大比赛'],['Good day!','goo-day','日安！'],['this side','thi-side','这一边'],['black coffee','bla-coffee','黑咖啡'],['last time','las-time','上次'],['some money','so-money','一些钱'],['a hot tea','ho-tea','一杯热茶']]},
+ {id:'ty',n:'t / d + you 变音',en:'t / d + you',how:'t + you 读成 chu，d + you 读成 ju。美剧里几乎都这样读，听懂这一条，很多句子一下就清楚了。',
+  ex:[['Nice to meet you.','nice-tə mee-chu','很高兴认识你。'],["Don't you like it?",'don-chu like it','你不喜欢吗？'],['What you said','wha-chu said','你说的'],['Got you!','go-chu (gotcha)','抓到你了！/ 明白了！'],['Did you eat?','di-ju eat','你吃了吗？'],['Would you like some?','wou-ju like some','你要来点吗？'],['Could you help me?','cou-ju help me','你能帮我吗？'],['I need you.','I nee-ju','我需要你。']]},
+ {id:'flap',n:'美式 t 弹舌',en:'Flap T',how:'t 夹在两个元音中间时（包括跨两个词），舌尖在上牙后面轻轻一弹，听起来像很轻的 d。这是美式口音最明显的特征之一。',
+  ex:[['water','wa-der','水'],['better','be-der','更好'],['Get it?','ge-dit','明白了吗？'],['a lot of','a lo-də','很多'],['What is it?','wha-di-zit','这是什么？'],['Put it on.','pu-di-don','穿上。'],['Shut up!','shu-dup','闭嘴！/ 不会吧！'],['but I think','bu-dI think','但我觉得']]},
+ {id:'drop',n:'t / d 吞音',en:'Dropped T / D',how:'t 或 d 夹在两个辅音中间时，几乎不发出来，只在那里轻轻停一下。',
+  ex:[['the next day','nex day','第二天'],['last night','las night','昨晚'],['It must be good.','mus be','肯定不错。'],['Just a minute.','jus-ta minute','稍等一下。'],['an old man','ol man','一位老人'],["I don't think so.",'I don think so','我不这么认为。'],['the first time','firs time','第一次'],['and then','an then','然后']]},
+ {id:'h',n:'h 不发音',en:'Dropped H',how:'him、her、his、have、has、had、them 在句子中间弱读时，开头的 h（或 th）不发音，直接和前一个词连上。',
+  ex:[['Tell him.','tel-lim','告诉他。'],['Ask her.','as-ker','问她。'],['I love her.','I lo-ver','我爱她。'],['Give him a call.','gi-vi-ma call','给他打个电话。'],['I should have known.','shoul-dəv known','我早该知道的。'],['I told them.','I tol-dem','我告诉他们了。'],['What has he done?','wha-dəz-ee done','他干了什么？'],['It must have been late.','mus-təv been','一定很晚了。']]},
+ {id:'weak',n:'弱读',en:'Weak Forms',how:'句子里的小词（to、for、of、and、can、a、the、at、from、them）通常读得又轻又快，元音变成一个含糊的“ə”。把它们读重，就会一字一顿。',
+  ex:[['I want to go.','I wan-tə go','我想去。'],['This is for you.','this is fər you','这是给你的。'],['a cup of tea','a cu-pə tea','一杯茶'],['you and me','you-ən me','你和我'],['I can do it.','I kən do it','我能做到。'],["I'm at home.",'I-mət home','我在家。'],["I'm from Japan.",'I-m frəm Japan','我来自日本。'],['Tell them.','tel-ləm','告诉他们。']]},
+ {id:'reduce',n:'口语缩读',en:'Reductions',how:'下面这些组合在口语里被压缩成一个词。日常说话自己可以用；看美剧、和美国人聊天时，至少要一听就懂。',
+  ex:[["I'm going to grab a coffee.","I'm gonna grab a coffee",'我要去买杯咖啡。'],['Do you want to come?','d’ya wanna come','你想来吗？'],["I've got to go.","I've gotta go",'我得走了。'],['I have to work today.','I hafta work today','我今天得上班。'],["It's kind of cold.","It's kinda cold",'有点冷。'],['Let me see.','lemme see','让我看看。'],['Give me a second.','gimme a second','给我一秒钟。'],["I don't know.",'I dunno','我不知道。'],['What are you doing?','whatcha doing','你在干嘛？'],['Get out of here!','get outta here','走开！/ 不会吧！']]},
+ {id:'stress',n:'重音和节奏',en:'Stress & Rhythm',how:'英语靠重音打拍子：名词、动词、形容词和否定词读得重、读得长；小词读得轻、读得快，连读就发生在这些轻读的地方。先把大写的词读重，其他词轻轻带过。',
+  ex:[['I need to go to the store.','I NEED to GO to the STORE','我得去趟商店。'],['What do you want to eat?','WHAT do you WANT to EAT','你想吃什么？'],["I'm so tired today.",'I’m SO TIRED toDAY','我今天好累。'],['Can you help me with this?','can you HELP me with THIS','你能帮我弄一下吗？'],["I didn't know that.",'I DIDN’T KNOW THAT','我不知道这件事。'],["It's not a big deal.",'it’s NOT a BIG DEAL','没什么大不了的。']]},
+ {id:'real',n:'实战高频句',en:'Real-Life Sentences',how:'把前面的规则合在一起：这些都是美国人每天挂在嘴边的句子。先慢速听，再正常速度跟读，直到你能一口气说出来。',
+  ex:[['What are you up to?','whatcha up-tə','你在忙什么？'],['Let me know.','lemme know','告诉我一声。'],['Do you want to grab a bite?','d’ya wanna gra-bə bite','要不要去吃点东西？'],["I've got to go.","I've gotta go",'我得走了。'],['Nice to meet you.','nice-tə mee-chu','很高兴认识你。'],['Can I get a refill?','kə-nai ge-də refill','能再给我续一杯吗？'],['Not at all.','na-də-dall','一点也不。'],['Take it easy.','ta-ki-deasy','放轻松。 / 再见。'],['Hold on a second.','hol-do-nə second','等我一下。'],['Check it out.','che-ki-dout','你看看。']]}
+];
+const LK_BY=Object.fromEntries(LK_LESSONS.map(x=>[x.id,x]));
+
+/* ---------- 连读：标在句子里、点开讲解、跟读 ---------- */
+const lkOn=()=>S.cfg.lkOn!==false;
+function wrapWords(s){
+ if(!lkOn())return s.split(/(\s+)/).map(tok=>{const m=tok.match(/^([^A-Za-z0-9]*)([A-Za-z0-9](?:[A-Za-z0-9'’\-]*[A-Za-z0-9])?)([^A-Za-z0-9]*)$/);return m?`${esc(m[1])}<i class="w">${esc(m[2])}</i>${esc(m[3])}`:esc(tok)}).join('');
+ const W=lkAnalyze(s);let out='',prevLinked=false;
+ W.forEach((x,i)=>{
+  const m=x.w.match(/^([^A-Za-z0-9]*)([A-Za-z0-9](?:[A-Za-z0-9'’\-]*[A-Za-z0-9])?)?(.*)$/)||['',x.w,'',''];
+  const linked=!!x.link||prevLinked;
+  out+=esc(m[1])+(m[2]?`<i class="w${linked?' lk':''}">${esc(m[2])}</i>`:'')+esc(m[3])+esc(x.trail);
+  if(x.link)out+=`<b class="lkm" data-a="lk" data-k="${x.link.k}" data-h="${esc(x.link.h)}" data-ph="${esc(x.link.ph)}" aria-label="连读">‿</b>`;
+  else if(i<W.length-1)out+=' ';
+  prevLinked=!!x.link;
+ });
+ return out;
+}
+function lkList(text){const out=[],seen=new Set();for(const s of sentences(text))for(const x of lkAnalyze(s))if(x.link&&!seen.has(x.link.ph+'|'+x.link.k)){seen.add(x.link.ph+'|'+x.link.k);out.push({...x.link,s})}return out}
+const lkShow=ph=>esc(ph).replace(/ /g,'‿');
+function lkCard(l){return `<div class="card say" data-en="${esc(l.ph)}" data-zh="${esc('读成 '+l.h)}"><div class="t"><b class="lkph">${lkShow(l.ph)}</b><span>读成 <b>${esc(l.h)}</b> · ${LKN[l.k]}</span></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="pslow" data-en="${esc(l.ph)}">${I.slow}</button><button class="ib" data-a="sh">${I.mic}</button></div>`}
+function lkPopup(t){
+ const k=t.dataset.k,h=t.dataset.h,ph=t.dataset.ph,sn=t.closest('.sn'),sent=sn?sn.textContent.replace(/‿/g,' ').replace(/\s+/g,' ').trim():ph;
+ if(CALL&&REC)REC.abort();
+ sheet(sheetHead('连读 · '+LKN[k])+`<div class="card" style="text-align:center;padding:16px 10px"><div class="lkph" style="font-size:26px">${lkShow(ph)}</div><div style="margin-top:6px;font-size:16px">读成 <b style="color:var(--lkc)">${esc(h)}</b></div></div>
+  <div class="note">${LK_WHY[k]}</div>
+  <div class="btns"><button class="btn g" data-a="pw" data-en="${esc(ph)}">${I.play} 听</button><button class="btn g" data-a="pslow" data-en="${esc(ph)}">慢速听</button><button class="btn" data-a="shp" data-en="${esc(ph)}">🎤 跟读</button></div>
+  <div class="card"><div class="note" style="margin:0 0 4px">在这句里</div><div class="en" style="font-size:16px">${richText(sent)}</div></div>
+  <button class="btn r" data-a="lkgo" data-id="${LK_BY[k]?k:'real'}">去学这一课：${LKN[k]}</button>`);
+ speak(ph);
+}
+function lkAll(text){
+ const L=lkList(text);
+ sheet(sheetHead('这段话里的连读')+(L.length?`<div class="note">一共 ${L.length} 处。先听，再点 🎤 跟读，直到能一口气连着说出来。</div>${L.map(lkCard).join('')}`:'<div class="note">这段话里没有明显的连读。</div>'));
+}
+
+/* ---------- 连读栏目 ---------- */
+let lkCur=null;
+const lkCnt=id=>(S.lk&&S.lk[id])||0;
+function renderLk(){
+ const v=$('#lkv');
+ if(lkCur)return renderLkLesson(lkCur);
+ v.innerHTML=`<div class="card" style="margin-top:2px;line-height:1.65"><b>为什么要练连读</b><div class="note" style="margin:4px 0 0">美国人说话不是一个词一个词蹦出来的，而是连成一串。听不懂美剧、跟不上对话，多半是因为不熟悉连读。<br>App 里 Sam 说的每句话，连读的地方都用橙色 <b class="lkm" style="pointer-events:none">‿</b> 标出来了，点一下就能听、能跟读。</div></div>
+ ${LK_LESSONS.map((x,i)=>`<button class="row" data-a="lkgo" data-id="${x.id}" style="width:100%;text-align:left"><div class="t"><div><b>${i+1}. ${esc(x.n)}</b> <small>${esc(x.en)}</small></div><small>${x.ex.length} 个例句${lkCnt(x.id)?` · 跟读过 ${lkCnt(x.id)} 次`:''}</small></div><span class="lkph" style="font-size:13px">${esc(x.ex[0][0])}</span></button>`).join('')}`;
+}
+function renderLkLesson(id){
+ const x=LK_BY[id];$('#title').textContent=x.n;
+ $('#lkv').innerHTML=`<div class="note" style="margin-top:0">${esc(x.en)}${lkCnt(id)?` · 跟读过 ${lkCnt(id)} 次`:''}</div>
+ ${LK_WHY[id]?`<div class="card"><b>什么时候连</b><div style="margin-top:4px">${LK_WHY[id]}</div></div>`:''}
+ <div class="card"><b>怎么读</b><div style="margin-top:4px">${esc(x.how)}</div></div>
+ <div class="sec">例句：先慢速听，再跟读（橙色 ‿ 是连读，点它看讲解）</div>
+ ${x.ex.map(([en,h,zh])=>`<div class="card say" data-en="${esc(en)}" data-zh="${esc(zh)}" data-lk="${id}"><div class="t"><div class="en" style="font-size:16.5px;font-weight:600">${richText(en,false)}</div><span>读成 <b style="color:var(--lkc)">${esc(h)}</b></span><small>${esc(zh)}</small></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="pslow" data-en="${esc(en)}">${I.slow}</button><button class="ib" data-a="sh">${I.mic}</button></div>`).join('')}
+ <div class="sec">更多练习</div>
+ <button class="btn" data-a="lkgen" data-id="${id}">让 Sam 现编 6 句来练</button>
+ <div id="lkgen"></div>`;
+}
+async function lkGen(id){
+ const x=LK_BY[id],box=$('#lkgen');box.innerHTML='<div class="note">Sam 正在编句子…</div>';
+ try{
+  const t=await askAI(`Write 6 short, natural everyday American English sentences (5-12 words each) for a learner practicing this connected-speech feature: ${x.en} — ${x.how} Each sentence must contain at least one very clear example of it. Output exactly 6 lines, nothing else:\nS: <sentence> || <中文>`,'Write them now.');
+  const L=t.split('\n').map(l=>l.replace(/\*\*/g,'').trim().match(/^S\s*[:：]\s*(.+?)\s*\|\|\s*(.+)$/i)).filter(Boolean);
+  if(!L.length)throw new Error('没编出来，再点一次试试');
+  box.innerHTML=L.map(m=>`<div class="card say" data-en="${esc(m[1])}" data-zh="${esc(m[2])}" data-lk="${id}"><div class="t"><div class="en" style="font-size:16px;font-weight:600">${richText(m[1],false)}</div><span>${esc(m[2])}</span></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="pslow" data-en="${esc(m[1])}">${I.slow}</button><button class="ib" data-a="sh">${I.mic}</button></div>`).join('');
+ }catch(e){box.innerHTML=`<div class="note" style="color:var(--bad)">${esc(e.message)}</div>`}
+}
+
+/* ---------- 词汇栏目 ---------- */
+let vocCur=null,VOC=null,vocQ='';
+function loadVocab(){
+ if(window.VOCAB)return Promise.resolve(VOC=window.VOCAB);
+ return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='/talk/vocab.js?v='+VER;sc.onload=()=>res(VOC=window.VOCAB);sc.onerror=()=>rej(new Error('词汇数据没加载出来，检查一下网络'));document.head.appendChild(sc)});
+}
+async function renderVoc(){
+ const v=$('#vocv');
+ if(!VOC){v.innerHTML='<div class="note">加载词汇…</div>';try{await loadVocab()}catch(e){v.innerHTML=`<div class="note">${esc(e.message)}</div>`;return}}
+ if(vocCur)return renderVocCat(vocCur);
+ const due=dueList().length,total=VOC.cats.reduce((a,c)=>a+c.n,0);
+ v.innerHTML=`<input id="vsearch" placeholder="搜索：中文或英文，例如 茄子 / fridge" value="${esc(vocQ)}" autocomplete="off">
+ <div id="vres"></div>
+ <div id="vmain"><button class="row" data-a="tobook" style="width:100%;text-align:left;border-color:var(--pri)"><div class="t"><div><b>我的表达本</b></div><small>收藏了 ${S.book.length} 条${due?` · 今天要复习 ${due} 条`:''}</small></div><span class="hb">${due?'去复习':'打开'}</span></button>
+ <div class="note">${VOC.cats.length} 个分类，${total} 个美国人日常用的说法。点单词听发音，点 ☆ 收藏。</div>
+ ${VOC.groups.map(g=>`<div class="sec">${esc(g)}</div><div class="grid">${VOC.cats.filter(c=>c.g===g).map(c=>`<button class="scene" data-a="vopen" data-id="${c.id}"><b>${esc(c.zh)}</b><span>${esc(c.en)} · ${c.n} 个</span></button>`).join('')}</div>`).join('')}</div>`;
+ if(vocQ)vocSearch(vocQ);
+}
+function vocSearch(q){
+ vocQ=q;const box=$('#vres'),main=$('#vmain');if(!box)return;
+ q=q.trim().toLowerCase();if(!q){box.innerHTML='';main.style.display='';return}
+ main.style.display='none';const R=[];
+ for(const c of VOC.cats)for(const sub of c.subs)for(const it of sub.items){if(it[0].toLowerCase().includes(q)||it[1].includes(q))R.push([it,c]);if(R.length>=80)break}
+ box.innerHTML=R.length?R.map(([it,c])=>vocRow(it,c.zh)).join(''):'<div class="empty">没找到，换个说法试试</div>';
+}
+const vocRow=(it,tag)=>`<div class="row say vrow" data-en="${esc(it[0])}" data-zh="${esc(it[1])}" data-note="${esc(it[2]||'')}"><div class="t" data-a="p"><b>${esc(it[0])}</b> <span>${esc(it[1])}</span>${it[2]||tag?`<small>${esc([tag,it[2]].filter(Boolean).join(' · '))}</small>`:''}</div><button class="ib" data-a="p">${I.play}</button><button class="ib ${inBook(it[0])?'on':''}" data-a="fav">${I.star}</button></div>`;
+function renderVocCat(id){
+ const c=VOC.cats.find(x=>x.id===id);$('#title').textContent=c.zh;
+ $('#vocv').innerHTML=`<div class="note" style="margin-top:0">${esc(c.en)} · ${c.n} 个 · 点一行听发音，“考考我”是看中文说英文</div>
+ <div class="btns" style="margin-bottom:6px"><button class="btn" data-a="vquiz" data-id="${id}">考考我</button><button class="btn g" data-a="vchat" data-id="${id}">和 Sam 聊</button><button class="btn g" data-a="vcall" data-id="${id}">📞 打电话</button></div>
+ ${c.subs.map(s=>`<div class="sec">${esc(s.zh)} <small>${esc(s.en)}</small></div>${s.items.map(it=>vocRow(it)).join('')}`).join('')}
+ ${c.ph&&c.ph.length?`<div class="sec">美国人常这么说（橙色 ‿ 是连读）</div>${c.ph.map(([en,zh])=>`<div class="card say" data-en="${esc(en)}" data-zh="${esc(zh)}"><div class="t"><div class="en" style="font-size:16px;font-weight:600">${richText(en,false)}</div><span>${esc(zh)}</span></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib ${inBook(en)?'on':''}" data-a="fav">${I.star}</button></div>`).join('')}`:''}`;
+}
+/* 看中文说英文 */
+let VQ=null;
+function vocQuiz(id){
+ const c=VOC.cats.find(x=>x.id===id),all=c.subs.flatMap(s=>s.items);
+ const pick=[...all].sort(()=>Math.random()-.5).slice(0,10);
+ VQ={c,items:pick,i:0,ok:0,miss:[]};vqItem();
+}
+function vqItem(){
+ const it=VQ.items[VQ.i];
+ if(!it){
+  sheet(sheetHead(esc(VQ.c.zh)+' · 结果')+`<div class="card" style="text-align:center"><div class="score" style="color:${VQ.ok>=8?'var(--ok)':VQ.ok>=5?'var(--warn)':'var(--bad)'}">${VQ.ok} / ${VQ.items.length}</div><div class="note">${VQ.miss.length?'没说出来的已经收进表达本，会按遗忘规律提醒你复习。':'全对！'}</div></div>${VQ.miss.map(x=>vocRow(x)).join('')}<div class="btns"><button class="btn" data-a="vquiz" data-id="${VQ.c.id}">再来 10 个</button><button class="btn g" data-a="close">好的</button></div>`);
+  return;
+ }
+ sheet(sheetHead(`${esc(VQ.c.zh)} · ${VQ.i+1}/${VQ.items.length}`)+`<div class="card" style="text-align:center;padding:18px 10px"><div style="font-size:24px;font-weight:700">${esc(it[1])}</div>${it[2]?`<div class="note">${esc(it[2])}</div>`:''}<div class="words" id="sw" style="filter:blur(7px)">${esc(it[0])}</div></div>
+  <input id="vans" placeholder="说出来，或者打字" autocomplete="off" autocapitalize="off" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);font-size:16px">
+  <div id="sres" class="note" style="text-align:center;min-height:22px"></div>
+  <div class="btns" id="vqb"><button class="btn g" data-a="vqmic" id="vqmic">🎤 说出来</button><button class="btn" data-a="vqsub">对答案</button></div>`);
+}
+const vnorm=x=>String(x||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/^(a|an|the|to)\s+/,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+function vqCheck(){
+ const it=VQ.items[VQ.i],ans=($('#vans').value||'').trim();
+ const alts=it[0].split(/\s*\/\s*|\s*,\s*/).map(vnorm),a=vnorm(ans);
+ const ok=!!a&&(alts.includes(a)||alts.some(x=>x.length>3&&(a.includes(x)||x.includes(a)&&a.length>=x.length-2))||compare(it[0],ans).score>=80);
+ if(ok)VQ.ok++;else{VQ.miss.push(it);if(!inBook(it[0]))addBook({en:it[0],zh:it[1],note:it[2]||''},true)}
+ $('#sw').style.filter='';speak(it[0]);
+ $('#sres').innerHTML=ok?'<b style="color:var(--ok)">答对了 ✓</b>':`<b style="color:var(--bad)">正确答案在上面</b>${ans?`<div>你说的：${esc(ans)}</div>`:''}`;
+ $('#vqb').innerHTML=`<button class="btn" data-a="vqnext">${VQ.i+1<VQ.items.length?'下一个':'看结果'}</button>`;
+}
+async function vqMic(){
+ if(REC){REC.stop();return}if(LISTENING)return;
+ freshAudio();const b=$('#vqmic'),st=$('#sres');b.textContent='说完点这里';
+ try{const t=await listen('en',(x,s)=>{st.textContent=s||x||''});if(t){$('#vans').value=t;vqCheck()}else st.textContent='没听到声音，再试一次'}
+ catch(e){st.textContent=e.message}
+ const bb=$('#vqmic');if(bb)bb.textContent='🎤 说出来';
+}
+function vocChat(id,call){
+ const c=VOC.cats.find(x=>x.id===id);closeSheet();
+ const s=newSession('v:'+id);s.vocab={zh:c.zh,en:c.en,words:c.subs.flatMap(x=>x.items.map(i=>i[0])).slice(0,60)};save();
+ go('chatv');if(call){freshAudio();enterCall()}else runAI(s,openerFor(s,false));
+}
+
 /* ---------- 导航与事件 ---------- */
 function go(v){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===v));
- document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===(v==='bookv'?'vocv':v)));
  $('#composer').classList.toggle('on',v==='chatv');
  renderHeader(v);
- if(v==='chatv')renderChat(true);if(v==='scenev')renderScenes();if(v==='gramv')renderGram();if(v==='bookv')renderBook();if(v==='mev')renderMe();
+ if(v==='chatv')renderChat(true);if(v==='scenev')renderScenes();if(v==='gramv')renderGram();if(v==='vocv')renderVoc();if(v==='lkv')renderLk();if(v==='bookv')renderBook();if(v==='mev')renderMe();
  renderBar2();if(v!=='chatv')$('#main').scrollTop=0;
 }
-$('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.v==='gramv'&&$('#gramv').classList.contains('on'))gramCur=null;go(b.dataset.v)};
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;const v=b.dataset.v,on=$('#'+v).classList.contains('on');if(on){if(v==='gramv')gramCur=null;if(v==='vocv')vocCur=null;if(v==='lkv')lkCur=null}go(v)};
 
 document.body.addEventListener('click',async e=>{
  const wd=e.target.closest('.w');
@@ -1491,6 +1759,23 @@ document.body.addEventListener('click',async e=>{
  const card=t.closest('[data-en]');
  switch(a){
   case 'close':return closeSheet();
+  case 'lk':return lkPopup(t);
+  case 'lkall':return lkAll(m.text);
+  case 'lkgo':closeSheet();lkCur=t.dataset.id;if(CALL)exitCall();go('lkv');$('#main').scrollTop=0;return;
+  case 'lkgen':return lkGen(t.dataset.id);
+  case 'pslow':return speak(t.dataset.en,true);
+  case 'shp':return openShadow(t.dataset.en,'');
+  case 'back':{const v=t.dataset.v;if(v==='vocv')vocCur=null;if(v==='lkv')lkCur=null;go(v==='bookv'?'vocv':v);$('#main').scrollTop=0;return}
+  case 'tobook':go('bookv');return;
+  case 'vopen':vocCur=t.dataset.id;go('vocv');$('#main').scrollTop=0;return;
+  case 'vquiz':return vocQuiz(t.dataset.id);
+  case 'vqsub':return vqCheck();
+  case 'vqmic':return vqMic();
+  case 'vqnext':VQ.i++;return vqItem();
+  case 'vchat':return vocChat(t.dataset.id,false);
+  case 'vcall':return vocChat(t.dataset.id,true);
+  case 'vagain':{const id=(s.scene||'').slice(2);if(!VOC)await loadVocab();return vocChat(id,false)}
+  case 'goal':S.cfg.goal=+t.dataset.m;save();return renderMe();
   case 'psn':{document.querySelectorAll('.sn.on').forEach(x=>x.classList.remove('on'));const sn=t.closest('.sn');if(sn)sn.classList.add('on');if(CALL&&REC)REC.abort();return speak(t.dataset.s).then(()=>sn&&sn.classList.remove('on'))}
   case 'pw':return speak(t.dataset.en);
   case 'wfav':{const on=addBook({en:t.dataset.en,zh:t.dataset.zh,note:t.dataset.note});t.textContent=on?'已在表达本':'收藏这个词';t.classList.toggle('g',!!on);return}
@@ -1515,7 +1800,7 @@ document.body.addEventListener('click',async e=>{
   case 'reveal':if(m&&!m.shown&&S.cfg.blurEn){m.shown=true;t.classList.remove('blur');save()}return;
   case 'zh':{if(m.zh){m.zhOn=!zhShown(m);save();return renderChat()}t.textContent='翻译中…';try{await ensureZh(m);m.zhOn=true;save()}catch(err){toast(err.message,4000)}return renderChat()}
   case 'ex':return openExplain(m.text);
-  case 'sh':return card?openShadow(card.dataset.en,card.dataset.zh):openShadow(m.text,m.zh);
+  case 'sh':{const lk=t.closest('[data-lk]');if(lk){S.lk=S.lk||{};S.lk[lk.dataset.lk]=(S.lk[lk.dataset.lk]||0)+1;save()}return card?openShadow(card.dataset.en,card.dataset.zh):openShadow(m.text,m.zh)}
   case 'favm':addBook({en:m.text,zh:m.zh});return renderChat();
   case 'p':return speak(card.dataset.en);
   case 'pf':return speak(t.dataset.en);
@@ -1555,7 +1840,7 @@ document.body.addEventListener('click',async e=>{
   case 'import':return $('#impf').click();
  }
 });
-document.body.addEventListener('input',e=>{if(e.target.id==='search'){renderBook.q=e.target.value;const p=e.target.selectionStart;renderBook();const n=$('#search');n.focus();n.setSelectionRange(p,p)}});
+document.body.addEventListener('input',e=>{if(e.target.id==='vsearch')return vocSearch(e.target.value);if(e.target.id==='search'){renderBook.q=e.target.value;const p=e.target.selectionStart;renderBook();const n=$('#search');n.focus();n.setSelectionRange(p,p)}});
 function readCfg(){
  const g=id=>{const el=$('#'+id);return el?el.value.trim():null};
  const k=g('c-key');if(k!==null)S.cfg.keys[S.cfg.prov]=cleanKey(k);
@@ -1581,6 +1866,7 @@ $('#mev').addEventListener('change',e=>{
  if(id==='c-zh')S.cfg.showZh=e.target.checked;
  if(id==='c-blur')S.cfg.blurEn=e.target.checked;
  if(id==='c-sayfix')S.cfg.sayFix=e.target.checked;
+ if(id==='c-lk')S.cfg.lkOn=e.target.checked;
  if(id==='c-autolisten')S.cfg.autoListen=e.target.checked;
  save();
 });
