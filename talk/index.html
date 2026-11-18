@@ -58,6 +58,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .fix{max-width:86%;border-left:3px solid var(--warn);font-size:14.5px}
 .fix .from{text-decoration:line-through;color:var(--sub)}
 .fix .to{font-weight:600;color:var(--ok)}
+.fix [data-a=pf]{float:right;margin:0 0 4px 8px}
 .fix .why{color:var(--sub);font-size:13px}
 .err{color:var(--bad);font-size:14px}
 .typing:after{content:'▍';animation:bl 1s infinite}
@@ -120,24 +121,44 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .w-ok{color:var(--ok)}.w-miss{color:var(--bad);text-decoration:underline}
 #toast{position:fixed;left:50%;top:calc(var(--top) + 60px);transform:translateX(-50%);background:rgba(25,27,40,.92);color:#fff;padding:9px 16px;border-radius:18px;font-size:14px;z-index:40;display:none;max-width:86%;text-align:center}
 /* call */
-#call{position:fixed;inset:0;z-index:30;background:linear-gradient(180deg,#2c3390,#4f5bd5 60%,#6c63d8);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(var(--top) + 18px) 22px calc(var(--bot) + 22px)}
+#call{position:fixed;inset:0;z-index:30;background:linear-gradient(180deg,#252b7a,#4450c8 55%,#6a5fd6);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(var(--top) + 14px) 20px calc(var(--bot) + 18px);user-select:none;-webkit-user-select:none}
 #call.on{display:flex}
-#call .who{font-size:15px;opacity:.85}
-#orb{margin-top:6vh;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;transition:transform .3s}
-#orb i{width:110px;height:110px;border-radius:50%;background:#fff;opacity:.92;display:block}
-#call.listen #orb{animation:br 1.4s infinite}
-#call.speak #orb i{animation:sp .5s infinite alternate}
-#call.think #orb i{opacity:.5}
-@keyframes br{50%{transform:scale(1.08)}}
-@keyframes sp{to{transform:scale(.86)}}
-#cstate{margin-top:22px;font-size:18px;font-weight:600}
-#ccap{margin-top:16px;font-size:18px;line-height:1.5;text-align:center;min-height:90px;max-height:32vh;overflow:auto}
-#ccap small{display:block;opacity:.72;font-size:14px;margin-top:6px}
-#cme{font-size:15px;opacity:.8;text-align:center;min-height:24px;margin-top:8px}
-#call .cbtns{margin-top:auto;display:flex;gap:18px;align-items:center}
-#call .cbtns button{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
-#call .cbtns button svg{width:26px;height:26px}
-#call .cbtns #cend{background:#e5484d;width:66px;height:66px}
+#call .top{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:14px;opacity:.88}
+#call .top b{font-size:16px;font-weight:600}
+#ctime{font-variant-numeric:tabular-nums}
+#orb{margin-top:3.5vh;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none;position:relative;transition:transform .08s linear}
+#orb i{width:104px;height:104px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:#4450c8;font-style:normal;font-size:14px;font-weight:700;text-align:center;line-height:1.25;padding:8px}
+#call.speak #orb i{animation:sp .45s infinite alternate}
+#call.think #orb i{opacity:.6;animation:th 1s infinite}
+#call.idle #orb{animation:br 1.8s infinite}
+@keyframes br{50%{transform:scale(1.06)}}
+@keyframes sp{to{transform:scale(.88)}}
+@keyframes th{50%{opacity:.35}}
+#cstate{margin-top:14px;font-size:16px;font-weight:600;min-height:22px;text-align:center}
+#ccap{margin-top:12px;width:100%;font-size:19px;line-height:1.45;text-align:center;flex:1;min-height:60px;overflow:auto}
+#ccap small{display:block;opacity:.75;font-size:14px;margin-top:6px}
+#ccap .tip{display:inline-block;margin-top:10px;font-size:14px;background:rgba(255,255,255,.16);border-radius:12px;padding:5px 10px;text-align:left}
+#ccap.hidecap .en{filter:blur(7px)}
+#cme{font-size:15px;opacity:.82;text-align:center;min-height:22px;margin:6px 0 10px;max-height:66px;overflow:auto;width:100%}
+#call .tools2{display:flex;gap:10px;justify-content:center;width:100%;margin-bottom:16px}
+#call .tools2 button{flex:1;max-width:76px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:#fff;opacity:.92}
+#call .tools2 button span{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center}
+#call .tools2 button.on span{background:#fff;color:#4450c8}
+#call .tools2 svg{width:21px;height:21px}
+#call .cbtns{display:flex;gap:30px;align-items:center}
+#call .cbtns button{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px}
+#call .cbtns button.on{background:#fff;color:#4450c8}
+#call .cbtns button svg{width:24px;height:24px}
+#call .cbtns #cend{background:#e5484d;width:68px;height:68px}
+#call .cbtns #cend svg{width:30px;height:30px;transform:rotate(135deg)}
+/* 录音条 */
+#recbar{display:none;flex:1;align-items:center;gap:8px;min-height:42px;padding:6px 14px;border-radius:20px;background:var(--card);border:1.5px solid var(--bad);font-size:14px;color:var(--sub);line-height:1.35}
+#recbar i{width:9px;height:9px;border-radius:50%;background:var(--bad);flex:none;animation:bl 1s infinite}
+#composer.recording #recbar{display:flex}
+#composer.recording #txt,#composer.recording #send,#composer.recording #callbtn{display:none!important}
+#composer.recording #lang{background:var(--bad);color:#fff}
+.note-msg{align-self:center;text-align:center;font-size:13px;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:7px 12px;margin:12px auto;max-width:92%}
+.note-msg button{color:var(--pri);font-weight:600;margin-left:6px}
 .hide{display:none!important}
 </style>
 </head>
@@ -153,8 +174,10 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
   <div id="bar2"></div>
   <div id="composer" class="on">
     <button class="cb" id="lang" title="切换识别语言">EN</button>
-    <textarea id="txt" rows="1" placeholder="说英语，或用中文问“…怎么说”"></textarea>
+    <textarea id="txt" rows="1" placeholder="打字，或点麦克风说"></textarea>
+    <div id="recbar"><i></i><span id="rectext">正在听…</span></div>
     <button class="cb" id="send" style="display:none"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="cb" id="callbtn" aria-label="打电话"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></button>
     <button class="cb" id="mic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
   </div>
   <nav id="nav">
@@ -169,20 +192,26 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 <div id="toast"></div>
 <input type="file" id="impf" accept=".json,application/json" hidden>
 <div id="call">
-  <div class="who">和 Sam 通话中 · <span id="cscene"></span></div>
-  <div id="orb"><i></i></div>
-  <div id="cstate">准备中</div>
+  <div class="top"><span><b>Sam</b> · <span id="cscene"></span></span><span id="ctime">00:00</span></div>
+  <button id="orb"><i id="orbt">接通中</i></button>
+  <div id="cstate"></div>
   <div id="ccap"></div>
   <div id="cme"></div>
+  <div class="tools2">
+    <button data-c="again"><span><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></svg></span>重听</button>
+    <button data-c="slow"><span><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></svg></span>慢速</button>
+    <button data-c="zh" id="czh"><span><svg viewBox="0 0 24 24"><path d="M4 5h16M12 3v2M7 5c0 6 4 10 10 12M17 5c-1 5-5 9-11 12"/></svg></span>中文</button>
+    <button data-c="hint"><span><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></span>提示</button>
+  </div>
   <div class="cbtns">
     <button id="clang">EN</button>
-    <button id="cend"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <button id="chint"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></button>
+    <button id="cend" aria-label="挂断"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></button>
+    <button id="ccapbtn" class="on" aria-label="字幕">字幕</button>
   </div>
 </div>
 <script>
 'use strict';
-const VER='1.3.0';
+const VER='1.4.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -538,7 +567,7 @@ document.addEventListener('pointerdown',unlockAudio,{once:true});
 
 /* ---------- 语音识别 ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let REC=null,LISTENING=false;
+let REC=null,LISTENING=false,MIC_LEVEL=0;
 function asrEngine(){
  const a=S.cfg.asr;
  if(a==='ali'&&aliKey())return 'ali';if(a==='openai'&&oaiKey())return 'openai';if(a==='system'&&SR)return 'system';
@@ -585,11 +614,11 @@ async function recordWav(onInterim){
  const src=ac.createMediaStreamSource(stream),proc=ac.createScriptProcessor(4096,1,1),rate=ac.sampleRate;
  const chunks=[];let heard=false,quiet=0,el=0,floor=0,nf=0,cancelled=false,manual=false,fin,sec=-1;
  const finished=new Promise(r=>fin=r),tap=S.cfg.send!=='auto';
- const status=()=>{const t=Math.floor(el/1000);return `正在听 ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')} · `+(tap?'说完再点一下发送，中间停顿没关系':'停顿 '+(PAUSE[S.cfg.pause]||2500)/1000+' 秒自动发送')};
+ const status=()=>{const t=Math.floor(el/1000);return `正在听 ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')} · `+(tap?'停顿没关系，说完再点一下':'停顿 '+(PAUSE[S.cfg.pause]||2500)/1000+' 秒自动发送')};
  onInterim&&onInterim('',status());
  proc.onaudioprocess=e=>{
   const d=e.inputBuffer.getChannelData(0);chunks.push(new Float32Array(d));
-  let s=0;for(let i=0;i<d.length;i++)s+=d[i]*d[i];const rms=Math.sqrt(s/d.length),dt=d.length/rate*1000;el+=dt;
+  let s=0;for(let i=0;i<d.length;i++)s+=d[i]*d[i];const rms=Math.sqrt(s/d.length),dt=d.length/rate*1000;el+=dt;MIC_LEVEL=rms;
   if(el<300){floor+=rms;nf++;return}
   const th=Math.max(.012,(nf?floor/nf:0)*3);
   if(rms>th){heard=true;quiet=0}else if(heard)quiet+=dt;
@@ -598,7 +627,7 @@ async function recordWav(onInterim){
   else if((heard&&quiet>(PAUSE[S.cfg.pause]||2500))||el>120000||(!heard&&el>12000))stop();
  };
  src.connect(proc);proc.connect(ac.destination);
- function stop(){if(!fin)return;const f=fin;fin=null;try{proc.disconnect();src.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());setSession('playback');f()}
+ function stop(){if(!fin)return;const f=fin;fin=null;MIC_LEVEL=0;try{proc.disconnect();src.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());setSession('playback');f()}
  REC={stop:()=>{manual=true;stop()},abort:()=>{cancelled=true;stop()}};
  await finished;REC=null;
  if(cancelled)return null;
@@ -658,7 +687,7 @@ async function runAI(s,hiddenUser){
  busy=true;ctrl=new AbortController();
  if(hiddenUser)s.msgs.push({role:'user',text:hiddenUser,hidden:true});
  const m={role:'ai',text:'',t:Date.now(),live:true};s.msgs.push(m);renderChat(true);
- const hist=s.msgs.filter(x=>x!==m&&x.role!=='err').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
+ const hist=s.msgs.filter(x=>x!==m&&x.role!=='err'&&x.role!=='note').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
  let raw='',sp=null,fed=0,fin=false;const want=S.cfg.autoplay||CALL;callState('think');
  /* 回复一写完一句就交给发音，不等整段 */
  const feed=(reply,final)=>{
@@ -705,10 +734,11 @@ function renderChat(scroll){
    3. 点下面按钮粘贴进去，再点“测试连接”
    <div class="btns"><button class="btn" data-a="toset">去填密钥</button></div></div>`)+`<div class="empty"><h2>Hi, I'm Sam 👋</h2><div><b>点一下麦克风</b>开口说，说完<b>再点一下</b>发送，中间想多久都行。<br>用英语聊天，或者用中文问“…用英语怎么说”。</div>
   <div class="chips">${['“我现在在桌子前用电脑呢”用英语怎么说？','Can we just chat for a bit?','“我有点社恐”地道的说法是什么？','帮我练一下点咖啡','How do Americans say “加油”?'].map(t=>`<button class="chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}</div>
-  <div class="chips"><button class="chip" data-a="call" style="border-color:var(--pri);color:var(--pri);font-weight:600">进入通话模式，像打电话一样连续对话</button></div></div>`;
+  <div class="chips"><button class="chip" data-a="call" style="border-color:var(--pri);color:var(--pri);font-weight:600">📞 给 Sam 打电话，像真打电话一样聊</button></div></div>`;
  }else el.innerHTML=s.msgs.map((m,i)=>{
   if(m.hidden)return '';
   if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${(m.fix||[]).map(f=>`<div class="card fix"><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span> <button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px;vertical-align:middle">${I.play}</button>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
+  if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}</div>`;
   if(m.role==='err')return `<div class="msg ai"><div class="bub err">${esc(m.text)}<div class="tools"><button data-a="retry">重试</button><button data-a="toset">去设置</button></div></div></div>`;
   return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}><div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${esc(m.text)}</div>
    ${m.zh?`<div class="zh" ${zhShown(m)?'':'hidden'}>${esc(m.zh)}</div>`:''}
@@ -718,10 +748,10 @@ function renderChat(scroll){
  renderBar2();if(!vis.length&&!busy)$('#main').scrollTop=0;else if(scroll)scrollEnd();
 }
 function renderBar2(){
- const s=curSess(),has=s&&s.msgs.some(m=>m.role==='ai'&&!m.live);
+ const s=curSess(),has=s&&s.msgs.some(m=>m.role==='ai'&&!m.live)&&!CALL;
  const on=$('#chatv').classList.contains('on')&&has;
  $('#bar2').classList.toggle('on',on);
- $('#bar2').innerHTML=on?`<button data-a="hint">我不知道怎么接</button><button data-a="call">通话模式</button><button data-a="review">结束并复盘</button><button data-a="new">新对话</button>`:'';
+ $('#bar2').innerHTML=on?`<button data-a="hint">我不知道怎么接</button><button data-a="review">结束并复盘</button><button data-a="new">新对话</button>`:'';
 }
 function renderHeader(v){
  const h=$('#hbtns');
@@ -752,7 +782,7 @@ function renderMe(){
  const vs=voices.length?voices.map(v=>`<option value="${esc(v.name)}" ${v.name===(pickVoice()||{}).name?'selected':''}>${esc(v.name)}${GOOD.test(v.name)?' ★':''}</option>`).join(''):'<option>系统暂未提供美式声音</option>';
  $('#mev').innerHTML=`<div class="stats"><div class="stat"><b>${mins}</b><span>今日分钟</span></div><div class="stat"><b>${streak()}</b><span>连续天数</span></div><div class="stat"><b>${S.turns}</b><span>累计开口</span></div><div class="stat"><b>${S.book.length}</b><span>收藏表达</span></div></div>
  <div class="sec">历史对话</div>
- ${S.sessions.filter(s=>s.msgs.some(m=>!m.hidden)).slice(0,8).map(s=>{const l=s.msgs.filter(m=>!m.hidden&&m.role!=='err').slice(-1)[0];return `<div class="row" data-sid="${s.id}"><div class="t" data-a="open"><div><b>${esc(sessTitle(s))}</b></div><small>${new Date(s.created).toLocaleDateString('zh-CN')} · ${esc((l&&l.text||'').slice(0,40))}</small></div><button class="ib" data-a="sdel">${I.del}</button></div>`}).join('')||'<div class="note">还没有对话记录。</div>'}
+ ${S.sessions.filter(s=>s.msgs.some(m=>!m.hidden)).slice(0,8).map(s=>{const l=s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').slice(-1)[0];return `<div class="row" data-sid="${s.id}"><div class="t" data-a="open"><div><b>${esc(sessTitle(s))}</b></div><small>${new Date(s.created).toLocaleDateString('zh-CN')} · ${esc((l&&l.text||'').slice(0,40))}</small></div><button class="ib" data-a="sdel">${I.del}</button></div>`}).join('')||'<div class="note">还没有对话记录。</div>'}
  <div class="sec">AI 服务</div>
  <div class="set">
   <label><span>服务商</span><select id="c-prov">${Object.entries(PROV).map(([k,v])=>`<option value="${k}" ${k===c.prov?'selected':''}>${v.name}</option>`).join('')}</select></label>
@@ -803,7 +833,7 @@ async function streamSheet(title,sys,user,render){
  try{const t=await askAI(sys,user,t=>{const el=$('#sp');if(el)el.textContent=render?'生成中…':t},sheet.ctrl.signal);if(render)render(t)}
  catch(e){if(e.name!=='AbortError'){const el=$('#sp');if(el)el.textContent=e.message;if(e instanceof NeedKey){closeSheet();go('mev')}}}
 }
-const transcript=s=>s.msgs.filter(m=>!m.hidden&&m.role!=='err').map(m=>(m.role==='ai'?'Sam: ':'Learner: ')+m.text).join('\n');
+const transcript=s=>s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').map(m=>(m.role==='ai'?'Sam: ':'Learner: ')+m.text).join('\n');
 
 function openHint(){
  const s=curSess();if(!s)return;
@@ -897,35 +927,77 @@ function drillMark(ok){
 }
 
 /* ---------- 通话模式 ---------- */
-let CALL=false;
-function callState(st,txt){if(!CALL)return;$('#call').className='on '+st;$('#cstate').textContent=txt||{listen:'在听你说…说完点圆圈发送',think:'Sam 在想…',speak:'Sam 在说（点圆圈打断）',idle:'点圆圈开始说'}[st]||''}
-function callCap(m,opts){if(!CALL)return;const s=curSess();m=m||[...s.msgs].reverse().find(x=>x.role==='ai'&&!x.live);
- if(opts)return $('#ccap').innerHTML=`<small>卡住了？可以这样说：</small>`+(typeof opts==='string'?esc(opts):opts.map(o=>`<div style="margin-top:8px">${esc(o.en)}<small>${esc(o.zh)}</small></div>`).join(''));
- $('#ccap').innerHTML=m?`${S.cfg.blurEn&&!m.shown?'<small>听力挑战：字幕已隐藏</small>':esc(m.text)}${S.cfg.showZh&&m.zh?`<small>${esc(m.zh)}</small>`:''}`:''}
+let CALL=false,callT0=0,callTurns=0,callTimer=0,levelRaf=0,wakeLock=null,capOn=true;
+const ORB_TXT={listen:'说完<br>点我发送',think:'…',speak:'点我<br>打断',idle:'点我<br>开始说',wait:'接通中'};
+function callState(st,txt){
+ if(!CALL)return;$('#call').className='on '+st;
+ $('#orbt').innerHTML=ORB_TXT[st]||'';
+ $('#cstate').textContent=txt||{listen:'在听你说…中间停顿没关系',think:'Sam 在想…',speak:'Sam 在说',idle:'点圆圈继续说',wait:''}[st]||'';
+}
+function lastAI(){const s=curSess();return s&&[...s.msgs].reverse().find(x=>x.role==='ai'&&!x.live)}
+function callCap(m,opts){
+ if(!CALL)return;const s=curSess(),el=$('#ccap');m=m||lastAI();
+ if(opts){el.classList.remove('hidecap');el.innerHTML=`<small>卡住了？可以这样说：</small>`+(typeof opts==='string'?esc(opts):opts.map(o=>`<div style="margin-top:8px">${esc(o.en)}<small>${esc(o.zh)}</small></div>`).join(''));return}
+ if(!m){el.innerHTML='';return}
+ const i=s.msgs.indexOf(m),u=[...s.msgs.slice(0,i)].reverse().find(x=>x.role==='user'&&!x.hidden);
+ const fix=u&&u.fix&&u.fix[0];
+ el.classList.toggle('hidecap',!capOn);
+ el.innerHTML=`<div class="en">${esc(m.text)}</div>${(S.cfg.showZh||m.zhOn)&&m.zh?`<small>${esc(m.zh)}</small>`:''}${fix?`<div class="tip">更地道：${esc(fix.to)}</div>`:''}`;
+}
+function tickCall(){const t=Math.floor((Date.now()-callT0)/1000);$('#ctime').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
+/* 说话时圆球跟着音量跳 */
+function levelLoop(){clearInterval(levelRaf);levelRaf=setInterval(()=>{if(!CALL)return clearInterval(levelRaf);$('#orb').style.transform=LISTENING&&REC?`scale(${(1+Math.min(MIC_LEVEL*5,.28)).toFixed(3)})`:''},80)}
+async function keepAwake(){try{if(navigator.wakeLock&&!document.hidden)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
 async function enterCall(){
+ if(CALL)return;
+ if(busy)return toast('Sam 还在回复，等这句说完再打');
+ if(!apiKey()){go('mev');return toast('先填好密钥才能打电话')}
  let s=curSess();if(!s)s=newSession();
- CALL=true;$('#call').classList.add('on');$('#cscene').textContent=sessTitle(s);updLangBtn();
- go('chatv');callCap();$('#cme').textContent='';
- const last=s.msgs.filter(m=>!m.hidden&&m.role!=='err').slice(-1)[0];
- if(!last||last.role==='user'){await runAI(s,last?undefined:'(Greet me casually and ask what I want to talk about. Keep it short.)')}
+ if(REC)REC.abort();stopSpeak();
+ CALL=true;callT0=Date.now();callTurns=0;callMiss=0;capOn=!S.cfg.blurEn;
+ $('#ccapbtn').classList.toggle('on',capOn);$('#czh').classList.toggle('on',!!S.cfg.showZh);
+ $('#call').classList.add('on');$('#cscene').textContent=sessTitle(s);updLangBtn();
+ $('#cme').textContent='';callCap();tickCall();callTimer=setInterval(tickCall,1000);levelLoop();keepAwake();
+ callState('wait');go('chatv');
+ const last=s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').slice(-1)[0];
+ if(!last)await runAI(s,'(We are now on a phone call. Answer like picking up the phone: greet me casually and ask what I want to talk about. Keep it short.)');
+ else if(last.role==='user')await runAI(s);
  else callNext();
 }
-function exitCall(){CALL=false;$('#call').className='';if(REC)REC.abort();stopSpeak();if(ctrl)ctrl.abort();renderChat(true)}
+function exitCall(){
+ if(!CALL)return;
+ CALL=false;clearInterval(callTimer);clearInterval(levelRaf);$('#orb').style.transform='';
+ $('#call').className='';if(REC)REC.abort();stopSpeak();if(ctrl&&busy)ctrl.abort();
+ try{wakeLock&&wakeLock.release()}catch(e){}wakeLock=null;
+ const s=curSess(),sec=Math.round((Date.now()-callT0)/1000);
+ if(s&&callTurns>0){s.msgs.push({role:'note',kind:'call',text:`通话 ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} · 你说了 ${callTurns} 句`,t:Date.now()});save()}
+ renderChat(true);
+}
 let callMiss=0;
 async function callNext(){
  if(!CALL||REC||LISTENING)return;
- callState('listen');$('#cme').textContent='';
+ if(document.hidden)return callState('idle');
+ callState('listen');
  try{
-  const t=await listen(S.cfg.lang,(x,st)=>{if(st)callState('listen',st);else $('#cme').textContent=x});
+  const t=await listen(S.cfg.lang,(x,st)=>{if(!CALL)return;if(st)$('#cstate').textContent=st;else $('#cme').textContent=x});
   if(!CALL)return;
-  if(!t){if(++callMiss>=2){callMiss=0;return callState('idle')}return callNext()}
-  callMiss=0;$('#cme').textContent='你：'+t;await sendText(t);
- }catch(e){callState('idle',e.message.slice(0,60))}
+  if(!t){if(document.hidden||++callMiss>=2){callMiss=0;return callState('idle','没听到声音，点圆圈再说')}return callNext()}
+  callMiss=0;callTurns++;$('#cme').textContent='你：'+t;await sendText(t);
+ }catch(e){callState('idle',String(e.message||e).slice(0,70))}
 }
 $('#orb').onclick=()=>{if(!CALL)return;if(SPEAKING){stopSpeak();return}if(busy)return;if(REC){REC.stop();return}if(LISTENING)return;callNext()};
 $('#cend').onclick=exitCall;
 $('#clang').onclick=toggleLang;
-$('#chint').onclick=()=>{stopSpeak();openHint()};
+$('#ccapbtn').onclick=()=>{capOn=!capOn;$('#ccapbtn').classList.toggle('on',capOn);$('#ccap').classList.toggle('hidecap',!capOn)};
+$('#call .tools2').onclick=e=>{
+ const b=e.target.closest('[data-c]');if(!b||!CALL)return;const c=b.dataset.c,m=lastAI();
+ if(c==='hint'){if(REC)REC.abort();stopSpeak();return openHint()}
+ if(c==='zh'){S.cfg.showZh=!S.cfg.showZh;save();b.classList.toggle('on',S.cfg.showZh);return callCap()}
+ if(!m)return;
+ if(REC)REC.abort();
+ callState('speak');speak(m.text,c==='slow').then(()=>{if(CALL&&!busy&&!REC&&!LISTENING)callNext()});
+};
+document.addEventListener('visibilitychange',()=>{if(CALL&&!document.hidden){keepAwake();if(!REC&&!LISTENING&&!busy&&!SPEAKING)callState('idle','点圆圈继续说')}});
 
 /* ---------- 输入区 ---------- */
 const txt=$('#txt');
@@ -933,23 +1005,29 @@ function autoGrow(){txt.style.height='auto';txt.style.height=Math.min(txt.scroll
 txt.addEventListener('input',autoGrow);
 txt.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendText(txt.value)}});
 $('#send').onclick=()=>sendText(txt.value);
-$('#lang').onclick=toggleLang;
+$('#callbtn').onclick=()=>enterCall();
+let recCancel=false;
+$('#lang').onclick=()=>{if($('#composer').classList.contains('recording')){recCancel=true;if(REC)REC.abort();return}toggleLang()};
 updLangBtn();
+const MIC_SVG=$('#mic').innerHTML,OK_SVG='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';
 $('#mic').onclick=async()=>{
  if(REC){REC.stop();return}
  if(LISTENING)return;
  if(busy)return toast('Sam 还在回复…');
- stopSpeak();const mic=$('#mic');mic.classList.add('rec');const before=txt.value;
- const PH='说英语，或用中文问“…怎么说”';
+ stopSpeak();recCancel=false;
+ const mic=$('#mic'),comp=$('#composer'),rt=$('#rectext'),before=txt.value;
+ mic.classList.add('rec');mic.innerHTML=OK_SVG;comp.classList.add('recording');$('#lang').innerHTML=I.x;rt.textContent='正在听…';
+ const done=()=>{mic.classList.remove('rec');mic.innerHTML=MIC_SVG;comp.classList.remove('recording');updLangBtn()};
  try{
-  const t=await listen(S.cfg.lang,(x,st)=>{if(st)txt.placeholder=st;else{txt.value=(before?before+' ':'')+x;autoGrow()}});
-  mic.classList.remove('rec');txt.placeholder=PH;
+  const t=await listen(S.cfg.lang,(x,st)=>{rt.textContent=st||x||'正在听…'});
+  done();
+  if(recCancel){toast('已取消这段录音');return}
   const all=((before?before+' ':'')+t).trim();txt.value=all;autoGrow();
   if(t){
    sendText(all);
    if(S.cfg.lang==='zh'&&!cloudAsr()){S.cfg.lang='en';save();updLangBtn();toast('已切回英语识别，看完答案试着说一遍',3000)}
-  }
- }catch(e){mic.classList.remove('rec');txt.placeholder=PH;toast(e.message,5000)}
+  }else toast('没听到声音，再试一次');
+ }catch(e){done();toast(e.message,5000)}
 };
 
 /* ---------- 导航与事件 ---------- */
