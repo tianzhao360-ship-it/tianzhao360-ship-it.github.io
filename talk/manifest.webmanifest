@@ -1,0 +1,15 @@
+{
+  "name": "口语陪练",
+  "short_name": "口语陪练",
+  "id": "/talk/",
+  "start_url": "/talk/",
+  "scope": "/talk/",
+  "display": "standalone",
+  "background_color": "#f4f5fb",
+  "theme_color": "#4f5bd5",
+  "lang": "zh-CN",
+  "icons": [
+    {"src": "/talk/icon-180.png", "sizes": "180x180", "type": "image/png"},
+    {"src": "/talk/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="口语陪练">
+<meta name="theme-color" content="#4f5bd5">
+<link rel="manifest" href="/talk/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/talk/icon-180.png">
+<title>口语陪练</title>
+<style>
+:root{--bg:#f4f5fb;--card:#fff;--ink:#1d2033;--sub:#6b7085;--line:#e3e5ef;--pri:#4f5bd5;--pri2:#eceefd;--ok:#16a06b;--bad:#d9483b;--warn:#c98a12;--me:#4f5bd5;--meink:#fff;--top:env(safe-area-inset-top);--bot:env(safe-area-inset-bottom)}
+@media (prefers-color-scheme:dark){:root{--bg:#111320;--card:#1b1e2e;--ink:#e9ebf5;--sub:#9aa0b8;--line:#2c3045;--pri:#8a94ff;--pri2:#262a48;--me:#5560dd;--meink:#fff}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink)}
+#app{display:flex;flex-direction:column;height:100dvh;padding-top:var(--top)}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px 8px;min-height:50px}
+header h1{font-size:19px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .hb{padding:6px 11px;border-radius:16px;background:var(--pri2);color:var(--pri);font-size:14px;font-weight:600;white-space:nowrap}
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.view{display:none;padding:4px 14px 20px}
+.view.on{display:block}
+nav{display:flex;border-top:1px solid var(--line);background:var(--card);padding-bottom:var(--bot)}
+nav button{flex:1;padding:8px 0 7px;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--pri)}
+svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* chat */
+#chatv{padding-bottom:8px}
+.msg{margin:10px 0;display:flex;flex-direction:column}
+.msg.me{align-items:flex-end}
+.bub{max-width:86%;padding:10px 13px;border-radius:18px;background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.05);word-wrap:break-word}
+.me .bub{background:var(--me);color:var(--meink);border-bottom-right-radius:6px}
+.ai .bub{border-bottom-left-radius:6px;max-width:92%}
+.en{font-size:17px;line-height:1.45}
+.en.blur{filter:blur(6px);user-select:none}
+.zh{color:var(--sub);font-size:14px;margin-top:5px}
+.tools{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.tools button{font-size:13px;padding:4px 9px;border-radius:12px;background:var(--pri2);color:var(--pri);display:inline-flex;align-items:center;gap:3px}
+.tools button svg{width:14px;height:14px}
+.tools button.act{background:var(--pri);color:#fff}
+.card{background:var(--card);border-radius:14px;padding:10px 12px;margin-top:6px;border:1px solid var(--line)}
+.say{display:flex;align-items:center;gap:8px}
+.say .t{flex:1;min-width:0}
+.say b{font-weight:600;display:block}
+.say span{color:var(--sub);font-size:14px}
+.say small{display:block;color:var(--sub);font-size:12.5px}
+.ib{width:34px;height:34px;border-radius:50%;background:var(--pri2);color:var(--pri);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ib svg{width:17px;height:17px}
+.ib.on{background:var(--pri);color:#fff}
+.fix{max-width:86%;border-left:3px solid var(--warn);font-size:14.5px}
+.fix .from{text-decoration:line-through;color:var(--sub)}
+.fix .to{font-weight:600;color:var(--ok)}
+.fix .why{color:var(--sub);font-size:13px}
+.err{color:var(--bad);font-size:14px}
+.typing:after{content:'▍';animation:bl 1s infinite}
+@keyframes bl{50%{opacity:0}}
+.empty{color:var(--sub);text-align:center;padding:26px 6px 6px}
+.empty h2{color:var(--ink);font-size:20px;margin:0 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:7px 12px;font-size:14px;text-align:left}
+#composer{display:none;align-items:flex-end;gap:6px;padding:8px 10px;background:var(--bg);border-top:1px solid var(--line)}
+#composer.on{display:flex}
+#txt{flex:1;resize:none;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:9px 14px;max-height:120px;min-height:42px;font-size:16px;outline:none}
+.cb{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;background:var(--pri2);color:var(--pri);font-weight:700;font-size:14px}
+.cb svg{width:21px;height:21px}
+#mic{background:var(--pri);color:#fff;width:48px;height:48px}
+#mic.rec{background:var(--bad);animation:pu 1.2s infinite}
+@keyframes pu{50%{box-shadow:0 0 0 8px rgba(217,72,59,.18)}}
+#bar2{display:none;gap:6px;padding:0 10px 2px;overflow-x:auto}
+#bar2.on{display:flex}
+#bar2 button{white-space:nowrap;font-size:13px;padding:5px 11px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--sub)}
+/* lists */
+.sec{font-size:13px;color:var(--sub);margin:18px 2px 6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.scene{background:var(--card);border-radius:16px;padding:13px;text-align:left;border:1px solid var(--line);min-height:84px}
+.scene b{display:block;font-size:16px;margin-bottom:3px}
+.scene span{font-size:13px;color:var(--sub);line-height:1.35;display:block}
+.row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:14px;padding:12px;margin-bottom:8px;border:1px solid var(--line)}
+.row .t{flex:1;min-width:0}
+.row .t div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t small{color:var(--sub);font-size:12.5px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--card);border-radius:14px;padding:10px 4px;text-align:center;border:1px solid var(--line)}
+.stat b{display:block;font-size:22px;color:var(--pri)}
+.stat span{font-size:12px;color:var(--sub)}
+.btn{display:block;width:100%;padding:12px;border-radius:14px;background:var(--pri);color:#fff;font-weight:600;font-size:16px;text-align:center}
+.btn.g{background:var(--pri2);color:var(--pri)}
+.btn.r{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.btns{display:flex;gap:8px;margin-top:10px}
+.btns .btn{flex:1}
+.set{background:var(--card);border-radius:14px;border:1px solid var(--line);overflow:hidden}
+.set label,.set .li{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line);font-size:15px}
+.set label:last-child,.set .li:last-child{border-bottom:0}
+.set label>span:first-child,.set .li>span:first-child{flex:none;width:92px;color:var(--sub);font-size:14px}
+.set input[type=text],.set input[type=password],.set select{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:15px;text-align:right}
+.set input[type=range]{flex:1}
+.set input[type=checkbox]{width:22px;height:22px;accent-color:var(--pri);margin-left:auto}
+.note{font-size:13px;color:var(--sub);margin:6px 2px;line-height:1.55}
+.seg{display:flex;background:var(--pri2);border-radius:12px;padding:3px;margin-left:auto}
+.seg button{padding:5px 11px;border-radius:9px;font-size:14px;color:var(--pri)}
+.seg button.on{background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.1);font-weight:600}
+#search{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;outline:none;margin-bottom:8px}
+/* sheet */
+#mask{position:fixed;inset:0;background:rgba(10,12,25,.42);display:none;z-index:20}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-height:calc(100dvh - var(--top) - 40px);overflow-y:auto;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 16px calc(18px + var(--bot));z-index:21;transform:translateY(105%);transition:transform .22s}
+#sheet.on{transform:none}
+#sheet h3{margin:2px 0 10px;font-size:18px;display:flex;align-items:center}
+#sheet h3 span{flex:1}
+.pre{white-space:pre-wrap;font-size:15px;line-height:1.65}
+.score{font-size:40px;font-weight:700;text-align:center}
+.words{font-size:18px;line-height:1.7;text-align:center;margin:8px 0}
+.w-ok{color:var(--ok)}.w-miss{color:var(--bad);text-decoration:underline}
+#toast{position:fixed;left:50%;top:calc(var(--top) + 60px);transform:translateX(-50%);background:rgba(25,27,40,.92);color:#fff;padding:9px 16px;border-radius:18px;font-size:14px;z-index:40;display:none;max-width:86%;text-align:center}
+/* call */
+#call{position:fixed;inset:0;z-index:30;background:linear-gradient(180deg,#2c3390,#4f5bd5 60%,#6c63d8);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(var(--top) + 18px) 22px calc(var(--bot) + 22px)}
+#call.on{display:flex}
+#call .who{font-size:15px;opacity:.85}
+#orb{margin-top:6vh;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;transition:transform .3s}
+#orb i{width:110px;height:110px;border-radius:50%;background:#fff;opacity:.92;display:block}
+#call.listen #orb{animation:br 1.4s infinite}
+#call.speak #orb i{animation:sp .5s infinite alternate}
+#call.think #orb i{opacity:.5}
+@keyframes br{50%{transform:scale(1.08)}}
+@keyframes sp{to{transform:scale(.86)}}
+#cstate{margin-top:22px;font-size:18px;font-weight:600}
+#ccap{margin-top:16px;font-size:18px;line-height:1.5;text-align:center;min-height:90px;max-height:32vh;overflow:auto}
+#ccap small{display:block;opacity:.72;font-size:14px;margin-top:6px}
+#cme{font-size:15px;opacity:.8;text-align:center;min-height:24px;margin-top:8px}
+#call .cbtns{margin-top:auto;display:flex;gap:18px;align-items:center}
+#call .cbtns button{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+#call .cbtns button svg{width:26px;height:26px}
+#call .cbtns #cend{background:#e5484d;width:66px;height:66px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <header><h1 id="title">口语陪练</h1><span id="hbtns"></span></header>
+  <main id="main">
+    <section class="view on" id="chatv"></section>
+    <section class="view" id="scenev"></section>
+    <section class="view" id="bookv"></section>
+    <section class="view" id="mev"></section>
+  </main>
+  <div id="bar2"></div>
+  <div id="composer" class="on">
+    <button class="cb" id="lang" title="切换识别语言">EN</button>
+    <textarea id="txt" rows="1" placeholder="说英语，或用中文问“…怎么说”"></textarea>
+    <button class="cb" id="send" style="display:none"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="cb" id="mic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+  </div>
+  <nav id="nav">
+    <button data-v="chatv" class="on"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>对话</button>
+    <button data-v="scenev"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>场景</button>
+    <button data-v="bookv"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>表达本</button>
+    <button data-v="mev"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>我的</button>
+  </nav>
+</div>
+<div id="mask"></div>
+<div id="sheet"></div>
+<div id="toast"></div>
+<input type="file" id="impf" accept=".json,application/json" hidden>
+<div id="call">
+  <div class="who">和 Sam 通话中 · <span id="cscene"></span></div>
+  <div id="orb"><i></i></div>
+  <div id="cstate">准备中</div>
+  <div id="ccap"></div>
+  <div id="cme"></div>
+  <div class="cbtns">
+    <button id="clang">EN</button>
+    <button id="cend"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button id="chint"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></button>
+  </div>
+</div>
+<script>
+'use strict';
+const VER='1.0.0';
+const KEY='talk.v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const addDays=(ds,n)=>{const d=new Date(ds+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const hasZh=s=>/[一-鿿]/.test(s);
+
+const I={
+ play:'<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>',
+ slow:'<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></svg>',
+ star:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+ mic:'<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+ del:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+ x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
+
+/* ---------- 数据 ---------- */
+const PROV={
+ deepseek:{name:'DeepSeek（国内直连，最省钱）',type:'openai',base:'https://api.deepseek.com',pick:[/flash/i,/chat/i,/^deepseek-v\d/i],fallback:'deepseek-v4-flash',url:'platform.deepseek.com'},
+ qwen:{name:'通义千问（阿里云百炼，国内直连）',type:'openai',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',pick:[/^qwen-plus$/,/^qwen-flash$/,/^qwen-turbo$/],fallback:'qwen-plus',url:'bailian.console.aliyun.com'},
+ openai:{name:'OpenAI（需代理）',type:'openai',base:'https://api.openai.com/v1',pick:[/^gpt-4\.1-mini$/,/^gpt-4o-mini$/,/^gpt-[\d.]+-mini$/],fallback:'gpt-4.1-mini',url:'platform.openai.com'},
+ anthropic:{name:'Claude（需代理）',type:'anthropic',base:'https://api.anthropic.com/v1',pick:[/haiku/i,/sonnet/i],fallback:'claude-haiku-5-5',url:'console.anthropic.com'},
+ custom:{name:'其他 OpenAI 兼容接口',type:'openai',base:'',pick:[],fallback:'',url:''}
+};
+const OAI_VOICES=['marin','cedar','coral','nova','shimmer','sage','alloy','ash','ballad','echo','fable','onyx','verse'];
+const LEVELS={easy:{n:'入门',p:'The learner is a beginner (about CEFR A2). Use very common words and short sentences (under 12 words each). Avoid idioms.'},mid:{n:'中级',p:'The learner is intermediate (about CEFR B1-B2). Use everyday vocabulary and natural but clear sentences; an occasional common idiom is fine.'},high:{n:'高级',p:'The learner is advanced (about CEFR C1). Talk like a native American adult would: idioms, phrasal verbs and slang are welcome.'}};
+const SCENES=[
+ {id:'free',t:'自由聊天',d:'想聊什么都行，也能用中文问“…怎么说”',p:''},
+ {id:'daily',t:'日常闲聊',d:'像老朋友一样聊今天过得怎么样',p:'You are the learner\'s friendly American friend, catching up casually about their day, plans, food and hobbies.'},
+ {id:'coffee',t:'咖啡店点单',d:'你是顾客，Sam 是咖啡师',p:'Role-play: you are a cheerful barista at a busy coffee shop in Seattle. The learner is the customer ordering. Ask about size, milk, for here or to go, name for the cup, and payment.'},
+ {id:'food',t:'餐厅点餐',d:'入座、点菜、问推荐、结账',p:'Role-play: you are a server at a casual American restaurant. Greet the learner, take drinks and food orders, answer questions about the menu, check in later, and handle the check and tip.'},
+ {id:'airport',t:'机场值机',d:'托运行李、选座位、过安检',p:'Role-play: you are an airline check-in agent at San Francisco airport, then a TSA officer. Ask for ID and booking, bags, seat preference, and give gate info.'},
+ {id:'hotel',t:'酒店入住',d:'办入住、问设施、提要求',p:'Role-play: you are a front desk clerk at a hotel in Chicago. Check the learner in, explain breakfast, Wi-Fi and checkout time, and handle a small problem they raise.'},
+ {id:'way',t:'问路与坐车',d:'找地铁站、打车、坐公交',p:'Role-play: you are a friendly local in New York. The learner stops you to ask for directions and how to get somewhere by subway or bus.'},
+ {id:'doctor',t:'看医生',d:'描述症状、听医嘱',p:'Role-play: you are a doctor at an urgent care clinic in the US. Ask about the learner\'s symptoms, how long, allergies, and give simple advice.'},
+ {id:'shop',t:'购物与退换',d:'试穿、问价、退货',p:'Role-play: you are a store associate at a clothing store in a US mall. Help the learner find sizes and colors, and handle a return or exchange.'},
+ {id:'call',t:'打电话预约',d:'约理发、约看房、改时间',p:'Role-play: this is a phone call. You are a receptionist at a hair salon. The learner calls to book, reschedule or ask about prices. Spell names and confirm times like on a real call.'},
+ {id:'job',t:'求职面试',d:'自我介绍、优缺点、经历追问',p:'Role-play: you are a friendly hiring manager interviewing the learner for an engineering internship at a US tech company. Ask one common interview question at a time and follow up on their answers.'},
+ {id:'intro',t:'自我介绍',d:'第一次见面，聊背景和爱好',p:'You just met the learner at an international student welcome party. Get to know them: where they are from, what they study, hobbies. Share a little about yourself too.'},
+ {id:'research',t:'介绍我的研究',d:'在学术会议上被外国同行追问',p:'Role-play: you are a curious American researcher at an academic conference coffee break. Ask the learner, a graduate student, about their research project: what problem it solves, how it works, results, and challenges. Keep questions accessible and encouraging.'},
+ {id:'campus',t:'校园与室友',d:'和室友、同学、导师沟通',p:'Role-play: you are the learner\'s American roommate at a US university. Chat about classes, chores, weekend plans, and sort out small roommate issues.'},
+ {id:'opinion',t:'观点讨论',d:'聊话题、讲理由、学会反驳',p:'Pick an interesting everyday debate topic (for example remote work, social media, cities vs small towns). Ask for the learner\'s opinion, ask why, and politely push back so they keep explaining.'},
+ {id:'custom',t:'自定义场景',d:'自己描述一个想练的场景',p:null}
+];
+const DEF={v:1,cfg:{prov:'deepseek',keys:{},model:{},base:'',oaiKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'system',sysVoice:'',oaiVoice:'marin',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+S=Object.assign(structuredClone(DEF),S||{});S.cfg=Object.assign(structuredClone(DEF.cfg),S.cfg||{});
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('存储空间不足，请删除一些旧对话')}};
+
+function toast(t,ms=2200){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>el.style.display='none',ms)}
+
+/* ---------- AI 接口 ---------- */
+const P=()=>PROV[S.cfg.prov];
+const base=()=>(S.cfg.prov==='custom'?S.cfg.base:P().base).replace(/\/+$/,'');
+const apiKey=()=>(S.cfg.keys[S.cfg.prov]||'').trim();
+const oaiKey=()=>(S.cfg.prov==='openai'?apiKey():'')||(S.cfg.oaiKey||'').trim();
+class NeedKey extends Error{}
+
+function authHeaders(){
+ const k=apiKey();
+ if(P().type==='anthropic')return {'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+ return {'content-type':'application/json','authorization':'Bearer '+k};
+}
+async function apiErr(r){
+ let m='';try{const t=await r.text();try{const j=JSON.parse(t);m=(j.error&&(j.error.message||j.error))||j.message||t}catch(e){m=t}}catch(e){}
+ m=String(m).slice(0,200);
+ const map={401:'密钥不对或已失效',402:'账户余额不足，请先充值',403:'没有权限（密钥或地区限制）',404:'接口地址或模型名不对',429:'请求太频繁或额度用完，稍等再试'};
+ if(r.status===404||/model/i.test(m)&&r.status===400){S.cfg.model[S.cfg.prov]='';save()}
+ return new Error((map[r.status]||('服务出错 '+r.status))+(m?'：'+m:''));
+}
+async function listModels(){
+ const r=await fetch(base()+'/models',{headers:authHeaders()});
+ if(!r.ok)throw await apiErr(r);
+ const j=await r.json();return (j.data||[]).map(x=>x.id).filter(Boolean);
+}
+async function ensureModel(){
+ const cur=(S.cfg.model[S.cfg.prov]||'').trim();if(cur)return cur;
+ let m=P().fallback;
+ try{const ids=(await listModels()).filter(i=>!/audio|realtime|tts|transcribe|search|image|embed|reasoner|vl|ocr|-\d{4}-\d\d-\d\d$/i.test(i)).sort().reverse();
+  for(const re of P().pick){const f=ids.find(i=>re.test(i));if(f){m=f;break}}
+  if(!m&&ids.length)m=ids[0];
+ }catch(e){if(!m)throw e}
+ if(!m)throw new Error('请在“我的 → AI 服务”里填写模型名');
+ S.cfg.model[S.cfg.prov]=m;save();return m;
+}
+function fixRoles(msgs){
+ const out=[];
+ for(const m of msgs){if(!m.content)continue;const l=out[out.length-1];if(l&&l.role===m.role)l.content+='\n'+m.content;else out.push({role:m.role,content:m.content})}
+ if(out.length&&out[0].role!=='user')out.unshift({role:'user',content:'(Start the conversation.)'});
+ return out;
+}
+async function* streamAI(system,msgs,signal){
+ if(!apiKey())throw new NeedKey('还没有填 AI 密钥');
+ if(!base())throw new Error('请先填写接口地址');
+ const model=await ensureModel();msgs=fixRoles(msgs);
+ const anth=P().type==='anthropic';
+ const body=anth?{model,max_tokens:1000,system,messages:msgs,stream:true}:{model,messages:[{role:'system',content:system},...msgs],stream:true};
+ const r=await fetch(base()+(anth?'/messages':'/chat/completions'),{method:'POST',headers:authHeaders(),body:JSON.stringify(body),signal});
+ if(!r.ok)throw await apiErr(r);
+ const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+ for(;;){
+  const {done,value}=await rd.read();if(done)break;
+  buf+=dec.decode(value,{stream:true});let i;
+  while((i=buf.indexOf('\n'))>=0){
+   const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+   if(!line.startsWith('data:'))continue;const d=line.slice(5).trim();if(d==='[DONE]')return;
+   let j;try{j=JSON.parse(d)}catch(e){continue}
+   if(anth){if(j.type==='content_block_delta'&&j.delta&&j.delta.text)yield j.delta.text;if(j.type==='error')throw new Error(j.error&&j.error.message||'服务出错')}
+   else{const c=j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content;if(c)yield c}
+  }
+ }
+}
+async function askAI(system,user,onText,signal){let t='';for await(const c of streamAI(system,[{role:'user',content:user}],signal)){t+=c;onText&&onText(t)}return t}
+
+/* ---------- 提示词 ---------- */
+function sysPrompt(sess){
+ const sc=SCENES.find(x=>x.id===sess.scene)||SCENES[0];
+ const scene=sess.scene==='custom'?'Role-play this situation the learner described (in Chinese or English): '+sess.custom+'. Stay in character.':sc.p;
+ return `You are Sam, a warm, upbeat American from California and an English conversation partner for a Chinese learner who wants to practice speaking. ${LEVELS[S.cfg.level].p}
+${scene}
+
+Every response MUST use exactly this plain-text format, one item per line, no markdown and nothing else:
+REPLY: <what you say out loud, in natural spoken American English, 1-3 short sentences; usually end with a question to keep the conversation going>
+ZH: <natural Chinese translation of REPLY>
+FIX: <the learner's wrong or unnatural words> => <how an American would naturally say it> || <一句简短的中文说明>
+SAY: <useful English expression> || <中文意思> || <简短中文用法提示，可省略>
+
+Rules:
+- FIX: only when the learner's latest message is in English and has a real grammar or word-choice error, or sounds clearly unnatural. 0-2 FIX lines. Never correct Chinese input. Ignore punctuation and capitalization, the input comes from speech recognition.
+- SAY: 0-3 lines, only genuinely useful expressions.
+- If the learner writes in Chinese or asks how to say something (e.g. "…怎么说", "用英语", "how do I say"): in REPLY give the single most natural way an American would actually say it (e.g. You could say: "..."), then invite them to try saying it. Put 2-3 alternatives in SAY lines (casual / neutral / formal) with Chinese meaning and when to use each.
+- If the learner asks any question (about English, facts, advice, anything at all), answer it helpfully and briefly in REPLY in simple spoken English, then keep the conversation going.
+- If the learner's text looks like garbled speech recognition, guess what they meant.
+- REPLY must be easy to read aloud: no lists, emojis, brackets or stage directions.`;
+}
+const SYS_HINT=`You help a Chinese learner who is stuck in an English conversation. Based on the conversation, suggest 3 things the learner could say next, from simple to more advanced, in natural spoken American English. Output exactly 3 lines, nothing else:
+OPT: <English sentence> || <中文意思>`;
+const SYS_REVIEW=`You are an experienced American English speaking coach reviewing a Chinese learner's practice conversation. Output plain text in exactly this line format, no markdown:
+SUMMARY: <用中文写 2-3 句总体评价：流利度、用词、主要问题>
+GOOD: <用中文写一个做得好的地方>
+FIX: <learner's original words> => <natural American version> || <简短中文说明>
+SAY: <useful expression for this topic> || <中文意思> || <简短中文用法提示>
+NEXT: <用中文写一句下次练习的建议>
+Give up to 6 FIX lines (most important first, only real problems in the learner's English) and 4-6 SAY lines.`;
+const SYS_EXPLAIN='你是耐心的美式英语老师。用中文简洁讲解用户给的英语句子：先给整句意思，再讲 2-4 个关键词或短语（意思和用法），最后一句说明口语里的语气或什么时候用。纯文本，不要用 markdown 符号，不要 * 或 #。';
+
+function parseOut(t){
+ const o={reply:'',zh:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
+ for(const raw of t.replace(/\*\*/g,'').split('\n')){
+  const line=raw.trim();if(!line)continue;
+  const m=line.match(/^[-•]?\s*(REPLY|ZH|FIX|SAY|OPT|SUMMARY|GOOD|NEXT)\s*[:：]\s*(.*)$/i);
+  if(m){cur=m[1].toUpperCase();const v=m[2];
+   if(cur==='FIX'||cur==='SAY'||cur==='OPT')o[cur.toLowerCase()].push(v);else o[cur.toLowerCase()]=v;}
+  else if(cur===null||cur==='REPLY')o.reply+=(o.reply?' ':'')+line;
+  else if(['ZH','SUMMARY','GOOD','NEXT'].includes(cur))o[cur.toLowerCase()]+=line;
+ }
+ const sp=s=>s.split(/\s*\|\|\s*/).map(x=>x.trim().replace(/^["“]|["”]$/g,''));
+ o.fix=o.fix.map(s=>{const [a,rest='']=s.split(/\s*=>\s*/);const [b,why='']=sp(rest);return {from:a.trim().replace(/^["“]|["”]$/g,''),to:b,why}}).filter(f=>f.to);
+ o.say=o.say.map(s=>{const [en,zh='',note='']=sp(s);return {en,zh,note}}).filter(s=>s.en&&!/^[<（(]/.test(s.en));
+ o.opt=o.opt.map(s=>{const [en,zh='']=sp(s);return {en,zh}}).filter(s=>s.en);
+ o.reply=o.reply.trim();return o;
+}
+const replyDone=t=>/\n\s*(ZH|FIX|SAY)\s*[:：]/i.test(t);
+
+/* ---------- 发音 ---------- */
+const AU=new Audio();AU.playsInline=true;
+let voices=[],UTT=null,speakEnd=null;
+const GOOD=/Premium|Enhanced|高级|优化|Natural|Neural|Siri/i;
+function loadVoices(){if(!('speechSynthesis' in window))return;voices=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang)).sort((a,b)=>(GOOD.test(b.name)-GOOD.test(a.name))||(/Ava|Samantha|Evan|Zoe|Nathan|Allison|Tom|Susan/.test(b.name)-/Ava|Samantha|Evan|Zoe|Nathan|Allison|Tom|Susan/.test(a.name)))}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+const pickVoice=()=>voices.find(v=>v.name===S.cfg.sysVoice)||voices[0]||null;
+const clean=t=>String(t||'').replace(/[*_#`~<>]/g,'').replace(/\s+/g,' ').trim();
+function stopSpeak(){if(speakEnd){const f=speakEnd;speakEnd=null;f()}try{AU.pause()}catch(e){}if('speechSynthesis' in window)speechSynthesis.cancel()}
+function speak(text,slow=false){
+ stopSpeak();text=clean(text);if(!text)return Promise.resolve();
+ if(S.cfg.tts==='openai'&&oaiKey())return speakOAI(text,slow).catch(e=>{if(e&&e.name==='AbortError')return;toast('真人发音失败，已改用系统声音');return speakSys(text,slow)});
+ return speakSys(text,slow);
+}
+function speakSys(text,slow){
+ return new Promise(res=>{
+  if(!('speechSynthesis' in window)){toast('此浏览器不支持朗读');return res()}
+  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=pickVoice();if(v)u.voice=v;
+  u.rate=Math.max(.5,S.cfg.rate*(slow?.7:1));UTT=u;
+  const t=setTimeout(done,text.length*150+4000);
+  function done(){clearTimeout(t);if(speakEnd===done)speakEnd=null;res()}
+  speakEnd=done;u.onend=done;u.onerror=done;speechSynthesis.speak(u);
+ });
+}
+const ttsCache=new Map();
+async function speakOAI(text,slow){
+ const k=S.cfg.oaiVoice+'|'+text;let url=ttsCache.get(k);
+ if(!url){
+  const r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+oaiKey()},body:JSON.stringify({model:'gpt-4o-mini-tts',voice:S.cfg.oaiVoice,input:text,instructions:'Speak in a natural, warm, friendly General American accent at a relaxed conversational pace, like a real person chatting.',response_format:'mp3'})});
+  if(!r.ok)throw await apiErr(r);
+  url=URL.createObjectURL(await r.blob());ttsCache.set(k,url);
+ }
+ return new Promise((res,rej)=>{
+  function done(){if(speakEnd===done)speakEnd=null;AU.onended=AU.onerror=null;res()}
+  speakEnd=done;AU.onended=done;AU.onerror=done;AU.src=url;AU.playbackRate=Math.max(.5,S.cfg.rate*(slow?.75:1));
+  AU.play().catch(e=>{speakEnd=null;rej(e)});
+ });
+}
+function unlockAudio(){
+ const n=800,b=new ArrayBuffer(44+n*2),d=new DataView(b);const w=(o,s)=>[...s].forEach((c,i)=>d.setUint8(o+i,c.charCodeAt(0)));
+ w(0,'RIFF');d.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,16000,true);d.setUint32(28,32000,true);d.setUint16(32,2,true);d.setUint16(34,16,true);w(36,'data');d.setUint32(40,n*2,true);
+ AU.src=URL.createObjectURL(new Blob([b],{type:'audio/wav'}));AU.play().catch(()=>{});
+ if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}
+}
+document.addEventListener('pointerdown',unlockAudio,{once:true});
+
+/* ---------- 语音识别 ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let REC=null;
+function asrEngine(){
+ if(S.cfg.asr==='openai')return oaiKey()?'openai':(SR?'system':null);
+ if(S.cfg.asr==='system')return SR?'system':(oaiKey()?'openai':null);
+ return SR?'system':(oaiKey()?'openai':null);
+}
+function listen(lang,onInterim){
+ const eng=asrEngine();
+ if(!eng)return Promise.reject(new Error('这个浏览器不支持语音识别。可以点输入框，用键盘上的麦克风听写；或在“我的”里填 OpenAI 密钥启用云端识别'));
+ if(eng==='openai')return listenOAI(lang,onInterim);
+ return new Promise((resolve,reject)=>{
+  const r=new SR();r.lang=lang==='zh'?'zh-CN':'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+  let fin='',inter='',err='';
+  r.onresult=e=>{fin='';inter='';for(const x of e.results){if(x.isFinal)fin+=x[0].transcript;else inter+=x[0].transcript}onInterim&&onInterim((fin+inter).trim())};
+  r.onerror=e=>{err=e.error};
+  r.onend=()=>{REC=null;const t=(fin||inter).trim();
+   if(t)return resolve(t);
+   if(err==='not-allowed'||err==='service-not-allowed'){
+    if(oaiKey()&&S.cfg.asr==='auto'){S.cfg.asr='openai';save();toast('系统识别不可用，已切换到云端识别');return listenOAI(lang,onInterim).then(resolve,reject)}
+    return reject(new Error(err==='not-allowed'?'没有麦克风权限，请在系统设置里允许，或点一下再试':'这里用不了系统语音识别，可用键盘麦克风听写，或在“我的”里填 OpenAI 密钥'));
+   }
+   if(err&&!['no-speech','aborted'].includes(err))return reject(new Error('识别出错：'+err));
+   resolve('');
+  };
+  REC={stop:()=>{try{r.stop()}catch(e){}},abort:()=>{try{r.abort()}catch(e){}}};
+  try{r.start()}catch(e){REC=null;reject(e)}
+ });
+}
+async function listenOAI(lang,onInterim){
+ const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+ const mime=['audio/mp4','audio/webm;codecs=opus','audio/webm'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
+ const mr=new MediaRecorder(stream,mime?{mimeType:mime}:{});const chunks=[];
+ mr.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+ const ac=new (window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser();ac.createMediaStreamSource(stream).connect(an);
+ const buf=new Uint8Array(an.fftSize);let heard=false,quiet=0,t0=Date.now(),cancelled=false;
+ onInterim&&onInterim('正在听…说完停顿一下即可');
+ const stopped=new Promise(r=>mr.onstop=r);
+ const tick=setInterval(()=>{an.getByteTimeDomainData(buf);let s=0;for(const v of buf)s+=(v-128)**2;const rms=Math.sqrt(s/buf.length);
+  if(rms>9){heard=true;quiet=0}else if(heard)quiet+=100;
+  if((heard&&quiet>1400)||Date.now()-t0>45000||(!heard&&Date.now()-t0>9000))stop()},100);
+ function stop(){clearInterval(tick);if(mr.state!=='inactive')mr.stop()}
+ REC={stop,abort:()=>{cancelled=true;stop()}};
+ mr.start();await stopped;REC=null;stream.getTracks().forEach(t=>t.stop());ac.close();
+ if(cancelled||!heard)return '';
+ onInterim&&onInterim('识别中…');
+ const fd=new FormData();fd.append('file',new Blob(chunks,{type:mr.mimeType||'audio/mp4'}),/webm/.test(mr.mimeType)?'speech.webm':'speech.m4a');
+ fd.append('model','gpt-4o-mini-transcribe');if(lang==='zh')fd.append('language','zh');
+ const r=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{authorization:'Bearer '+oaiKey()},body:fd});
+ if(!r.ok)throw await apiErr(r);
+ return ((await r.json()).text||'').trim();
+}
+
+/* ---------- 会话 ---------- */
+const curSess=()=>S.sessions.find(s=>s.id===S.cur);
+function newSession(scene='free',custom=''){
+ const s={id:uid(),scene,custom,created:Date.now(),msgs:[]};S.sessions.unshift(s);
+ if(S.sessions.length>60)S.sessions.length=60;S.cur=s.id;save();return s;
+}
+function sessTitle(s){const sc=SCENES.find(x=>x.id===s.scene);if(s.scene==='custom')return s.custom.slice(0,18)||'自定义场景';return sc?sc.t:'对话'}
+let lastAct=0;
+function tickTime(){const n=Date.now();const add=lastAct?Math.min(n-lastAct,120000):20000;lastAct=n;const d=today();S.days[d]=(S.days[d]||0)+Math.round(add/1000)}
+let busy=false,ctrl=null;
+
+async function sendText(text){
+ text=text.trim();if(!text||busy)return;
+ let s=curSess();if(!s)s=newSession();
+ s.msgs=s.msgs.filter(m=>m.role!=='err');
+ s.msgs.push({role:'user',text,t:Date.now()});S.turns++;tickTime();save();
+ $('#txt').value='';autoGrow();renderChat(true);
+ await runAI(s);
+}
+async function runAI(s,hiddenUser){
+ busy=true;ctrl=new AbortController();
+ if(hiddenUser)s.msgs.push({role:'user',text:hiddenUser,hidden:true});
+ const m={role:'ai',text:'',t:Date.now(),live:true};s.msgs.push(m);renderChat(true);
+ const hist=s.msgs.filter(x=>x!==m&&x.role!=='err').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
+ let raw='',spoke=null;callState('think');
+ try{
+  for await(const c of streamAI(sysPrompt(s),hist,ctrl.signal)){
+   raw+=c;const o=parseOut(raw);m.text=o.reply;updLive(m);
+   if(!spoke&&replyDone(raw)&&o.reply&&(S.cfg.autoplay||CALL))spoke=say(o.reply);
+  }
+  const o=parseOut(raw);
+  Object.assign(m,{text:o.reply||raw.trim(),zh:o.zh,say:o.say});delete m.live;
+  if(o.fix.length){const u=[...s.msgs].reverse().find(x=>x.role==='user'&&!x.hidden&&x!==m);if(u)u.fix=o.fix}
+  save();busy=false;renderChat(true);
+  if(!spoke&&m.text&&(S.cfg.autoplay||CALL))spoke=say(m.text);
+  if(CALL){callCap(m);await spoke;callNext()}
+ }catch(e){
+  busy=false;s.msgs.splice(s.msgs.indexOf(m),1);
+  if(e.name!=='AbortError'){s.msgs.push({role:'err',text:e.message||String(e)});if(e instanceof NeedKey)setTimeout(()=>{go('mev');toast('先在这里填好 AI 密钥')},600)}
+  save();renderChat(true);if(CALL&&e.name!=='AbortError'){callState('idle','出错了：'+(e.message||e).slice(0,60))}
+ }
+}
+function say(t){if(CALL)callState('speak');return speak(t)}
+function updLive(m){const el=document.querySelector('.msg.ai[data-live] .en');if(el){el.textContent=m.text;el.classList.add('typing')}scrollEnd()}
+function scrollEnd(){const mn=$('#main');requestAnimationFrame(()=>mn.scrollTop=mn.scrollHeight)}
+
+/* ---------- 渲染 ---------- */
+function sayCard(x,src){
+ return `<div class="card say" data-en="${esc(x.en)}" data-zh="${esc(x.zh)}" data-note="${esc(x.note||'')}"><div class="t"><b>${esc(x.en)}</b><span>${esc(x.zh)}</span>${x.note?`<small>${esc(x.note)}</small>`:''}</div>
+ <button class="ib" data-a="p" aria-label="播放">${I.play}</button><button class="ib" data-a="sh" aria-label="跟读">${I.mic}</button><button class="ib ${inBook(x.en)?'on':''}" data-a="fav" aria-label="收藏">${I.star}</button></div>`;
+}
+const inBook=en=>S.book.some(b=>b.en.toLowerCase()===String(en).toLowerCase());
+function renderChat(scroll){
+ const s=curSess(),el=$('#chatv');
+ $('#title').textContent=s?sessTitle(s):'口语陪练';
+ const vis=s?s.msgs.filter(m=>!m.hidden):[];
+ if(!vis.length&&!busy){
+  el.innerHTML=`<div class="empty"><h2>Hi, I'm Sam 👋</h2><div>按住不用，<b>点一下麦克风</b>开口说，说完会自动发送。<br>用英语聊天，或者用中文问“…用英语怎么说”。</div>
+  <div class="chips">${['“我现在在桌子前用电脑呢”用英语怎么说？','Can we just chat for a bit?','“我有点社恐”地道的说法是什么？','帮我练一下点咖啡','How do Americans say “加油”?'].map(t=>`<button class="chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+  <div class="chips"><button class="chip" data-a="call" style="border-color:var(--pri);color:var(--pri);font-weight:600">进入通话模式，像打电话一样连续对话</button></div></div>`;
+ }else el.innerHTML=s.msgs.map((m,i)=>{
+  if(m.hidden)return '';
+  if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${(m.fix||[]).map(f=>`<div class="card fix"><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span> <button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px;vertical-align:middle">${I.play}</button>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
+  if(m.role==='err')return `<div class="msg ai"><div class="bub err">${esc(m.text)}<div class="tools"><button data-a="retry">重试</button><button data-a="toset">去设置</button></div></div></div>`;
+  return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}><div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${esc(m.text)}</div>
+   ${m.zh?`<div class="zh" ${S.cfg.showZh||m.zhOn?'':'hidden'}>${esc(m.zh)}</div>`:''}
+   ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button>${m.zh?`<button data-a="zh" class="${S.cfg.showZh||m.zhOn?'act':''}">中文</button>`:''}<button data-a="ex">讲解</button><button data-a="sh">跟读</button><button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
+   ${(m.say||[]).map(x=>sayCard(x)).join('')}</div>`;
+ }).join('');
+ renderBar2();if(scroll)scrollEnd();
+}
+function renderBar2(){
+ const s=curSess(),has=s&&s.msgs.some(m=>m.role==='ai'&&!m.live);
+ const on=$('#chatv').classList.contains('on')&&has;
+ $('#bar2').classList.toggle('on',on);
+ $('#bar2').innerHTML=on?`<button data-a="hint">我不知道怎么接</button><button data-a="call">通话模式</button><button data-a="review">结束并复盘</button><button data-a="new">新对话</button>`:'';
+}
+function renderHeader(v){
+ const h=$('#hbtns');
+ if(v==='chatv')h.innerHTML=`<button class="hb" data-a="level">${LEVELS[S.cfg.level].n}</button> <button class="hb" data-a="new">新对话</button>`;
+ else h.innerHTML='';
+ if(v==='scenev')$('#title').textContent='选一个场景';
+ if(v==='bookv')$('#title').textContent='表达本';
+ if(v==='mev')$('#title').textContent='我的';
+}
+function renderScenes(){
+ $('#scenev').innerHTML=`<div class="note" style="margin-top:2px">选好后 Sam 会先开口，你接着说就行。</div><div class="grid">${SCENES.map(s=>`<button class="scene" data-scene="${s.id}"><b>${s.t}</b><span>${s.d}</span></button>`).join('')}</div>
+ <div class="sec">今天的随机话题</div><button class="row" data-a="topic" style="width:100%;text-align:left"><div class="t"><div><b>换个话题聊聊</b></div><small>Sam 随机抛一个有意思的话题</small></div></button>`;
+}
+function dueList(){const d=today();return S.book.filter(b=>(b.due||d)<=d)}
+function renderBook(){
+ const q=(renderBook.q||'').toLowerCase();
+ const list=S.book.filter(b=>!q||b.en.toLowerCase().includes(q)||(b.zh||'').includes(q));
+ const due=dueList().length;
+ $('#bookv').innerHTML=`<div class="btns" style="margin:4px 0 12px"><button class="btn" data-a="drill" ${due?'':'disabled style="opacity:.5"'}>开始复习（${due} 条到期）</button></div>
+ <input id="search" placeholder="搜索英文或中文" value="${esc(renderBook.q||'')}">
+ ${list.length?list.map(b=>`<div class="row say" data-en="${esc(b.en)}" data-zh="${esc(b.zh)}" data-id="${b.id}"><div class="t"><b>${esc(b.en)}</b><span>${esc(b.zh||'')}</span>${b.note?`<small>${esc(b.note)}</small>`:''}</div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib" data-a="bdel">${I.del}</button></div>`).join(''):`<div class="empty">${S.book.length?'没有匹配的表达':'还没有收藏。对话里点 ☆ 就能把好用的说法存进来，之后按遗忘规律提醒你复习。'}</div>`}`;
+}
+function streak(){let n=0,d=today();if(!S.days[d])d=addDays(d,-1);while(S.days[d]){n++;d=addDays(d,-1)}return n}
+function renderMe(){
+ const c=S.cfg,p=P();
+ const mins=Math.round((S.days[today()]||0)/60);
+ const vs=voices.length?voices.map(v=>`<option value="${esc(v.name)}" ${v.name===(pickVoice()||{}).name?'selected':''}>${esc(v.name)}${GOOD.test(v.name)?' ★':''}</option>`).join(''):'<option>系统暂未提供美式声音</option>';
+ $('#mev').innerHTML=`<div class="stats"><div class="stat"><b>${mins}</b><span>今日分钟</span></div><div class="stat"><b>${streak()}</b><span>连续天数</span></div><div class="stat"><b>${S.turns}</b><span>累计开口</span></div><div class="stat"><b>${S.book.length}</b><span>收藏表达</span></div></div>
+ <div class="sec">历史对话</div>
+ ${S.sessions.filter(s=>s.msgs.some(m=>!m.hidden)).slice(0,8).map(s=>{const l=s.msgs.filter(m=>!m.hidden&&m.role!=='err').slice(-1)[0];return `<div class="row" data-sid="${s.id}"><div class="t" data-a="open"><div><b>${esc(sessTitle(s))}</b></div><small>${new Date(s.created).toLocaleDateString('zh-CN')} · ${esc((l&&l.text||'').slice(0,40))}</small></div><button class="ib" data-a="sdel">${I.del}</button></div>`}).join('')||'<div class="note">还没有对话记录。</div>'}
+ <div class="sec">AI 服务</div>
+ <div class="set">
+  <label><span>服务商</span><select id="c-prov">${Object.entries(PROV).map(([k,v])=>`<option value="${k}" ${k===c.prov?'selected':''}>${v.name}</option>`).join('')}</select></label>
+  ${c.prov==='custom'?`<label><span>接口地址</span><input type="text" id="c-base" value="${esc(c.base)}" placeholder="https://…/v1" autocomplete="off" autocapitalize="off"></label>`:''}
+  <label><span>API 密钥</span><input type="password" id="c-key" value="${esc(c.keys[c.prov]||'')}" placeholder="粘贴 sk-… 密钥" autocomplete="off" autocapitalize="off"></label>
+  <label><span>模型</span><input type="text" id="c-model" value="${esc(c.model[c.prov]||'')}" placeholder="留空自动选择" autocomplete="off" autocapitalize="off"></label>
+ </div>
+ <div class="btns"><button class="btn g" data-a="test">测试连接</button><button class="btn g" data-a="models">选择模型</button></div>
+ <div class="note">密钥只存在这台手机上，只发给你选的服务商。${p.url?`在 ${p.url} 注册并创建 API Key。`:''}聊天一次大约几厘钱。</div>
+ <div class="sec">发音（Sam 的声音）</div>
+ <div class="set">
+  <div class="li"><span>发音来源</span><div class="seg" id="c-tts"><button data-v="system" class="${c.tts==='system'?'on':''}">手机自带</button><button data-v="openai" class="${c.tts==='openai'?'on':''}">OpenAI 真人</button></div></div>
+  ${c.tts==='system'?`<label><span>美式声音</span><select id="c-voice">${vs}</select></label>`:`<label><span>声音</span><select id="c-ovoice">${OAI_VOICES.map(v=>`<option ${v===c.oaiVoice?'selected':''}>${v}</option>`).join('')}</select></label>`}
+  <label><span>语速 <b id="ratev">${c.rate.toFixed(2)}</b></span><input type="range" id="c-rate" min="0.6" max="1.3" step="0.05" value="${c.rate}"></label>
+  <label><span>自动朗读</span><input type="checkbox" id="c-auto" ${c.autoplay?'checked':''}></label>
+  <div class="li"><span>试听</span><button class="hb" data-a="testv">Hey! How's it going? What are you up to today?</button></div>
+ </div>
+ <div class="note">${c.tts==='system'?'手机自带声音想更像真人：iPhone 设置 → 辅助功能 → 朗读内容 → 声音 → 英语 → 美国，下载 <b>Ava（高级）</b>或 Evan/Zoe 的“高级/优化”版本，回来在上面选带 ★ 的。':'用 OpenAI 的 gpt-4o-mini-tts，语气最自然，每句大约 0.1 分钱，需要代理。'}</div>
+ <div class="set" style="margin-top:8px"><label><span>OpenAI 密钥</span><input type="password" id="c-okey" value="${esc(c.prov==='openai'?(c.keys.openai||''):c.oaiKey)}" ${c.prov==='openai'?'disabled':''} placeholder="可选：真人发音 / 云端识别" autocomplete="off" autocapitalize="off"></label>
+  <div class="li"><span>语音识别</span><div class="seg" id="c-asr"><button data-v="auto" class="${c.asr==='auto'?'on':''}">自动</button><button data-v="system" class="${c.asr==='system'?'on':''}">系统</button><button data-v="openai" class="${c.asr==='openai'?'on':''}">云端</button></div></div></div>
+ <div class="note">识别默认用手机系统的；系统识别用不了时，填了 OpenAI 密钥会自动换成云端识别（中英混说也能认）。</div>
+ <div class="sec">练习方式</div>
+ <div class="set">
+  <div class="li"><span>难度</span><div class="seg" id="c-level">${Object.entries(LEVELS).map(([k,v])=>`<button data-v="${k}" class="${k===c.level?'on':''}">${v.n}</button>`).join('')}</div></div>
+  <label><span>总显示中文</span><input type="checkbox" id="c-zh" ${c.showZh?'checked':''}></label>
+  <label><span>听力挑战</span><input type="checkbox" id="c-blur" ${c.blurEn?'checked':''}></label>
+ </div>
+ <div class="note">听力挑战：Sam 的英文先打码，听不懂再点开看。</div>
+ <div class="sec">数据</div>
+ <div class="btns"><button class="btn g" data-a="export">备份到文件</button><button class="btn g" data-a="import">从备份恢复</button></div>
+ <div class="note">数据只存在这台手机的这个 App 里。备份文件不含密钥。版本 ${VER}</div>`;
+}
+
+/* ---------- 弹层 ---------- */
+function sheet(html){$('#sheet').innerHTML=html;$('#mask').style.display='block';sheet.open=true;requestAnimationFrame(()=>{if(sheet.open)$('#sheet').classList.add('on')})}
+function closeSheet(){sheet.open=false;$('#sheet').classList.remove('on');$('#mask').style.display='none';if(REC)REC.abort();if(sheet.ctrl)sheet.ctrl.abort()}
+$('#mask').onclick=closeSheet;
+const sheetHead=t=>`<h3><span>${t}</span><button class="ib" data-a="close">${I.x}</button></h3>`;
+
+async function streamSheet(title,sys,user,render){
+ sheet(sheetHead(title)+`<div class="pre" id="sp">思考中…</div>`);
+ sheet.ctrl=new AbortController();
+ try{const t=await askAI(sys,user,t=>{const el=$('#sp');if(el)el.textContent=render?'生成中…':t},sheet.ctrl.signal);if(render)render(t)}
+ catch(e){if(e.name!=='AbortError'){const el=$('#sp');if(el)el.textContent=e.message;if(e instanceof NeedKey){closeSheet();go('mev')}}}
+}
+const transcript=s=>s.msgs.filter(m=>!m.hidden&&m.role!=='err').map(m=>(m.role==='ai'?'Sam: ':'Learner: ')+m.text).join('\n');
+
+function openHint(){
+ const s=curSess();if(!s)return;
+ sheet(sheetHead('可以这样接')+`<div class="pre" id="sp">想几种说法…</div>`);sheet.ctrl=new AbortController();
+ askAI(SYS_HINT,'Conversation so far:\n'+transcript(s).slice(-3000),null,sheet.ctrl.signal).then(t=>{
+  const o=parseOut(t);if(!$('#sp'))return;
+  $('#sp').outerHTML=(o.opt.length?o.opt:[{en:t,zh:''}]).map(x=>sayCard(x)).join('')+`<div class="note">点 ▶ 听一遍，点 🎤 跟着说；也可以直接回到对话自己说。</div>`;
+  if(CALL)callCap(null,o.opt.map(x=>x.en).join(' / '));
+ }).catch(e=>{if(e.name!=='AbortError'&&$('#sp'))$('#sp').textContent=e.message});
+}
+function openReview(){
+ const s=curSess();if(!s||!s.msgs.some(m=>m.role==='user'&&!m.hidden))return toast('先聊几句再复盘');
+ sheet(sheetHead('这次对话复盘')+`<div class="pre" id="sp">Sam 正在看你们的对话…</div>`);sheet.ctrl=new AbortController();
+ askAI(SYS_REVIEW,'Conversation:\n'+transcript(s).slice(-8000),null,sheet.ctrl.signal).then(t=>{
+  const o=parseOut(t);if(!$('#sp'))return;
+  s.review=o;save();
+  $('#sp').outerHTML=`${o.summary?`<div class="card">${esc(o.summary)}</div>`:''}${o.good?`<div class="card"><b style="color:var(--ok)">做得好：</b>${esc(o.good)}</div>`:''}
+  ${o.fix.length?`<div class="sec">可以说得更地道</div>`+o.fix.map(f=>`<div class="card fix" style="max-width:none"><span class="from">${esc(f.from)}</span><br><span class="to">${esc(f.to)}</span> <button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px;vertical-align:middle">${I.play}</button><div class="why">${esc(f.why)}</div></div>`).join(''):''}
+  ${o.say.length?`<div class="sec">这个话题常用的说法</div>`+o.say.map(x=>sayCard(x)).join(''):''}
+  ${o.next?`<div class="card"><b>下次试试：</b>${esc(o.next)}</div>`:''}
+  ${!o.summary&&!o.say.length?`<div class="pre">${esc(t)}</div>`:''}
+  <div class="btns"><button class="btn g" data-a="addall">全部收藏</button><button class="btn" data-a="new">开始新对话</button></div>`;
+  sheet.review=o;
+ }).catch(e=>{if(e.name!=='AbortError'&&$('#sp'))$('#sp').textContent=e.message});
+}
+function openExplain(text){streamSheet('讲解',SYS_EXPLAIN,text,null);$('#sheet h3 span').textContent='讲解';const p=$('#sp');if(p)p.insertAdjacentHTML('beforebegin',`<div class="card" style="margin-bottom:10px"><b>${esc(text)}</b></div>`)}
+
+/* 跟读打分 */
+const words=s=>clean(s).toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9' ]+/g,' ').split(' ').filter(Boolean);
+function compare(target,said){
+ const a=words(target),b=words(said),n=a.length,m=b.length;
+ const dp=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+ for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+ const ok=new Array(n).fill(false);let i=0,j=0;
+ while(i<n&&j<m){if(a[i]===b[j]){ok[i]=true;i++;j++}else if(dp[i+1][j]>=dp[i][j+1])i++;else j++}
+ const hit=ok.filter(Boolean).length;
+ const score=n?Math.round(100*hit/Math.max(n,(n+m)/2)):0;
+ const toks=clean(target).split(' ');let k=0;
+ const html=toks.map(t=>{const w=words(t);if(!w.length)return esc(t);const good=w.every(()=>ok[k++]);return `<span class="${good?'w-ok':'w-miss'}">${esc(t)}</span>`}).join(' ');
+ return {score,html};
+}
+function openShadow(en,zh){
+ sheet(sheetHead('跟读')+`<div class="card" style="text-align:center"><div class="words" id="sw">${esc(en)}</div>${zh?`<div class="zh">${esc(zh)}</div>`:''}</div>
+ <div class="btns"><button class="btn g" data-a="sp">${'听原声'}</button><button class="btn g" data-a="sps">慢速听</button></div>
+ <div id="sres" class="note" style="text-align:center;min-height:70px;margin-top:12px">先听一遍，再点下面的按钮跟着说</div>
+ <button class="btn" data-a="srec" id="srec">开始跟读</button>`);
+ sheet.shadow={en,zh};
+}
+async function doShadow(){
+ const {en}=sheet.shadow,res=$('#sres'),b=$('#srec');
+ if(REC){REC.stop();return}
+ stopSpeak();b.textContent='说完点这里结束';b.style.background='var(--bad)';
+ try{
+  const said=await listen('en',t=>res.textContent=t||'正在听…');
+  b.textContent='再说一次';b.style.background='';
+  if(!said){res.textContent='没听到声音，再试一次';return}
+  const {score,html}=compare(en,said);
+  $('#sw').innerHTML=html;
+  res.innerHTML=`<div class="score" style="color:${score>=85?'var(--ok)':score>=60?'var(--warn)':'var(--bad)'}">${score}</div><div>${score>=85?'很棒，非常清楚！':score>=60?'不错，红色的词再练练':'红色的词没听清，慢速听一遍再来'}</div><div style="margin-top:4px">识别到：${esc(said)}</div>`;
+  tickTime();save();return score;
+ }catch(e){b.textContent='再试一次';b.style.background='';res.textContent=e.message}
+}
+
+/* 表达本复习 */
+function addBook(x,quiet){
+ if(!x.en)return;if(inBook(x.en)){S.book=S.book.filter(b=>b.en.toLowerCase()!==x.en.toLowerCase());save();if(!quiet)toast('已从表达本移除');return false}
+ S.book.unshift({id:uid(),en:x.en,zh:x.zh||'',note:x.note||'',box:0,due:addDays(today(),1),added:Date.now()});save();if(!quiet)toast('已收藏，明天提醒你复习');return true;
+}
+const BOX=[1,2,4,7,15,30,60];
+function startDrill(){const q=dueList().slice(0,20);if(!q.length)return toast('今天没有要复习的');drill.q=q;drill.i=0;drill.show=false;drill.done=0;drillRender()}
+function drill(){}
+function drillRender(){
+ const b=drill.q[drill.i];
+ if(!b){sheet(sheetHead('复习完成')+`<div class="empty"><h2>复习完 ${drill.done} 条</h2>明天继续，记得越来越牢。</div><button class="btn" data-a="close">好的</button>`);renderBook();return}
+ sheet(sheetHead(`复习 ${drill.i+1}/${drill.q.length}`)+`<div class="card" style="text-align:center;padding:18px 12px"><div style="font-size:19px;font-weight:600">${esc(b.zh||'(无中文)')}</div>${b.note?`<div class="zh">${esc(b.note)}</div>`:''}
+ <div class="words" id="sw" style="${drill.show?'':'filter:blur(7px)'}">${esc(b.en)}</div></div>
+ <div class="note" style="text-align:center">先试着用英语说出来，再看答案</div>
+ <div id="sres" class="note" style="text-align:center;min-height:56px"></div>
+ <div class="btns"><button class="btn" data-a="srec" id="srec">说出来</button><button class="btn g" data-a="dshow">看答案并播放</button></div>
+ <div class="btns"><button class="btn r" data-a="dno">没记住</button><button class="btn g" data-a="dok" style="color:var(--ok)">记住了</button></div>`);
+ sheet.shadow={en:b.en,zh:b.zh};
+}
+function drillMark(ok){
+ const b=drill.q[drill.i];const real=S.book.find(x=>x.id===b.id);
+ if(real){if(ok){real.box=Math.min((real.box||0)+1,BOX.length-1);real.due=addDays(today(),BOX[real.box])}else{real.box=0;real.due=addDays(today(),1)}}
+ if(ok)drill.done++;else drill.q.push(b);
+ drill.i++;drill.show=false;save();drillRender();
+}
+
+/* ---------- 通话模式 ---------- */
+let CALL=false;
+function callState(st,txt){if(!CALL)return;$('#call').className='on '+st;$('#cstate').textContent=txt||{listen:'在听你说…',think:'Sam 在想…',speak:'Sam 在说（点圆圈打断）',idle:'点圆圈开始说'}[st]||''}
+function callCap(m,extra){if(!CALL)return;const s=curSess();m=m||[...s.msgs].reverse().find(x=>x.role==='ai'&&!x.live);
+ $('#ccap').innerHTML=extra?`<small>可以这样说：</small>${esc(extra)}`:(m?`${esc(m.text)}${S.cfg.showZh&&m.zh?`<small>${esc(m.zh)}</small>`:''}`:'')}
+async function enterCall(){
+ let s=curSess();if(!s)s=newSession();
+ CALL=true;$('#call').classList.add('on');$('#cscene').textContent=sessTitle(s);$('#clang').textContent=S.cfg.lang==='zh'?'中':'EN';
+ go('chatv');callCap();$('#cme').textContent='';
+ const last=s.msgs.filter(m=>!m.hidden&&m.role!=='err').slice(-1)[0];
+ if(!last||last.role==='user'){await runAI(s,last?undefined:'(Greet me casually and ask what I want to talk about. Keep it short.)')}
+ else callNext();
+}
+function exitCall(){CALL=false;$('#call').className='';if(REC)REC.abort();stopSpeak();if(ctrl)ctrl.abort();renderChat(true)}
+let callMiss=0;
+async function callNext(){
+ if(!CALL)return;if(REC)return;
+ callState('listen');$('#cme').textContent='';
+ try{
+  const t=await listen(S.cfg.lang,x=>$('#cme').textContent=x);
+  if(!CALL)return;
+  if(!t){if(++callMiss>=2){callMiss=0;return callState('idle')}return callNext()}
+  callMiss=0;$('#cme').textContent='你：'+t;await sendText(t);
+ }catch(e){callState('idle',e.message.slice(0,60))}
+}
+$('#orb').onclick=()=>{if(!CALL)return;if(busy&&ctrl&&!speakEnd)return;if(speakEnd){stopSpeak();return}if(REC){REC.stop();return}callNext()};
+$('#cend').onclick=exitCall;
+$('#clang').onclick=()=>{S.cfg.lang=S.cfg.lang==='en'?'zh':'en';save();$('#clang').textContent=S.cfg.lang==='zh'?'中':'EN';$('#lang').textContent=$('#clang').textContent;if(REC){REC.abort()}};
+$('#chint').onclick=()=>{if(REC)REC.abort();stopSpeak();callState('idle');openHint()};
+
+/* ---------- 输入区 ---------- */
+const txt=$('#txt');
+function autoGrow(){txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeight,120)+'px';const has=txt.value.trim().length>0;$('#send').style.display=has?'flex':'none'}
+txt.addEventListener('input',autoGrow);
+txt.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendText(txt.value)}});
+$('#send').onclick=()=>sendText(txt.value);
+$('#lang').onclick=()=>{S.cfg.lang=S.cfg.lang==='en'?'zh':'en';save();$('#lang').textContent=S.cfg.lang==='zh'?'中':'EN';toast(S.cfg.lang==='zh'?'现在说中文（问怎么说）':'现在说英语')};
+$('#lang').textContent=S.cfg.lang==='zh'?'中':'EN';
+$('#mic').onclick=async()=>{
+ if(REC){REC.stop();return}
+ if(busy)return toast('Sam 还在回复…');
+ stopSpeak();const mic=$('#mic');mic.classList.add('rec');const before=txt.value;
+ txt.placeholder=S.cfg.lang==='zh'?'请说中文…':'Speak English…';
+ try{
+  const t=await listen(S.cfg.lang,x=>{txt.value=(before?before+' ':'')+x;autoGrow()});
+  mic.classList.remove('rec');txt.placeholder='说英语，或用中文问“…怎么说”';
+  const all=((before?before+' ':'')+t).trim();txt.value=all;autoGrow();
+  if(t)sendText(all);
+ }catch(e){mic.classList.remove('rec');txt.placeholder='说英语，或用中文问“…怎么说”';toast(e.message,4000)}
+};
+
+/* ---------- 导航与事件 ---------- */
+function go(v){
+ document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===v));
+ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+ $('#composer').classList.toggle('on',v==='chatv');
+ renderHeader(v);
+ if(v==='chatv')renderChat(true);if(v==='scenev')renderScenes();if(v==='bookv')renderBook();if(v==='mev')renderMe();
+ renderBar2();if(v!=='chatv')$('#main').scrollTop=0;
+}
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
+
+function startScene(id){
+ if(id==='custom'){
+  sheet(sheetHead('自定义场景')+`<textarea id="cust" rows="4" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card)" placeholder="例如：我在美国租房，和房东沟通热水器坏了要修"></textarea><div class="btns"><button class="btn" data-a="custgo">开始</button></div>`);
+  setTimeout(()=>$('#cust').focus(),300);return;
+ }
+ const s=newSession(id);go('chatv');runAI(s,'(Start the role-play now: say your short opening line in character.)');
+}
+
+document.body.addEventListener('click',async e=>{
+ const t=e.target.closest('[data-a],[data-chip],[data-scene]');if(!t)return;
+ if(t.dataset.chip){txt.value=t.dataset.chip;sendText(t.dataset.chip);return}
+ if(t.dataset.scene)return startScene(t.dataset.scene);
+ const a=t.dataset.a,msgEl=t.closest('.msg'),s=curSess();
+ const m=msgEl&&s?s.msgs[+msgEl.dataset.i]:null;
+ const card=t.closest('[data-en]');
+ switch(a){
+  case 'close':return closeSheet();
+  case 'play':return speak(m.text);
+  case 'slow':return speak(m.text,true);
+  case 'reveal':if(m&&!m.shown&&S.cfg.blurEn){m.shown=true;t.classList.remove('blur');save()}return;
+  case 'zh':m.zhOn=!(m.zhOn||S.cfg.showZh);if(S.cfg.showZh&&!m.zhOn){S.cfg.showZh=false}save();return renderChat();
+  case 'ex':return openExplain(m.text);
+  case 'sh':return card&&!m?openShadow(card.dataset.en,card.dataset.zh):openShadow(m?m.text:card.dataset.en,m?m.zh:card.dataset.zh);
+  case 'favm':addBook({en:m.text,zh:m.zh});return renderChat();
+  case 'p':return speak(card.dataset.en);
+  case 'pf':return speak(t.dataset.en);
+  case 'fav':{const on=addBook({en:card.dataset.en,zh:card.dataset.zh,note:card.dataset.note});t.classList.toggle('on',!!on);return}
+  case 'retry':{if(!s)return;s.msgs=s.msgs.filter(x=>x.role!=='err');save();return runAI(s)}
+  case 'toset':return go('mev');
+  case 'new':closeSheet();newSession();return go('chatv');
+  case 'level':{const ks=Object.keys(LEVELS);S.cfg.level=ks[(ks.indexOf(S.cfg.level)+1)%ks.length];save();renderHeader('chatv');return toast('难度：'+LEVELS[S.cfg.level].n+'（从下一句开始生效）')}
+  case 'hint':return openHint();
+  case 'review':return openReview();
+  case 'call':return enterCall();
+  case 'addall':{const o=sheet.review;if(!o)return;let n=0;o.fix.forEach(f=>{if(!inBook(f.to)){addBook({en:f.to,zh:'改地道：'+f.from,note:f.why},true);n++}});o.say.forEach(x=>{if(!inBook(x.en)){addBook(x,true);n++}});document.querySelectorAll('#sheet .say [data-a=fav]').forEach(b=>b.classList.add('on'));toast(`收藏了 ${n} 条`);return}
+  case 'topic':{const s2=newSession('opinion');go('chatv');return runAI(s2,'(Pick a fun, random everyday topic, different from remote work, and start chatting about it with a short opener and a question.)')}
+  case 'custgo':{const v=($('#cust').value||'').trim();if(!v)return toast('写一句场景描述');closeSheet();const s2=newSession('custom',v);go('chatv');return runAI(s2,'(Start the role-play now: say your short opening line in character.)')}
+  case 'sp':return speak(sheet.shadow.en);
+  case 'sps':return speak(sheet.shadow.en,true);
+  case 'srec':return doShadow();
+  case 'drill':return startDrill();
+  case 'dshow':drill.show=true;$('#sw').style.filter='';return speak(sheet.shadow.en);
+  case 'dok':return drillMark(true);
+  case 'dno':return drillMark(false);
+  case 'bdel':{const id=t.closest('[data-id]').dataset.id;S.book=S.book.filter(b=>b.id!==id);save();return renderBook()}
+  case 'open':{S.cur=t.closest('[data-sid]').dataset.sid;save();return go('chatv')}
+  case 'sdel':{const id=t.closest('[data-sid]').dataset.sid;if(!confirm('删除这段对话？'))return;S.sessions=S.sessions.filter(x=>x.id!==id);if(S.cur===id)S.cur=null;save();return renderMe()}
+  case 'test':{readCfg();toast('连接中…',8000);try{const r=await askAI('Reply with exactly: OK','ping');toast('连接成功：'+(S.cfg.model[S.cfg.prov])+' 回复 '+r.trim().slice(0,20),3500);renderMe()}catch(err){toast(err.message,5000)}return}
+  case 'models':{readCfg();try{const ids=(await listModels()).sort();sheet(sheetHead('选择模型')+ids.map(i=>`<button class="row" style="width:100%;text-align:left" data-a="pickm" data-m="${esc(i)}"><div class="t"><div>${esc(i)}${i===S.cfg.model[S.cfg.prov]?' ✓':''}</div></div></button>`).join(''))}catch(err){toast(err.message,5000)}return}
+  case 'pickm':S.cfg.model[S.cfg.prov]=t.dataset.m;save();closeSheet();renderMe();return toast('已选择 '+t.dataset.m);
+  case 'testv':return speak(t.textContent);
+  case 'export':{const d=structuredClone(S);d.cfg.keys={};d.cfg.oaiKey='';const blob=new Blob([JSON.stringify(d)],{type:'application/json'});const u=URL.createObjectURL(blob);const l=document.createElement('a');l.href=u;l.download='口语陪练备份-'+today()+'.json';document.body.appendChild(l);l.click();l.remove();return}
+  case 'import':return $('#impf').click();
+ }
+});
+document.body.addEventListener('input',e=>{if(e.target.id==='search'){renderBook.q=e.target.value;const p=e.target.selectionStart;renderBook();const n=$('#search');n.focus();n.setSelectionRange(p,p)}});
+function readCfg(){
+ const g=id=>{const el=$('#'+id);return el?el.value.trim():null};
+ const k=g('c-key');if(k!==null)S.cfg.keys[S.cfg.prov]=k;
+ const m=g('c-model');if(m!==null)S.cfg.model[S.cfg.prov]=m;
+ const b=g('c-base');if(b!==null)S.cfg.base=b;
+ const ok=$('#c-okey');if(ok&&!ok.disabled)S.cfg.oaiKey=ok.value.trim();
+ save();
+}
+$('#mev').addEventListener('change',e=>{
+ const id=e.target.id;
+ if(id==='c-prov'){readCfg();S.cfg.prov=e.target.value;save();return renderMe()}
+ if(['c-key','c-model','c-base','c-okey'].includes(id))return readCfg();
+ if(id==='c-voice'){S.cfg.sysVoice=e.target.value;save();return speak('Hi, this is how I sound.')}
+ if(id==='c-ovoice'){S.cfg.oaiVoice=e.target.value;save();return speak('Hi, this is how I sound.')}
+ if(id==='c-auto')S.cfg.autoplay=e.target.checked;
+ if(id==='c-zh')S.cfg.showZh=e.target.checked;
+ if(id==='c-blur')S.cfg.blurEn=e.target.checked;
+ save();
+});
+$('#mev').addEventListener('input',e=>{if(e.target.id==='c-rate'){S.cfg.rate=+e.target.value;$('#ratev').textContent=S.cfg.rate.toFixed(2);save()}});
+$('#mev').addEventListener('click',e=>{
+ const b=e.target.closest('.seg button');if(!b)return;const seg=b.parentElement.id;
+ if(seg==='c-tts'){if(b.dataset.v==='openai'&&!oaiKey()){readCfg();if(!oaiKey())return toast('先在下面填 OpenAI 密钥')}S.cfg.tts=b.dataset.v}
+ if(seg==='c-asr'){if(b.dataset.v==='openai'&&!oaiKey()){readCfg();if(!oaiKey())return toast('先填 OpenAI 密钥')}S.cfg.asr=b.dataset.v}
+ if(seg==='c-level')S.cfg.level=b.dataset.v;
+ save();renderMe();
+});
+$('#impf').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.sessions)||!Array.isArray(d.book))throw 0;
+  if(!confirm(`恢复备份：${d.sessions.length} 段对话、${d.book.length} 条表达。当前数据会被替换（密钥保留），继续？`))return;
+  const keep={keys:S.cfg.keys,oaiKey:S.cfg.oaiKey};S=Object.assign(structuredClone(DEF),d);S.cfg=Object.assign(structuredClone(DEF.cfg),d.cfg||{},keep);save();toast('已恢复');renderMe();
+ }catch(err){toast('这不是口语陪练的备份文件')}
+ e.target.value='';
+};
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(REC)REC.abort();stopSpeak();lastAct=0}});
+
+if(!S.cur||!curSess()){const s=S.sessions.find(x=>x.msgs.length===0);S.cur=s?s.id:null}
+go('chatv');
+if(!apiKey())setTimeout(()=>toast('第一次使用：先到“我的”填 AI 密钥',3500),800);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/talk/sw.js',{scope:'/talk/'}).catch(()=>{});
+</script>
+</body>
+</html>
