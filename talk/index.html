@@ -110,8 +110,8 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .seg button.on{background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.1);font-weight:600}
 #search{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;outline:none;margin-bottom:8px}
 /* sheet */
-#mask{position:fixed;inset:0;background:rgba(10,12,25,.42);display:none;z-index:20}
-#sheet{position:fixed;left:0;right:0;bottom:0;max-height:calc(100dvh - var(--top) - 40px);overflow-y:auto;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 16px calc(18px + var(--bot));z-index:21;transform:translateY(105%);transition:transform .22s}
+#mask{position:fixed;inset:0;background:rgba(10,12,25,.42);display:none;z-index:40}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-height:calc(100dvh - var(--top) - 40px);overflow-y:auto;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 16px calc(18px + var(--bot));z-index:21;transform:translateY(105%);transition:transform .22s;z-index:41}
 #sheet.on{transform:none}
 #sheet h3{margin:2px 0 10px;font-size:18px;display:flex;align-items:center}
 #sheet h3 span{flex:1}
@@ -119,7 +119,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .score{font-size:40px;font-weight:700;text-align:center}
 .words{font-size:18px;line-height:1.7;text-align:center;margin:8px 0}
 .w-ok{color:var(--ok)}.w-miss{color:var(--bad);text-decoration:underline}
-#toast{position:fixed;left:50%;top:calc(var(--top) + 60px);transform:translateX(-50%);background:rgba(25,27,40,.92);color:#fff;padding:9px 16px;border-radius:18px;font-size:14px;z-index:40;display:none;max-width:86%;text-align:center}
+#toast{position:fixed;left:50%;top:calc(var(--top) + 60px);transform:translateX(-50%);background:rgba(25,27,40,.92);color:#fff;padding:9px 16px;border-radius:18px;font-size:14px;z-index:60;display:none;max-width:86%;text-align:center}
 /* call */
 #call{position:fixed;inset:0;z-index:30;background:linear-gradient(180deg,#252b7a,#4450c8 55%,#6a5fd6);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(var(--top) + 14px) 20px calc(var(--bot) + 18px);user-select:none;-webkit-user-select:none}
 #call.on{display:flex}
@@ -160,6 +160,25 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .note-msg{align-self:center;text-align:center;font-size:13px;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:7px 12px;margin:12px auto;max-width:92%}
 .note-msg button{color:var(--pri);font-weight:600;margin-left:6px}
 .hide{display:none!important}
+.sn{border-radius:6px;transition:background .15s}
+.say .sn{color:inherit;font-size:inherit}
+.sn.on{background:var(--pri2)}
+.sp{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--pri2);color:var(--pri);align-items:center;justify-content:center;vertical-align:1px;margin-right:4px}
+.sp svg{width:9px;height:9px;fill:currentColor}
+.w{font-style:normal;border-radius:4px;cursor:pointer}
+.w:active{background:var(--pri2)}
+#ccap .sp{background:rgba(255,255,255,.22);color:#fff}
+#ccap .sn.on{background:rgba(255,255,255,.18)}
+#ccap .w:active{background:rgba(255,255,255,.25)}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:var(--pri2);color:var(--pri);font-weight:600}
+.lvh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.lvh b{color:var(--ink);font-size:15px}
+.lvh em{margin-left:auto;font-style:normal;color:var(--pri);font-weight:600}
+.scene.done{border-color:var(--ok)}
+.scene.done b{color:var(--ok)}
+.scene.nx{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri) inset}
+.stars{color:var(--warn);letter-spacing:1px;font-size:14px}
+.note-msg button{margin-left:6px}
 </style>
 </head>
 <body>
@@ -168,6 +187,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
   <main id="main">
     <section class="view on" id="chatv"></section>
     <section class="view" id="scenev"></section>
+    <section class="view" id="gramv"></section>
     <section class="view" id="bookv"></section>
     <section class="view" id="mev"></section>
   </main>
@@ -183,6 +203,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
   <nav id="nav">
     <button data-v="chatv" class="on"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>对话</button>
     <button data-v="scenev"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>场景</button>
+    <button data-v="gramv"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>语法</button>
     <button data-v="bookv"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>表达本</button>
     <button data-v="mev"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>我的</button>
   </nav>
@@ -211,7 +232,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.6.0';
+const VER='1.7.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -240,26 +261,193 @@ const PROV={
 const FAST={qwen:[['qwen-plus','推荐：回复快，纠错质量好'],['qwen-flash','最省钱，速度差不多'],['deepseek-v4.1-flash-1017','DeepSeek，已自动关掉深度思考']]};
 const OAI_VOICES=['marin','cedar','coral','nova','shimmer','sage','alloy','ash','ballad','echo','fable','onyx','verse'];
 const LEVELS={easy:{n:'入门',p:'The learner is a beginner (about CEFR A2). Use very common words and short sentences (under 12 words each). Avoid idioms.'},mid:{n:'中级',p:'The learner is intermediate (about CEFR B1-B2). Use everyday vocabulary and natural but clear sentences; an occasional common idiom is fine.'},high:{n:'高级',p:'The learner is advanced (about CEFR C1). Talk like a native American adult would: idioms, phrasal verbs and slang are welcome.'}};
-const SCENES=[
- {id:'free',t:'自由聊天',d:'想聊什么都行，也能用中文问“…怎么说”',p:''},
- {id:'daily',t:'日常闲聊',d:'像老朋友一样聊今天过得怎么样',p:'You are the learner\'s friendly American friend, catching up casually about their day, plans, food and hobbies.'},
- {id:'coffee',t:'咖啡店点单',d:'你是顾客，Sam 是咖啡师',p:'Role-play: you are a cheerful barista at a busy coffee shop in Seattle. The learner is the customer ordering. Ask about size, milk, for here or to go, name for the cup, and payment.'},
- {id:'food',t:'餐厅点餐',d:'入座、点菜、问推荐、结账',p:'Role-play: you are a server at a casual American restaurant. Greet the learner, take drinks and food orders, answer questions about the menu, check in later, and handle the check and tip.'},
- {id:'airport',t:'机场值机',d:'托运行李、选座位、过安检',p:'Role-play: you are an airline check-in agent at San Francisco airport, then a TSA officer. Ask for ID and booking, bags, seat preference, and give gate info.'},
- {id:'hotel',t:'酒店入住',d:'办入住、问设施、提要求',p:'Role-play: you are a front desk clerk at a hotel in Chicago. Check the learner in, explain breakfast, Wi-Fi and checkout time, and handle a small problem they raise.'},
- {id:'way',t:'问路与坐车',d:'找地铁站、打车、坐公交',p:'Role-play: you are a friendly local in New York. The learner stops you to ask for directions and how to get somewhere by subway or bus.'},
- {id:'doctor',t:'看医生',d:'描述症状、听医嘱',p:'Role-play: you are a doctor at an urgent care clinic in the US. Ask about the learner\'s symptoms, how long, allergies, and give simple advice.'},
- {id:'shop',t:'购物与退换',d:'试穿、问价、退货',p:'Role-play: you are a store associate at a clothing store in a US mall. Help the learner find sizes and colors, and handle a return or exchange.'},
- {id:'call',t:'打电话预约',d:'约理发、约看房、改时间',p:'Role-play: this is a phone call. You are a receptionist at a hair salon. The learner calls to book, reschedule or ask about prices. Spell names and confirm times like on a real call.'},
- {id:'job',t:'求职面试',d:'自我介绍、优缺点、经历追问',p:'Role-play: you are a friendly hiring manager interviewing the learner for an engineering internship at a US tech company. Ask one common interview question at a time and follow up on their answers.'},
- {id:'intro',t:'自我介绍',d:'第一次见面，聊背景和爱好',p:'You just met the learner at an international student welcome party. Get to know them: where they are from, what they study, hobbies. Share a little about yourself too.'},
- {id:'research',t:'介绍我的研究',d:'在学术会议上被外国同行追问',p:'Role-play: you are a curious American researcher at an academic conference coffee break. Ask the learner, a graduate student, about their research project: what problem it solves, how it works, results, and challenges. Keep questions accessible and encouraging.'},
- {id:'campus',t:'校园与室友',d:'和室友、同学、导师沟通',p:'Role-play: you are the learner\'s American roommate at a US university. Chat about classes, chores, weekend plans, and sort out small roommate issues.'},
- {id:'opinion',t:'观点讨论',d:'聊话题、讲理由、学会反驳',p:'Pick an interesting everyday debate topic (for example remote work, social media, cities vs small towns). Ask for the learner\'s opinion, ask why, and politely push back so they keep explaining.'},
- {id:'custom',t:'自定义场景',d:'自己描述一个想练的场景',p:null}
+/* ---------- 场景：五个等级 ---------- */
+const SCENE_LV=[
+ {n:'零基础',d:'照着说就行，先敢开口',p:'The learner is a complete beginner (pre-A1). Use very short, very simple sentences (3-8 words) and speak about one thing at a time. Ask only ONE very easy question per turn. EVERY REPLY, including your very first line, MUST end with a ready-made answer they can copy, in this form: You can say: "...". Keep that model answer under 8 words. For personal facts (name, city, job, age) put ___ in the model answer so the learner fills in their own, e.g. You can say: "My name is ___."'},
+ {n:'入门',d:'简单问答，说完整短句',p:'The learner is a beginner (A1-A2). Use short simple sentences (under 12 words). Ask one simple question at a time. If they seem stuck or answer in Chinese, give a short model answer in this form: You can say: "...".'},
+ {n:'中等',d:'真实场景，处理小状况',p:'The learner is intermediate (B1). Use everyday vocabulary and natural but clear sentences. Add one small realistic complication during the scene so they practice handling it.'},
+ {n:'高级',d:'协商、投诉、讲经历、谈观点',p:'The learner is upper-intermediate (B2-C1). Talk naturally like a native adult, with common idioms and phrasal verbs. Push them to give longer answers with reasons and details.'},
+ {n:'随心所欲',d:'自由发挥，什么都能聊',p:null}
 ];
+/* t 标题 d 说明 goal 学会什么 tasks [中文, English] ph 关键句 role 角色设定 */
+const SCENE_DATA=[
+ /* 零基础 */
+ {id:'hello',lv:0,t:'打招呼、说名字',d:'第一次见面的三句话',goal:'能打招呼、介绍自己的名字、问对方名字、说再见',
+  tasks:[['打招呼','Say hello'],['说出你的名字','Say your name'],['问 Sam 的名字','Ask Sam\'s name'],['说再见','Say goodbye']],
+  ph:[["Hi! I'm Ken.",'你好！我是 Ken。'],['Nice to meet you.','很高兴认识你。'],["What's your name?",'你叫什么名字？'],['See you!','再见！']],
+  role:'You meet the learner for the first time at a friendly event.'},
+ {id:'wherefrom',lv:0,t:'说你从哪里来',d:'国家、城市、住在哪',goal:'能说自己来自哪里、住在哪个城市，并反问对方',
+  tasks:[['说你来自哪里','Say where you are from'],['说你住在哪个城市','Say which city you live in'],['问 Sam 来自哪里','Ask where Sam is from']],
+  ph:[["I'm from Japan.",'我来自日本。'],['I live in Tokyo.','我住在东京。'],['Where are you from?','你是哪里人？']],
+  role:'You are chatting with the learner at an international student lounge.'},
+ {id:'water',lv:0,t:'买一瓶水',d:'数字、价钱、付钱',goal:'能买东西、问价钱、听懂数字并付钱',
+  tasks:[['说你想要一瓶水','Ask for a bottle of water'],['问多少钱','Ask how much it is'],['付钱','Pay'],['说谢谢','Say thank you']],
+  ph:[['Can I have a water, please?','请给我一瓶水。'],['How much is it?','多少钱？'],['Here you go.','给你。'],['Thank you!','谢谢！']],
+  role:'You are a cashier at a small convenience store. Prices are simple, like two dollars.'},
+ {id:'likes',lv:0,t:'说你喜欢什么',d:'食物、爱好、喜欢和不喜欢',goal:'能说喜欢和不喜欢的东西，并问对方',
+  tasks:[['说一个你喜欢的食物','Say a food you like'],['说一个你喜欢的爱好','Say a hobby you like'],['说一个你不喜欢的东西','Say something you do not like'],['问 Sam 喜欢什么','Ask what Sam likes']],
+  ph:[['I like sushi.','我喜欢寿司。'],['I like reading.','我喜欢看书。'],["I don't like spicy food.",'我不喜欢辣的。'],['What do you like?','你喜欢什么？']],
+  role:'You are a new friend getting to know the learner.'},
+ {id:'feel',lv:0,t:'今天怎么样',d:'说感觉、说正在做什么',goal:'能回答 How are you，说自己的状态和现在在做什么',
+  tasks:[['回答今天好不好','Answer how you are today'],['说你现在在做什么','Say what you are doing now'],['说你累不累或忙不忙','Say if you are tired or busy']],
+  ph:[["I'm good, thanks.",'我很好，谢谢。'],["I'm a little tired.",'我有点累。'],["I'm studying now.",'我现在在学习。']],
+  role:'You are a friend who calls the learner to check in.'},
+ {id:'time',lv:0,t:'问时间、约时间',d:'几点、几点起床、几点见',goal:'能问时间、说自己的作息、约一个见面时间',
+  tasks:[['问现在几点','Ask what time it is'],['说你几点起床','Say what time you get up'],['约一个见面的时间','Suggest a time to meet']],
+  ph:[['What time is it?','现在几点？'],['I get up at seven.','我七点起床。'],['How about three o\'clock?','三点怎么样？']],
+  role:'You are a classmate planning to study together with the learner.'},
+ /* 入门 */
+ {id:'coffee',lv:1,t:'咖啡店点单',d:'点饮料、选杯型、外带',goal:'能独立完成一次点咖啡',
+  tasks:[['点一杯饮料','Order a drink'],['选杯型','Choose a size'],['回答要不要加奶或糖','Answer about milk or sugar'],['说堂食还是外带','Say for here or to go'],['付钱','Pay']],
+  ph:[['Can I get a latte, please?','请给我一杯拿铁。'],['A medium, please.','中杯，谢谢。'],['No sugar, please.','不要糖。'],['To go, please.','外带。']],
+  role:'You are a cheerful barista at a busy coffee shop in Seattle. The learner is the customer.'},
+ {id:'food',lv:1,t:'餐厅点餐',d:'几位、点菜、结账',goal:'能在餐厅点菜和结账',
+  tasks:[['说几个人用餐','Say how many people'],['点一道主菜','Order a main dish'],['点一杯饮料','Order a drink'],['要账单','Ask for the check']],
+  ph:[['A table for two, please.','两位。'],["I'll have the chicken.",'我要鸡肉。'],['Can I get some water?','能给我点水吗？'],['Can we get the check?','可以结账吗？']],
+  role:'You are a friendly server at a casual American restaurant.'},
+ {id:'shop',lv:1,t:'买衣服',d:'找东西、问尺码、问价钱',goal:'能在店里找东西、问尺码价钱并决定买不买',
+  tasks:[['说你在找什么','Say what you are looking for'],['问有没有你的尺码','Ask for your size'],['问价钱','Ask the price'],['决定买还是不买','Decide to buy it or not']],
+  ph:[["I'm looking for a jacket.",'我在找一件外套。'],['Do you have this in medium?','这个有中号吗？'],['How much is this?','这个多少钱？'],["I'll take it.",'我买了。']],
+  role:'You are a store associate at a clothing store in a US mall.'},
+ {id:'way',lv:1,t:'问路',d:'车站在哪、怎么走、多远',goal:'能问路并听懂简单的路线',
+  tasks:[['问车站在哪','Ask where the station is'],['确认怎么走','Check the directions'],['问要走多久','Ask how long it takes'],['道谢','Say thanks']],
+  ph:[['Excuse me, where is the station?','请问车站在哪？'],['Go straight and turn left?','直走然后左转？'],['How long does it take?','要多久？'],['Thanks a lot!','太谢谢了！']],
+  role:'You are a friendly local in New York. The learner stops you to ask for directions.'},
+ {id:'intro',lv:1,t:'自我介绍',d:'新朋友聚会上介绍自己',goal:'能用 4–5 句话介绍自己，并问对方问题',
+  tasks:[['说名字和来自哪里','Say your name and where you are from'],['说你在做什么（学习或工作）','Say what you do'],['说一个爱好','Say a hobby'],['问 Sam 一个问题','Ask Sam a question']],
+  ph:[["I'm Ken, and I'm from Osaka.",'我是 Ken，来自大阪。'],["I'm a grad student.",'我是研究生。'],['I like hiking on weekends.','我周末喜欢爬山。'],['What about you?','你呢？']],
+  role:'You just met the learner at an international student welcome party.'},
+ {id:'weekend',lv:1,t:'聊周末',d:'用过去式讲你做了什么',goal:'能用一般过去时讲周末去了哪、做了什么',
+  tasks:[['说你周末去了哪里','Say where you went'],['说你做了什么','Say what you did'],['说感觉怎么样','Say how it was'],['问 Sam 的周末','Ask about Sam\'s weekend']],
+  ph:[['I went to the beach.','我去了海边。'],['I watched a movie.','我看了一部电影。'],['It was really fun.','真的很好玩。'],['How was your weekend?','你周末怎么样？']],
+  role:'You are a friend catching up with the learner on Monday morning. Focus on the past tense.'},
+ {id:'call',lv:1,t:'打电话订位',d:'日期、时间、人数、留名字',goal:'能打电话完成一次预约',
+  tasks:[['说你想订位','Say you want a reservation'],['说日期和时间','Give the date and time'],['说人数','Say how many people'],['留你的名字','Give your name']],
+  ph:[["I'd like to make a reservation.",'我想订个位。'],['For Friday at seven.','周五七点。'],['For four people.','四个人。'],["It's under Ken.",'名字写 Ken。']],
+  role:'This is a phone call. You are the host at a restaurant taking reservations. Confirm details like on a real call.'},
+ /* 中等 */
+ {id:'airport',lv:2,t:'机场值机和安检',d:'证件、行李、座位、登机口',goal:'能独立完成值机并问清登机信息',
+  tasks:[['出示证件说目的地','Show your ID and say your destination'],['托运行李','Check your bag'],['选座位','Choose a seat'],['问登机口和登机时间','Ask about the gate and boarding time']],
+  ph:[["I'm flying to Chicago.",'我飞芝加哥。'],["I'd like to check one bag.",'我要托运一件行李。'],['Can I get a window seat?','能要靠窗的座位吗？'],['What time does boarding start?','几点开始登机？']],
+  role:'You are an airline check-in agent at San Francisco airport. Add a small issue, for example the bag is a little overweight.'},
+ {id:'hotel',lv:2,t:'酒店入住',d:'入住、设施、房间出问题',goal:'能办入住，并说明和解决房间问题',
+  tasks:[['办入住','Check in'],['问早餐和 Wi-Fi','Ask about breakfast and Wi-Fi'],['反映房间的问题','Report a problem with the room'],['要求解决','Ask for a solution']],
+  ph:[['I have a reservation under Ken.','我用 Ken 的名字订了房。'],['What time is breakfast?','早餐几点？'],["The air conditioner isn't working.",'空调坏了。'],['Could I change rooms?','能换个房间吗？']],
+  role:'You are a front desk clerk at a hotel in Chicago.'},
+ {id:'doctor',lv:2,t:'看医生',d:'描述症状、听医嘱',goal:'能说清楚哪里不舒服，并确认医生的建议',
+  tasks:[['描述症状','Describe your symptoms'],['说持续了多久','Say how long it has lasted'],['回答过敏和用药情况','Answer about allergies and medicine'],['确认医生的建议','Confirm the doctor\'s advice']],
+  ph:[['I have a sore throat and a fever.','我嗓子疼还发烧。'],["It started two days ago.",'两天前开始的。'],["I'm not allergic to anything.",'我没有过敏。'],['So I should rest and drink water?','所以我应该休息多喝水？']],
+  role:'You are a doctor at an urgent care clinic in the US.'},
+ {id:'return',lv:2,t:'退换货',d:'说明原因、选择退款或换货',goal:'能礼貌地完成退货或换货',
+  tasks:[['说明要退什么','Say what you want to return'],['说原因','Explain why'],['出示小票','Show the receipt'],['选择退款或换货','Choose a refund or an exchange']],
+  ph:[["I'd like to return these shoes.",'我想退这双鞋。'],["They're too small.",'太小了。'],["Here's my receipt.",'这是小票。'],['Can I exchange them for a bigger size?','能换大一号吗？']],
+  role:'You are a customer service associate at a shoe store.'},
+ {id:'campus',lv:2,t:'和室友商量',d:'提出问题、一起想办法',goal:'能委婉地提出问题并和对方达成约定',
+  tasks:[['提出一个问题（太吵或卫生）','Bring up a problem'],['说你的感受','Say how you feel'],['一起想办法','Suggest a solution together'],['达成约定','Agree on a plan']],
+  ph:[['Can we talk for a minute?','能聊一下吗？'],["It's been a little loud at night.",'晚上有点吵。'],['How about we take turns cleaning?','我们轮流打扫怎么样？'],['Sounds like a plan.','就这么定了。']],
+  role:'You are the learner\'s American roommate. Be friendly but have your own point of view.'},
+ {id:'apartment',lv:2,t:'租房看房',d:'房租、押金、设施、交通',goal:'能问清租房的关键信息',
+  tasks:[['问房租和押金','Ask about rent and deposit'],['问包含哪些设施','Ask what is included'],['问交通','Ask about transportation'],['约下一步','Arrange the next step']],
+  ph:[["How much is the rent?",'房租多少？'],['Is the deposit refundable?','押金能退吗？'],['Are utilities included?','水电费包含吗？'],['When can I move in?','什么时候能搬进来？']],
+  role:'You are a landlord showing an apartment to the learner.'},
+ {id:'daily',lv:2,t:'和同学同事闲聊',d:'开话题、接话、自然结束',goal:'能和人自然地闲聊几分钟',
+  tasks:[['打开话题','Start the conversation'],['聊学习或工作','Talk about study or work'],['聊周末计划','Talk about weekend plans'],['自然地结束对话','End the chat naturally']],
+  ph:[['How\'s it going?','最近怎么样？'],["Work's been busy lately.",'最近工作挺忙的。'],['Any plans for the weekend?','周末有什么计划？'],['Nice talking to you!','跟你聊天很开心！']],
+  role:'You are a friendly colleague the learner runs into at the coffee machine.'},
+ /* 高级 */
+ {id:'job',lv:3,t:'求职面试',d:'自我介绍、讲成就、说优缺点',goal:'能在面试中有条理地讲自己的经历',
+  tasks:[['自我介绍','Introduce yourself'],['讲一个过去的成就','Describe a past achievement'],['说你的优点和缺点','Talk about your strengths and weaknesses'],['问面试官一个问题','Ask the interviewer a question']],
+  ph:[["I'm currently a researcher in Japan.",'我目前在日本做研究。'],['I led a project that improved accuracy by 20%.','我主导的项目把准确率提高了 20%。'],['One of my weaknesses is public speaking.','我的一个弱点是公开演讲。'],['What does a typical day look like?','这份工作通常一天怎么过？']],
+  role:'You are a friendly hiring manager interviewing the learner for an engineering position at a US tech company. Ask follow-up questions like a real interviewer.'},
+ {id:'research',lv:3,t:'介绍我的研究',d:'学术会议茶歇被同行追问',goal:'能用通俗的话讲清楚研究内容、方法和结果',
+  tasks:[['用一句话说研究是什么','Say what your research is in one sentence'],['说它解决什么问题','Explain the problem it solves'],['说方法和结果','Explain your method and results'],['回答一个追问','Answer a follow-up question']],
+  ph:[["My research is about...",'我的研究是关于……'],['The main problem is that...','主要问题是……'],['We found that...','我们发现……'],["That's a great question.",'这是个好问题。']],
+  role:'You are a curious American researcher at an academic conference coffee break. Ask the learner about their research with accessible, encouraging follow-up questions.'},
+ {id:'complain',lv:3,t:'投诉与协商',d:'航班取消、被多收费',goal:'能礼貌但坚定地投诉并争取结果',
+  tasks:[['说明问题','Explain the problem'],['礼貌地表达不满','Politely express that you are unhappy'],['提出你的要求','Say what you want'],['协商出一个结果','Negotiate an outcome']],
+  ph:[['I was charged twice for this.','这个被扣了两次钱。'],["I'm a little frustrated, to be honest.",'说实话我有点不满。'],["I'd like a full refund.",'我要全额退款。'],['Is there anything else you can do?','还有别的办法吗？']],
+  role:'You are a customer service agent. At first you can only offer a partial solution, so the learner has to negotiate.'},
+ {id:'opinion',lv:3,t:'观点讨论',d:'说观点、给理由、回应反方',goal:'能清楚地表达观点并用理由支持',
+  tasks:[['说出你的观点','State your opinion'],['给出两个理由','Give two reasons'],['回应 Sam 的反对意见','Respond to Sam\'s counterpoint'],['总结','Sum up']],
+  ph:[['In my opinion,...','我认为……'],['First of all,... Also,...','首先……另外……'],['I see your point, but...','我明白你的意思，但是……'],['So overall, I think...','所以总的来说我觉得……']],
+  role:'Pick one everyday debate topic (for example remote work or social media). Ask for the learner\'s opinion, then politely take the other side.'},
+ {id:'meeting',lv:3,t:'开会汇报进度',d:'讲完成了什么、问题和下一步',goal:'能在会上清楚汇报进度',
+  tasks:[['汇报已经完成的工作','Report what you have finished'],['说遇到的问题','Explain a problem'],['说下一步计划','Explain your next steps'],['请别人帮忙','Ask for help']],
+  ph:[["This week, I've finished...",'这周我完成了……'],["We've run into an issue with...",'我们在……上遇到了问题。'],['Next, I\'m going to...','接下来我打算……'],['Could you help me with...?','能帮我……吗？']],
+  role:'You are the learner\'s team lead in a weekly progress meeting. Ask clarifying questions.'},
+ {id:'negotiate',lv:3,t:'讨价还价',d:'二手交易、谈价格和条件',goal:'能谈价格并说出理由',
+  tasks:[['问价钱和情况','Ask about the price and condition'],['提出更低的价格','Offer a lower price'],['说出你的理由','Give your reasons'],['成交或礼貌放弃','Make a deal or politely walk away']],
+  ph:[['Is the price negotiable?','价格能商量吗？'],['Would you take 200?','200 卖吗？'],["It has a few scratches, so...",'它有些划痕，所以……'],["It's a deal.",'成交。']],
+  role:'You are selling a used bike online and meeting the learner. Do not accept the first offer.'},
+ {id:'story',lv:3,t:'讲一段经历',d:'时间、经过、感受、收获',goal:'能有条理地讲完一个完整的故事',
+  tasks:[['交代时间和地点','Set the time and place'],['讲发生了什么','Tell what happened'],['讲你的感受','Say how you felt'],['讲你学到了什么','Say what you learned']],
+  ph:[['A few years ago, when I was in...','几年前我在……的时候'],['Suddenly,...','突然……'],['I was really nervous.','我当时很紧张。'],['Looking back, I learned that...','回头看，我学到了……']],
+  role:'You are a friend who asks the learner to tell a memorable experience and asks natural follow-up questions.'},
+ /* 随心所欲 */
+ {id:'free',lv:4,t:'自由聊天',d:'想聊什么都行，也能用中文问“…怎么说”',role:''},
+ {id:'topic',lv:4,t:'随机话题',d:'Sam 随机抛一个有意思的话题',role:'Pick a fun, random everyday topic and start chatting about it with a short opener and a question.'},
+ {id:'debate',lv:4,t:'辩论模式',d:'Sam 故意站在你的对立面',role:'Pick an interesting debate topic, ask for the learner\'s opinion, and always argue the opposite side politely so they keep explaining.'},
+ {id:'custom',lv:4,t:'自定义场景',d:'自己描述一个想练的场景',role:null}
+];
+const SCENES=SCENE_DATA;
+const SCENE_BY=Object.fromEntries(SCENE_DATA.map(x=>[x.id,x]));
+/* 旧场景编号兼容 */
+SCENE_BY.shop2=SCENE_BY.shop;SCENE_BY.doctor2=SCENE_BY.doctor;
+
+/* ---------- 语法模块 ---------- */
+/* n 中文名 en 英文名 g 分组 use 什么时候用 form 结构 sig 信号词 ex 例句 err 常见错误[错,对,为什么] */
+const GRAM=[
+ {id:'ps',g:'时态',n:'一般现在时',en:'Present Simple',use:'习惯、经常发生的事、事实和真理、时刻表。',form:['I / you / we / they + 动词原形：I work every day.','he / she / it + 动词-s/-es：She works every day.','否定：don\'t / doesn\'t + 动词原形','疑问：Do / Does + 主语 + 动词原形？'],sig:'always, usually, often, sometimes, never, every day, on Mondays',
+  ex:[['I usually get up at seven.','我通常七点起床。'],['She works at a university.','她在一所大学工作。'],['Does he like coffee?','他喜欢咖啡吗？']],err:[['He go to school every day.','He goes to school every day.','第三人称单数要加 -s'],["She don't like fish.","She doesn't like fish.",'第三人称单数否定用 doesn\'t']]},
+ {id:'pc',g:'时态',n:'现在进行时',en:'Present Continuous',use:'说话这一刻正在发生的事；最近一段时间正在进行的事；已经安排好的近期计划。',form:['am / is / are + 动词-ing：I am working now.','否定：am / is / are + not + 动词-ing','疑问：Am / Is / Are + 主语 + 动词-ing？'],sig:'now, right now, at the moment, these days, Look!, Listen!',
+  ex:[["I'm talking to my friend right now.",'我现在正在和朋友说话。'],['They are building a new lab this year.','他们今年在建一个新实验室。'],['What are you doing?','你在做什么？']],err:[['I am work now.','I am working now.','be 后面要用 -ing'],['She working now.','She is working now.','不能漏掉 be 动词']]},
+ {id:'past',g:'时态',n:'一般过去时',en:'Past Simple',use:'过去某个时间发生、并且已经结束的事。',form:['规则动词 + -ed：I worked yesterday.','不规则动词：go→went, see→saw, eat→ate','否定：didn\'t + 动词原形','疑问：Did + 主语 + 动词原形？'],sig:'yesterday, last week, two days ago, in 2020, when I was a child',
+  ex:[['I went to the library yesterday.','我昨天去了图书馆。'],["We didn't eat breakfast this morning.",'我们今天早上没吃早饭。'],['Did you watch the game last night?','你昨晚看比赛了吗？']],err:[['Yesterday I go to the park.','Yesterday I went to the park.','过去的事用过去式'],["I didn't went there.","I didn't go there.",'didn\'t 后面用原形']]},
+ {id:'pastc',g:'时态',n:'过去进行时',en:'Past Continuous',use:'过去某一时刻正在进行的事；常和一般过去时搭配：一件事正在进行时，另一件事发生了。',form:['was / were + 动词-ing','I was cooking when he called.','while + 过去进行时'],sig:'at 8 pm yesterday, at that time, when, while',
+  ex:[['I was studying at nine last night.','昨晚九点我正在学习。'],['She was walking home when it started to rain.','她走回家时开始下雨了。'],['What were you doing at that time?','那时你在做什么？']],err:[['I was study when you called.','I was studying when you called.','was 后面要 -ing'],['They was playing.','They were playing.','they 用 were']]},
+ {id:'pp',g:'时态',n:'现在完成时',en:'Present Perfect',use:'过去发生、和现在有关系的事；到现在为止的经历；从过去持续到现在的状态。',form:['have / has + 过去分词：I have finished my homework.','经历：Have you ever been to Japan?','持续：I have lived here for three years.'],sig:'already, yet, ever, never, just, for + 一段时间, since + 时间点, so far',
+  ex:[['I have already eaten lunch.','我已经吃过午饭了。'],['Have you ever tried sushi?','你吃过寿司吗？'],['She has lived in Tokyo since 2022.','她从 2022 年起就住在东京。']],err:[['I have went there.','I have gone there.','have 后面用过去分词'],['I have seen him yesterday.','I saw him yesterday.','有明确的过去时间（yesterday）要用一般过去时']]},
+ {id:'ppc',g:'时态',n:'现在完成进行时',en:'Present Perfect Continuous',use:'从过去开始一直持续到现在、可能还在继续的动作，强调“一直在做”。',form:['have / has been + 动词-ing','How long have you been + 动词-ing？'],sig:'for two hours, since this morning, all day, how long',
+  ex:[['I have been studying English for two years.','我学英语已经两年了。'],['It has been raining all day.','下了一整天的雨。'],['How long have you been waiting?','你等了多久了？']],err:[['I am studying here for two years.','I have been studying here for two years.','从过去持续到现在，不用现在进行时'],['She has been work all day.','She has been working all day.','been 后面要 -ing']]},
+ {id:'pastp',g:'时态',n:'过去完成时',en:'Past Perfect',use:'“过去的过去”：在过去某件事之前就已经发生的事。',form:['had + 过去分词','When I arrived, the train had left.','常配 before / after / by the time'],sig:'before, after, already, by the time, by then',
+  ex:[['When I got to the station, the train had already left.','我到车站时，火车已经开走了。'],['She had never seen snow before she moved to Canada.','搬到加拿大之前，她从没见过雪。'],['We had finished dinner when he came.','他来的时候我们已经吃完晚饭了。']],err:[['When I arrived, the movie already started.','When I arrived, the movie had already started.','更早发生的事用 had + 过去分词'],['I had went home.','I had gone home.','had 后面用过去分词']]},
+ {id:'pastpc',g:'时态',n:'过去完成进行时',en:'Past Perfect Continuous',use:'在过去某个时间点之前，已经持续了一段时间的动作。',form:['had been + 动词-ing','常配 for / since / when / before'],sig:'for + 一段时间, before, when, by the time',
+  ex:[['I had been waiting for an hour when the bus finally came.','公交车终于来的时候，我已经等了一个小时。'],['She was tired because she had been working all night.','她很累，因为她工作了一整夜。'],['They had been living there for ten years before they moved.','搬家前他们在那里住了十年。']],err:[['I was waiting for an hour when he came.','I had been waiting for an hour when he came.','强调到那时已经持续了一段时间'],['She had been work all night.','She had been working all night.','been 后面要 -ing']]},
+ {id:'will',g:'时态',n:'一般将来时（will）',en:'Future Simple: will',use:'说话时临时做的决定；预测；承诺和提议。',form:['will + 动词原形：I will help you.','否定：won\'t + 动词原形','疑问：Will + 主语 + 动词原形？'],sig:'tomorrow, next week, soon, I think, probably',
+  ex:[["I'll call you tomorrow.",'我明天给你打电话。'],['I think it will rain later.','我觉得等会儿会下雨。'],['Will you come to the party?','你会来聚会吗？']],err:[['I will to go there.','I will go there.','will 后面直接跟原形'],['She wills come.','She will come.','will 不加 -s']]},
+ {id:'goingto',g:'时态',n:'将来时（be going to）',en:'Future: be going to',use:'已经打算好的计划；根据眼前迹象做的预测。',form:['am / is / are going to + 动词原形','否定：am not / isn\'t / aren\'t going to','疑问：Are you going to ...?'],sig:'this weekend, next month, tomorrow, Look!',
+  ex:[["I'm going to visit my parents this weekend.",'这周末我打算去看父母。'],["Look at those clouds. It's going to rain.",'看那些云，要下雨了。'],['What are you going to do after graduation?','毕业后你打算做什么？']],err:[['I going to study tonight.',"I'm going to study tonight.",'不能漏掉 am / is / are'],['She is going to studies.','She is going to study.','going to 后面用原形']]},
+ {id:'futc',g:'时态',n:'将来进行时',en:'Future Continuous',use:'将来某一时刻正在进行的事。',form:['will be + 动词-ing','This time tomorrow, I will be flying to New York.'],sig:'this time tomorrow, at 8 tonight, all day tomorrow',
+  ex:[["This time tomorrow, I'll be flying to New York.",'明天这个时候，我正在飞往纽约。'],["Don't call at nine. I'll be working.",'九点别打电话，我那时在工作。'],['Will you be using the car tonight?','你今晚要用车吗？']],err:[['At eight tomorrow I will work.','At eight tomorrow I will be working.','将来某一刻正在做，用 will be + -ing'],['I will be study.','I will be studying.','be 后面要 -ing']]},
+ {id:'futp',g:'时态',n:'将来完成时',en:'Future Perfect',use:'到将来某个时间点之前，已经完成的事。',form:['will have + 过去分词','常配 by + 将来时间'],sig:'by tomorrow, by next year, by the time, by then',
+  ex:[['I will have finished the report by Friday.','到周五我会写完报告。'],['By next year, she will have graduated.','到明年她就毕业了。'],['Will you have arrived by six?','六点前你能到吗？']],err:[['By Friday I will finished it.','By Friday I will have finished it.','到某时已完成，用 will have + 过去分词'],['I will have went.','I will have gone.','have 后面用过去分词']]},
+ {id:'pastfut',g:'时态',n:'过去将来时',en:'Future in the Past',use:'站在过去的角度说“将要”；转述过去说过的计划。',form:['would + 动词原形：He said he would come.','was / were going to + 动词原形：I was going to call you, but I forgot.'],sig:'said, thought, knew, promised（过去的说、想）',
+  ex:[['She said she would help me.','她说她会帮我。'],['I was going to call you, but I forgot.','我本来要给你打电话，但是忘了。'],['I knew it would be difficult.','我知道这会很难。']],err:[['He said he will come.','He said he would come.','主句是过去时，从句里的 will 变 would'],['I was going to called you.','I was going to call you.','going to 后面用原形']]},
+ {id:'mixed',g:'时态',n:'混合时态挑战',en:'Mixed Tenses',use:'把学过的时态放在一起：讲经历、讲计划时，能根据时间自然切换。',form:['过去发生：一般过去时','到现在为止：现在完成时','现在的习惯：一般现在时；正在做：现在进行时','打算：be going to；临时决定和预测：will'],sig:'yesterday, now, already, usually, next week',
+  ex:[["I started learning English two years ago, and I've made a lot of progress.",'我两年前开始学英语，进步了很多。'],["I usually study in the morning, but today I'm working from home.",'我通常早上学习，但今天在家工作。'],["I'm going to take a test next month, so I'll practice every day.",'我下个月要考试，所以每天都会练习。']],err:[['I learn English since two years.','I have been learning English for two years.','持续到现在用现在完成（进行）时，时长用 for'],['Yesterday I am very busy.','Yesterday I was very busy.','看时间词选时态']]},
+ {id:'qneg',g:'句子',n:'疑问句和否定句',en:'Questions & Negatives',use:'用 do / does / did、be 动词或情态动词来提问和说否定。',form:['Do / Does / Did + 主语 + 动词原形？','特殊疑问句：What / Where / When / Why / How + do / does / did + 主语 + 动词？','be 动词句：Is she ...? / She isn\'t ...','否定：don\'t / doesn\'t / didn\'t + 动词原形'],sig:'what, where, when, why, how, who, which',
+  ex:[['Where do you live?','你住在哪里？'],['Why did you choose this major?','你为什么选这个专业？'],["I don't understand this word.",'我不懂这个词。']],err:[['Where you live?','Where do you live?','疑问句不能漏掉 do'],['What you did yesterday?','What did you do yesterday?','用 did 提问，动词回到原形']]},
+ {id:'modal',g:'句子',n:'情态动词',en:'Modal Verbs',use:'表达能力、可能、建议、必须、许可。',form:['can / could：能力、请求','should：建议','must / have to：必须','may / might：可能','情态动词 + 动词原形（不加 to，不加 -s）'],sig:'can, could, should, must, have to, may, might',
+  ex:[['Can you help me with this?','你能帮我一下吗？'],['You should get some rest.','你应该休息一下。'],['I might be late today.','我今天可能会晚到。']],err:[['I can to swim.','I can swim.','情态动词后直接用原形'],['He musts go.','He must go.','情态动词不加 -s']]},
+ {id:'passive',g:'句子',n:'被动语态',en:'Passive Voice',use:'不知道、或不重要是谁做的，或者想强调动作的承受者。',form:['be + 过去分词','现在：The room is cleaned every day.','过去：The bridge was built in 1990.','现在完成：The paper has been published.','需要时加 by + 做事的人'],sig:'by, was made, is called, has been done',
+  ex:[['This phone was made in Japan.','这部手机是日本制造的。'],['The results are shown in the table.','结果列在表格里。'],['My bike has been stolen.','我的自行车被偷了。']],err:[['The room cleaned every day.','The room is cleaned every day.','被动不能漏掉 be'],['The book was write by him.','The book was written by him.','be 后面用过去分词']]},
+ {id:'cond',g:'句子',n:'条件句（if）',en:'Conditionals',use:'“如果……就……”：真实的可能，以及不真实的假设。',form:['真实可能：If + 一般现在时, will + 原形','现在的假设：If + 一般过去时, would + 原形','过去的假设：If + had + 过去分词, would have + 过去分词','普遍事实：If + 现在时, 现在时'],sig:'if, unless, as long as, I wish',
+  ex:[["If it rains tomorrow, I'll stay home.",'如果明天下雨，我就待在家。'],['If I had more time, I would travel more.','如果我有更多时间，我会多旅行。'],['If I had known, I would have helped you.','如果我早知道，我就会帮你了。']],err:[['If it will rain, I will stay home.','If it rains, I will stay home.','if 从句里不用 will'],['If I am you, I would go.','If I were you, I would go.','假设用 were']]},
+ {id:'compare',g:'句子',n:'比较级和最高级',en:'Comparatives & Superlatives',use:'比较两样东西（更……），或在三个以上里说“最……”。',form:['短词：-er / the -est：bigger, the biggest','长词：more / the most：more expensive, the most expensive','不规则：good–better–best, bad–worse–worst','A + be + 比较级 + than B；同级：as + 原级 + as'],sig:'than, the most, as ... as, much / a lot + 比较级',
+  ex:[['Tokyo is bigger than Osaka.','东京比大阪大。'],["This is the most interesting book I've read.",'这是我读过最有意思的书。'],['My English is getting better.','我的英语越来越好了。']],err:[['This is more cheaper.','This is cheaper.','不能同时用 more 和 -er'],['She is the most tall.','She is the tallest.','短词用 -est']]},
+ {id:'relcl',g:'句子',n:'定语从句',en:'Relative Clauses',use:'用一个小句子修饰前面的人或东西：“……的人 / ……的东西”。',form:['人：who / that','物：which / that','地点：where；所属：whose','The man who lives next door is a doctor.'],sig:'who, which, that, where, whose',
+  ex:[['The professor who teaches this class is from Canada.','教这门课的教授来自加拿大。'],['This is the robot that we built last year.','这是我们去年做的机器人。'],["That's the café where we first met.",'那是我们第一次见面的咖啡馆。']],err:[['The man he lives next door is a doctor.','The man who lives next door is a doctor.','修饰人用 who，不要再加 he'],['This is the book which I bought it.','This is the book which I bought.','从句里不要重复 it']]},
+ {id:'reported',g:'句子',n:'宾语从句和转述',en:'Reported Speech',use:'转述别人说的话、问的问题；在句子里放进“……这件事”。',form:['say / tell + (that) + 句子','时态后退：is → was，will → would','间接疑问句用陈述语序：Can you tell me where the station is?','是否：if / whether'],sig:'said, told, asked, I think, I don\'t know, Can you tell me',
+  ex:[['He said that he was busy.','他说他很忙。'],['Can you tell me where the station is?','你能告诉我车站在哪吗？'],["I don't know if she will come.",'我不知道她会不会来。']],err:[['Can you tell me where is the station?','Can you tell me where the station is?','间接疑问句用陈述语序'],['He told that he was tired.','He said that he was tired.','tell 后面要接人：He told me ...']]},
+ {id:'gerinf',g:'句子',n:'动名词和不定式',en:'-ing vs to do',use:'有些动词后面跟 -ing，有些跟 to + 动词原形，有些两种都可以。',form:['跟 -ing：enjoy, finish, mind, avoid, keep, practice','跟 to do：want, decide, hope, plan, need, learn','两种都可以：like, love, start, begin','介词后面用 -ing：good at swimming, interested in learning'],sig:'enjoy, want, decide, finish, look forward to',
+  ex:[['I enjoy cooking on weekends.','我喜欢周末做饭。'],['I want to improve my English.','我想提高英语。'],["I'm looking forward to seeing you.",'我很期待见到你。']],err:[['I enjoy to cook.','I enjoy cooking.','enjoy 后面用 -ing'],['I want improving my English.','I want to improve my English.','want 后面用 to do']]},
+ {id:'article',g:'句子',n:'冠词和可数不可数',en:'Articles & Countability',use:'什么时候用 a / an / the，什么时候不用；可数名词和不可数名词怎么用。',form:['a / an：第一次提到的、一个：a book, an apple','the：双方都知道的、特指的：the book on the table','不用冠词：泛指复数和不可数：I like music. Dogs are cute.','不可数：information, advice, money 不加 -s，用 much / a lot of'],sig:'a, an, the, some, much, many',
+  ex:[['I bought a new laptop. The laptop is very light.','我买了台新笔记本，它很轻。'],['Can you give me some advice?','你能给我一些建议吗？'],['She is an engineer.','她是一名工程师。']],err:[['She is engineer.','She is an engineer.','说职业要加 a / an'],['I need some informations.','I need some information.','information 不可数，不加 -s']]}
+];
+const GRAM_BY=Object.fromEntries(GRAM.map(x=>[x.id,x]));
+const GRAM_ORDER=['ps','pc','past','will','goingto','qneg','pp','pastc','modal','compare','gerinf','article','cond','passive','ppc','pastp','futc','relcl','reported','futp','pastfut','pastpc','mixed'];
 const ALI_VOICES=[['Jennifer','Jennifer · 美式女声'],['Aiden','Aiden · 美式男声'],['Cherry','Cherry · 中英双语女声'],['Ethan','Ethan · 中英双语男声']];
-const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',send:'tap',sayFix:true,pause:'mid',aliRoot:'',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
+const DEF={v:2,cfg:{prov:'qwen',keys:{},model:{},base:'',oaiKey:'',aliKey:'',level:'mid',rate:1,autoplay:true,showZh:false,blurEn:false,tts:'auto',send:'tap',sayFix:true,autoListen:false,pause:'mid',aliRoot:'',sysVoice:'',oaiVoice:'marin',aliVoice:'Jennifer',asr:'auto',lang:'en'},sessions:[],cur:null,book:[],days:{},turns:0};
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 S=Object.assign(structuredClone(DEF),S||{});S.cfg=Object.assign(structuredClone(DEF.cfg),S.cfg||{});
@@ -359,10 +547,8 @@ async function* streamAI(system,msgs,signal){
 async function askAI(system,user,onText,signal){let t='';for await(const c of streamAI(system,[{role:'user',content:user}],signal)){t+=c;onText&&onText(t)}return t}
 
 /* ---------- 提示词 ---------- */
-function sysPrompt(sess){
- const sc=SCENES.find(x=>x.id===sess.scene)||SCENES[0];
- const scene=sess.scene==='custom'?'Role-play this situation the learner described (in Chinese or English): '+sess.custom+'. Stay in character.':sc.p;
- return `You are Sam, a warm, patient, upbeat American from California. You are the English speaking partner of a Chinese university student. Their spoken English is still limited: they speak slowly, in fragments, with fillers (um, uh), repeated words, wrong tenses, Chinese word order, and sometimes switch to Chinese in the middle of a sentence. Your job is to make them feel understood, keep them talking, and help them say it better. ${LEVELS[S.cfg.level].p} Keep your own English simple, clear and friendly.
+function corePrompt(levelP,scene){
+ return `You are Sam, a warm, patient, upbeat American from California. You are the English speaking partner of a Chinese university student. Their spoken English is still limited: they speak slowly, in fragments, with fillers (um, uh), repeated words, wrong tenses, Chinese word order, and sometimes switch to Chinese in the middle of a sentence. Your job is to make them feel understood, keep them talking, and help them say it better. ${levelP} Keep your own English simple, clear and friendly.
 ${scene}
 
 Every response MUST use exactly this plain-text format, one item per line, nothing else:
@@ -400,10 +586,10 @@ Give up to 6 FIX lines (most important first, only real problems in the learner'
 const SYS_EXPLAIN='你是耐心的美式英语老师。用中文简洁讲解用户给的英语句子：先给整句意思，再讲 2-4 个关键词或短语（意思和用法），最后一句说明口语里的语气或什么时候用。纯文本，不要用 markdown 符号，不要 * 或 #。';
 
 function parseOut(t){
- const o={reply:'',zh:'',mean:'',better:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
+ const o={reply:'',zh:'',mean:'',better:'',step:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
  for(const raw of t.replace(/\*\*/g,'').split('\n')){
   const line=raw.trim();if(!line)continue;
-  const m=line.match(/^[-•]?\s*(REPLY|ZH|MEAN|BETTER|FIX|SAY|OPT|SUMMARY|GOOD|NEXT)\s*[:：]\s*(.*)$/i);
+  const m=line.match(/^[-•]?\s*(REPLY|ZH|MEAN|BETTER|FIX|SAY|OPT|SUMMARY|GOOD|NEXT|STEP)\s*[:：]\s*(.*)$/i);
   if(m){cur=m[1].toUpperCase();const v=m[2];
    if(cur==='FIX'||cur==='SAY'||cur==='OPT')o[cur.toLowerCase()].push(v);else o[cur.toLowerCase()]=v;}
   else if(cur==='FIX'&&/=>/.test(line))o.fix.push(line.replace(/^FIX\s*[:：]\s*/i,''));
@@ -418,7 +604,7 @@ function parseOut(t){
  const tidy=x=>x.replace(/\p{Extended_Pictographic}\uFE0F?/gu,'').replace(/[*_`#]+/g,'').replace(/\s{2,}/g,' ').trim();
  o.reply=tidy(o.reply);o.zh=tidy(o.zh);o.better=tidy(o.better).replace(/^["“]|["”]$/g,'');o.mean=tidy(o.mean);return o;
 }
-const replyDone=t=>/\n\s*(ZH|MEAN|BETTER|FIX|SAY)\s*[:：]/i.test(t);
+const replyDone=t=>/\n\s*(ZH|MEAN|BETTER|FIX|SAY|STEP)\s*[:：]/i.test(t);
 
 /* ---------- 发音 ---------- */
 const AU=new Audio();AU.playsInline=true;
@@ -691,9 +877,9 @@ function newSession(scene='free',custom=''){
  const s={id:uid(),scene,custom,created:Date.now(),msgs:[]};S.sessions.unshift(s);
  if(S.sessions.length>60)S.sessions.length=60;S.cur=s.id;save();return s;
 }
-function sessTitle(s){const sc=SCENES.find(x=>x.id===s.scene);if(s.scene==='custom')return s.custom.slice(0,18)||'自定义场景';return sc?sc.t:'对话'}
+function sessTitle(s){if((s.scene||'').startsWith('g:'))return '语法对话 · '+((GRAM_BY[s.scene.slice(2)]||{}).n||'');const sc=SCENE_BY[s.scene];if(s.scene==='custom')return s.custom.slice(0,18)||'自定义场景';return sc?sc.t:'对话'}
 let lastAct=0;
-function tickTime(){const n=Date.now();const add=lastAct?Math.min(n-lastAct,120000):20000;lastAct=n;const d=today();S.days[d]=(S.days[d]||0)+Math.round(add/1000)}
+function tickTime(){lastInput=Date.now()}
 let busy=false,ctrl=null;
 
 async function sendText(text){
@@ -709,7 +895,8 @@ async function runAI(s,hiddenUser){
  if(hiddenUser)s.msgs.push({role:'user',text:hiddenUser,hidden:true});
  const m={role:'ai',text:'',t:Date.now(),live:true};s.msgs.push(m);renderChat(true);
  const hist=s.msgs.filter(x=>x!==m&&x.role!=='err'&&x.role!=='note').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
- if(hist.length&&hist[hist.length-1].role==='user')hist[hist.length-1]={role:'user',content:hist[hist.length-1].content+'\n\n(Answer in the REPLY / ZH / MEAN / BETTER / FIX / SAY line format. No emojis or markdown.)'};
+ const SYS=sysPrompt(s),needStep=/Also output this line: STEP/.test(SYS),zeroLv=/pre-A1/.test(SYS);
+ if(hist.length&&hist[hist.length-1].role==='user')hist[hist.length-1]={role:'user',content:hist[hist.length-1].content+'\n\n(Answer in the REPLY / ZH / MEAN / BETTER / FIX / SAY'+(needStep?' / STEP':'')+' line format.'+(needStep?' Always include the STEP line, also on your last turn.':'')+(zeroLv?' End REPLY with You can say: "...".':'')+' No emojis or markdown.)'};
  let raw='',sp=null,fed=0,fin=false;const want=S.cfg.autoplay||CALL;callState('think');
  /* 回复一写完一句就交给发音，不等整段 */
  const feed=(reply,final)=>{
@@ -719,16 +906,17 @@ async function runAI(s,hiddenUser){
   if(final){fin=true;if(sp)sp.end()}
  };
  try{
-  for await(const c of streamAI(sysPrompt(s),hist,ctrl.signal)){
+  for await(const c of streamAI(SYS,hist,ctrl.signal)){
    raw+=c;const o=parseOut(raw);m.text=o.reply;updLive(m);feed(o.reply,replyDone(raw));
   }
   const o=parseOut(raw);
   Object.assign(m,{text:o.reply||raw.trim(),zh:o.zh,say:o.say});delete m.live;
   {const u=[...s.msgs].reverse().find(x=>x.role==='user'&&!x.hidden&&x!==m);
    if(u&&!u.hidden&&s.msgs.indexOf(u)===s.msgs.indexOf(m)-1){if(o.fix.length)u.fix=o.fix;if(o.mean)u.mean=o.mean;if(o.better&&o.better.toLowerCase()!==u.text.trim().toLowerCase()&&!hasZh(o.better))u.better=o.better}}
+  if(o.step)handleStep(s,o.step);
   save();busy=false;renderChat(true);
   feed(m.text,true);
-  if(CALL){callCap(m);if(sp)await sp.done;callNext()}
+  if(CALL){callCap(m);if(sp)await sp.done;if(!CALL)return;if(S.cfg.autoListen)callNext();else callState('idle','轮到你了：可以先跟读，想回答时点圆圈')}
  }catch(e){
   busy=false;s.msgs.splice(s.msgs.indexOf(m),1);
   if(e.name!=='AbortError'){s.msgs.push({role:'err',text:e.message||String(e)});if(e instanceof NeedKey)setTimeout(()=>{go('mev');toast('先在这里填好 AI 密钥')},600)}
@@ -763,9 +951,9 @@ function renderChat(scroll){
  }else el.innerHTML=s.msgs.map((m,i)=>{
   if(m.hidden)return '';
   if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${m.mean||m.better?`<div class="card fix">${m.mean?`<div class="why" style="font-size:13.5px">Sam 理解的：${esc(m.mean)}</div>`:''}${m.better?`<div class="say" data-en="${esc(m.better)}" data-zh="${esc(m.mean||'')}" style="margin-top:4px"><div class="t"><span style="color:var(--sub);font-size:12.5px;display:block">完整地道说法</span><b style="color:var(--ok)">${esc(m.better)}</b></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib ${inBook(m.better)?'on':''}" data-a="fav">${I.star}</button></div>`:''}</div>`:''}${(m.fix||[]).map(f=>`<div class="card fix"><button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px">${I.play}</button><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
-  if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}</div>`;
+  if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}${m.kind==='done'?'<button data-a="review">复盘</button><button data-a="nextscene">下一课</button>':''}${m.kind==='gdone'?'<button data-a="review">复盘</button><button data-a="gagain">再来一轮</button>':''}</div>`;
   if(m.role==='err')return `<div class="msg ai"><div class="bub err">${esc(m.text)}<div class="tools"><button data-a="retry">重试</button><button data-a="toset">去设置</button></div></div></div>`;
-  return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}><div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${esc(m.text)}</div>
+  return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}><div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${m.live?esc(m.text):richText(m.text)}</div>
    ${m.zh?`<div class="zh" ${zhShown(m)?'':'hidden'}>${esc(m.zh)}</div>`:''}
    ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button><button data-a="zh" class="${zhShown(m)&&m.zh?'act':''}">中文</button><button data-a="ex">讲解</button><button data-a="sh">跟读</button><button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
    ${(m.say||[]).map(x=>sayCard(x)).join('')}</div>`;
@@ -780,15 +968,14 @@ function renderBar2(){
 }
 function renderHeader(v){
  const h=$('#hbtns');
- if(v==='chatv')h.innerHTML=`<button class="hb" data-a="level">${LEVELS[S.cfg.level].n}</button> <button class="hb" data-a="new">新对话</button>`;
+ const cs=curSess();
+ if(v==='chatv')h.innerHTML=`${cs&&cs.step?`<span class="hb" style="background:${cs.passed?'var(--ok)':'var(--pri2)'};color:${cs.passed?'#fff':'var(--pri)'}">${cs.scene.startsWith('g:')?'已答':'任务'} ${cs.step[0]}/${cs.step[1]}</span> `:''}${cs&&(cs.scene||'free').match(/^(free|daily|topic|debate|custom)$/)||!cs?`<button class="hb" data-a="level">${LEVELS[S.cfg.level].n}</button> `:''}<button class="hb" data-a="new">新对话</button>`;
+ else if(v==='gramv'&&gramCur)h.innerHTML='<button class="hb" data-a="gback">返回</button>';
  else h.innerHTML='';
+ if(v==='gramv')$('#title').textContent=gramCur?GRAM_BY[gramCur].n:'语法';
  if(v==='scenev')$('#title').textContent='选一个场景';
  if(v==='bookv')$('#title').textContent='表达本';
  if(v==='mev')$('#title').textContent='我的';
-}
-function renderScenes(){
- $('#scenev').innerHTML=`<div class="note" style="margin-top:2px">选好后 Sam 会先开口，你接着说就行。</div><div class="grid">${SCENES.map(s=>`<button class="scene" data-scene="${s.id}"><b>${s.t}</b><span>${s.d}</span></button>`).join('')}</div>
- <div class="sec">今天的随机话题</div><button class="row" data-a="topic" style="width:100%;text-align:left"><div class="t"><div><b>换个话题聊聊</b></div><small>Sam 随机抛一个有意思的话题</small></div></button>`;
 }
 function dueList(){const d=today();return S.book.filter(b=>(b.due||d)<=d)}
 function renderBook(){
@@ -840,15 +1027,15 @@ function renderMe(){
   <label><span>总显示中文</span><input type="checkbox" id="c-zh" ${c.showZh?'checked':''}></label>
   <label><span>听力挑战</span><input type="checkbox" id="c-blur" ${c.blurEn?'checked':''}></label>
  </div>
- <div class="set" style="margin-top:8px"><label><span>开口纠错</span><input type="checkbox" id="c-sayfix" ${c.sayFix!==false?'checked':''}></label></div>
- <div class="note">听力挑战：Sam 的英文先打码，听不懂再点开看。开口纠错：你说错时，Sam 会先口头纠正最重要的一处，再接着聊。</div>
+ <div class="set" style="margin-top:8px"><label><span>通话自动接听</span><input type="checkbox" id="c-autolisten" ${c.autoListen?'checked':''}></label><label><span>开口纠错</span><input type="checkbox" id="c-sayfix" ${c.sayFix!==false?'checked':''}></label></div>
+ <div class="note">听力挑战：Sam 的英文先打码，听不懂再点开看。开口纠错：你说错时，Sam 会先口头纠正最重要的一处，再接着聊。通话自动接听：默认关，Sam 说完会停下等你，你可以先跟读，点圆圈才开始听你说。</div>
  <div class="sec">数据</div>
  <div class="btns"><button class="btn g" data-a="export">备份到文件</button><button class="btn g" data-a="import">从备份恢复</button></div>
  <div class="note">数据只存在这台手机的这个 App 里。备份文件不含密钥。版本 ${VER}</div>`;
 }
 
 /* ---------- 弹层 ---------- */
-function sheet(html){$('#sheet').innerHTML=html;$('#mask').style.display='block';sheet.open=true;requestAnimationFrame(()=>{if(sheet.open)$('#sheet').classList.add('on')})}
+function sheet(html){$('#sheet').innerHTML=html;$('#mask').style.display='block';sheet.open=true;setTimeout(()=>{if(sheet.open)$('#sheet').classList.add('on')},16)}
 function closeSheet(){sheet.open=false;$('#sheet').classList.remove('on');$('#mask').style.display='none';if(REC)REC.abort();if(sheet.ctrl)sheet.ctrl.abort()}
 $('#mask').onclick=closeSheet;
 const sheetHead=t=>`<h3><span>${t}</span><button class="ib" data-a="close">${I.x}</button></h3>`;
@@ -969,7 +1156,7 @@ function callCap(m,opts){
  const fix=u&&u.fix&&u.fix[0];
  el.classList.toggle('hidecap',!capOn);
  const tip=u&&u.better?u.better:fix&&fix.to;
- el.innerHTML=`<div class="en">${esc(m.text)}</div>${zhShown(m)&&m.zh?`<small>${esc(m.zh)}</small>`:''}${tip?`<div class="tip">更地道：${esc(tip)}</div>`:''}`;
+ el.innerHTML=`<div class="en">${richText(m.text)}</div>${zhShown(m)&&m.zh?`<small>${esc(m.zh)}</small>`:''}${tip?`<div class="tip">更地道：${esc(tip)}</div>`:''}`;
  $('#czh').classList.toggle('on',!!(zhShown(m)&&m.zh));
 }
 function tickCall(){const t=Math.floor((Date.now()-callT0)/1000);$('#ctime').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
@@ -988,9 +1175,9 @@ async function enterCall(){
  $('#cme').textContent='';callCap();tickCall();callTimer=setInterval(tickCall,1000);levelLoop();keepAwake();
  callState('wait');go('chatv');
  const last=s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').slice(-1)[0];
- if(!last)await runAI(s,'(We are now on a phone call. Answer like picking up the phone: greet me casually and ask what I want to talk about. Keep it short.)');
+ if(!last)await runAI(s,openerFor(s,true));
  else if(last.role==='user')await runAI(s);
- else callNext();
+ else callState('idle','想说的时候点圆圈');
 }
 function exitCall(){
  if(!CALL)return;
@@ -1025,7 +1212,7 @@ $('#call .tools2').onclick=e=>{
   return ensureZh(m).then(()=>{m.zhOn=true;save();callCap()},err=>{const z=$('#ztmp');if(z)z.textContent=err.message})}
  if(!m)return;
  if(REC)REC.abort();
- callState('speak');speak(m.text,c==='slow').then(()=>{if(CALL&&!busy&&!REC&&!LISTENING)callNext()});
+ callState('speak');speak(m.text,c==='slow').then(()=>{if(CALL&&!busy&&!REC&&!LISTENING)callState('idle','想回答时点圆圈')});
 };
 document.addEventListener('visibilitychange',()=>{if(CALL&&!document.hidden){keepAwake();if(!REC&&!LISTENING&&!busy&&!SPEAKING)callState('idle','点圆圈继续说')}});
 
@@ -1061,34 +1248,268 @@ $('#mic').onclick=async()=>{
  }catch(e){done();toast(e.message,5000)}
 };
 
+/* ---------- 点句子播放、点单词查词 ---------- */
+function wrapWords(s){return s.split(/(\s+)/).map(tok=>{const m=tok.match(/^([^A-Za-z0-9]*)([A-Za-z0-9](?:[A-Za-z0-9'’\-]*[A-Za-z0-9])?)([^A-Za-z0-9]*)$/);return m?`${esc(m[1])}<i class="w">${esc(m[2])}</i>${esc(m[3])}`:esc(tok)}).join('')}
+function richText(t,btn=true){
+ const ss=sentences(t);if(!ss.length)return esc(t);
+ return ss.map(s=>`<span class="sn">${btn?`<button class="sp" data-a="psn" data-s="${esc(s)}" aria-label="播放这句">${I.play}</button>`:''}${wrapWords(s)}</span>`).join(' ');
+}
+const SYS_WORD=`You are an English-Chinese learner's dictionary. Explain the given English word as it is used in the given sentence. Output exactly these lines, plain text, nothing else:
+WORD: <dictionary form>
+IPA: <American IPA between slashes>
+POS: <词性，用中文，如 动词 / 名词 / 形容词>
+ZH: <它在这句话里的中文意思，简短>
+MORE: <其他常见意思，用；分隔，最多三个；没有就写 无>
+NOTE: <一句中文用法提示或常见搭配>
+EX: <a short new example sentence using this word> || <中文>`;
+function tagLines(t){const o={};for(const l of String(t).replace(/\*\*/g,'').split('\n')){const m=l.trim().match(/^([A-Z]+)\s*[:：]\s*(.*)$/);if(m&&!o[m[1]])o[m[1]]=m[2].trim()}return o}
+const lookCache=new Map();
+async function lookupWord(word,sent){
+ sheet(sheetHead(esc(word))+`<div id="lk"><div class="note">查询中…</div></div>`);
+ speak(word);
+ const key=word.toLowerCase()+'|'+sent;
+ try{
+  let o=lookCache.get(key);
+  if(!o){o=tagLines(await askAI(SYS_WORD,`Word: ${word}\nSentence: ${sent}`));lookCache.set(key,o)}
+  const box=$('#lk');if(!box)return;
+  const [exEn,exZh='']=(o.EX||'').split(/\s*\|\|\s*/);const w=o.WORD||word;
+  box.innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="font-size:24px;font-weight:700">${esc(w)}</div><div class="zh" style="margin-top:2px">${esc(o.IPA||'')} ${o.POS?'· '+esc(o.POS):''}</div></div><button class="ib" data-a="pw" data-en="${esc(w)}">${I.play}</button></div>
+   <div style="font-size:17px;margin-top:8px"><b>${esc(o.ZH||'')}</b></div>
+   ${o.MORE&&o.MORE!=='无'?`<div class="note">其他意思：${esc(o.MORE)}</div>`:''}${o.NOTE?`<div class="note">${esc(o.NOTE)}</div>`:''}</div>
+   <div class="card"><div class="note" style="margin:0 0 4px">在这句里</div><div class="en" style="font-size:16px">${richText(sent)}</div></div>
+   ${exEn?`<div class="card say" data-en="${esc(exEn)}" data-zh="${esc(exZh)}"><div class="t"><span style="font-size:12.5px;color:var(--sub);display:block">例句</span><b>${esc(exEn)}</b><span>${esc(exZh)}</span></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button></div>`:''}
+   <div class="btns"><button class="btn ${inBook(w)?'g':''}" data-a="wfav" data-en="${esc(w)}" data-zh="${esc(o.ZH||'')}" data-note="${esc((o.IPA||'')+' '+(o.NOTE||''))}">${inBook(w)?'已在表达本':'收藏这个词'}</button></div>`;
+ }catch(e){const b=$('#lk');if(b)b.innerHTML=`<div class="note">${esc(e.message)}</div>`}
+}
+
+/* ---------- 学习时长：只要在用（听、说、看、打字）就计时 ---------- */
+let lastInput=Date.now();
+['pointerdown','keydown','touchstart','scroll'].forEach(ev=>document.addEventListener(ev,()=>{lastInput=Date.now()},{capture:true,passive:true}));
+setInterval(()=>{
+ if(document.hidden)return;
+ const active=CALL||REC||LISTENING||SPEAKING||busy||Date.now()-lastInput<180000;
+ if(!active)return;
+ const d=today();S.days[d]=(S.days[d]||0)+15;save();
+},15000);
+
+/* ---------- 场景：分级、预习、任务进度 ---------- */
+const sceneDone=id=>!!(S.done&&S.done[id]);
+function nextScene(){return SCENE_DATA.find(x=>x.lv<4&&!sceneDone(x.id))||SCENE_DATA.find(x=>x.lv===4)}
+function renderScenes(){
+ const nx=nextScene();
+ $('#scenev').innerHTML=`<button class="card" data-a="sintro" data-id="${nx.id}" style="width:100%;text-align:left;border-color:var(--pri);margin-top:2px"><div class="note" style="margin:0">下一课 · ${SCENE_LV[nx.lv].n}</div><div style="font-size:18px;font-weight:700;margin-top:2px">${esc(nx.t)}</div><div class="note" style="margin:2px 0 0">${esc(nx.goal||nx.d)}</div></button>
+ ${SCENE_LV.map((lv,k)=>{const list=SCENE_DATA.filter(x=>x.lv===k),done=list.filter(x=>sceneDone(x.id)).length;
+  return `<div class="sec lvh"><b>${k<4?(k+1)+'. ':''}${lv.n}</b><span>${lv.d}</span>${k<4?`<em>${done}/${list.length}</em>`:''}</div><div class="grid">${list.map(x=>`<button class="scene${sceneDone(x.id)?' done':''}${x===nx?' nx':''}" data-a="sintro" data-id="${x.id}"><b>${esc(x.t)}${sceneDone(x.id)?' ✓':''}</b><span>${esc(x.d)}</span></button>`).join('')}</div>`}).join('')}`;
+}
+function sceneIntro(id){
+ const sc=SCENE_BY[id];if(!sc)return;
+ if(id==='custom'){
+  sheet(sheetHead('自定义场景')+`<textarea id="cust" rows="4" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card)" placeholder="例如：我在美国租房，和房东沟通热水器坏了要修"></textarea><div class="btns"><button class="btn" data-a="custgo">开始练习</button><button class="btn g" data-a="custcall">📞 打电话练</button></div>`);
+  setTimeout(()=>$('#cust')&&$('#cust').focus(),300);return;
+ }
+ sheet(sheetHead(esc(sc.t))+`<div class="note" style="margin-top:-4px">${SCENE_LV[sc.lv].n} · ${esc(sc.d)}${sceneDone(id)?' · 已完成 ✓':''}</div>
+  ${sc.goal?`<div class="card"><b>这一课学会</b><div style="margin-top:4px">${esc(sc.goal)}</div></div>`:''}
+  ${sc.tasks?`<div class="card"><b>任务（Sam 会一步步带你完成）</b><ol style="margin:6px 0 0;padding-left:20px;line-height:1.8">${sc.tasks.map(x=>`<li>${esc(x[0])}</li>`).join('')}</ol></div>`:''}
+  ${sc.ph?`<div class="sec">先预习这几句，点 ▶ 听，点 🎤 跟读</div>${sc.ph.map(([en,zh])=>sayCard({en,zh})).join('')}`:''}
+  <div class="btns"><button class="btn" data-a="sgo" data-id="${id}">开始练习</button><button class="btn g" data-a="scall" data-id="${id}">📞 打电话练</button></div>`);
+}
+function openerFor(s,call){
+ const id=s.scene||'free';
+ if(id.startsWith('g:'))return '(Start the grammar practice: greet me in one short sentence, then ask your first question.)';
+ const sc=SCENE_BY[id];
+ if(sc&&sc.tasks)return '(Start the role-play now: say your short opening line in character and lead me to the first task.)';
+ if(id==='topic')return '(Pick a fun, random everyday topic and start chatting about it with a short opener and a question.)';
+ if(id==='debate')return '(Pick an interesting debate topic and ask for my opinion.)';
+ if(id==='custom')return '(Start the role-play now: say your short opening line in character.)';
+ return call?'(We are now on a phone call. Answer like picking up the phone: greet me casually and ask what I want to talk about. Keep it short.)':'(Greet me casually and ask what I want to talk about. Keep it short.)';
+}
+function startLesson(id,call,custom){
+ closeSheet();const s=newSession(id,custom||'');go('chatv');
+ if(call){freshAudio();enterCall()}else runAI(s,openerFor(s,false));
+}
+function handleStep(s,step){
+ const m=String(step).match(/(\d+)\s*\/\s*(\d+)/);if(!m)return;
+ const n=+m[1],t=+m[2];if(!t)return;s.step=[Math.min(n,t),t];
+ if(n>=t&&!s.passed){
+  s.passed=true;
+  if(!s.scene.startsWith('g:')){S.done=S.done||{};S.done[s.scene]=Date.now()}
+  s.msgs.push({role:'note',kind:s.scene.startsWith('g:')?'gdone':'done',text:s.scene.startsWith('g:')?'这一轮语法对话完成了！':'这个场景完成了！你做到了。',t:Date.now()});
+  toast(s.scene.startsWith('g:')?'这一轮完成了！':'场景完成 ✓');
+ }
+ save();if($('#chatv').classList.contains('on'))renderHeader('chatv');
+}
+
+/* ---------- 提示词：场景、语法对话 ---------- */
+function sysPrompt(sess){
+ const id=sess.scene||'free';
+ if(id.startsWith('g:')){
+  const g=GRAM_BY[id.slice(2)]||GRAM[0];
+  return corePrompt(LEVELS[S.cfg.level].p,`This is a FOCUSED GRAMMAR PRACTICE conversation on ONE grammar point only: ${g.en} (${g.n}). Use: ${g.use} Structure: ${g.form.join(' / ')}. Typical signal words: ${g.sig}.
+RULES FOR THIS PRACTICE: Ask short, everyday questions (daily life, study, research, food, travel, friends) that the learner can only answer well by using ${g.en}; include the right time words in your questions. Ask ONE question at a time. Never drift to other topics or other grammar points. Check every answer: if the learner made a mistake with ${g.en}, correct it out loud first (say the correct sentence and a very short reason) and ask them to say the corrected sentence once. If it was correct, praise them in a few words and ask the next question. Keep your own sentences simple. After 8 answers, give a short summary of what they did well and one thing to remember.
+Also output this line: STEP: <number of answers the learner has given so far>/8`);
+ }
+ const sc=SCENE_BY[id]||SCENE_BY.free;
+ const levelP=sc.lv===4||!SCENE_LV[sc.lv].p?LEVELS[S.cfg.level].p:SCENE_LV[sc.lv].p;
+ let scene=id==='custom'?'Role-play this situation the learner described (in Chinese or English): '+sess.custom+'. Stay in character and stay inside this situation.':(sc.role||'');
+ if(sc.tasks)scene+=`\n\nThis is a structured lesson: "${sc.t}". The learner's tasks, in order:\n${sc.tasks.map((x,i)=>(i+1)+') '+x[1]).join('\n')}
+RULES FOR THIS LESSON: Stay strictly inside this scene. Guide the learner through the tasks one at a time, in order; each of your questions should lead them to do the next task. If they go off-topic, answer in at most one short sentence and bring them back to the current task. Never start unrelated topics. When every task is done, congratulate them briefly and say the scene is complete.
+Also output this line: STEP: <number of tasks the learner has completed so far>/${sc.tasks.length}`;
+ return corePrompt(levelP,scene);
+}
+
+/* ---------- 语法栏目 ---------- */
+let gramCur=null;
+const gStat=id=>(S.gram&&S.gram[id])||{n:0,ok:0};
+const gStars=id=>{const s=gStat(id);if(s.n<8)return 0;const a=s.ok/s.n;return a>=.9?3:a>=.75?2:a>=.5?1:0};
+const gWrong=id=>(S.gwrong||[]).filter(w=>w.mod===id);
+function nextGram(){return GRAM_ORDER.map(i=>GRAM_BY[i]).find(g=>gStars(g.id)<2)||GRAM_BY.mixed}
+function renderGram(){
+ const v=$('#gramv');
+ if(gramCur){renderGramMod(gramCur);return}
+ const nx=nextGram();
+ const row=g=>{const s=gStat(g.id),st=gStars(g.id),w=gWrong(g.id).length;return `<button class="row" data-a="gopen" data-id="${g.id}" style="width:100%;text-align:left"><div class="t"><div><b>${esc(g.n)}</b> <small>${esc(g.en)}</small></div><small>${s.n?`练了 ${s.n} 题 · 正确率 ${Math.round(100*s.ok/s.n)}%`:'还没练'}${w?` · 错题 ${w}`:''}</small></div><span class="stars">${'★'.repeat(st)}${'☆'.repeat(3-st)}</span></button>`};
+ v.innerHTML=`<div class="card" style="margin-top:2px;line-height:1.65"><b>造句四步法</b><div class="note" style="margin:4px 0 0">每个语法点都按这四步走，一次只练一个点：<br>① 看懂：什么时候用、句子怎么搭<br>② 跟读：例句听三遍、跟着说<br>③ 造句：句型转换 + 中译英，说出来或打出来，当场批改<br>④ 实战：和 Sam 对话，只用这个语法回答</div></div>
+ <button class="card" data-a="gopen" data-id="${nx.id}" style="width:100%;text-align:left;border-color:var(--pri)"><div class="note" style="margin:0">推荐下一个</div><div style="font-size:18px;font-weight:700;margin-top:2px">${esc(nx.n)} <small style="font-weight:400;color:var(--sub)">${esc(nx.en)}</small></div></button>
+ ${(S.gwrong||[]).length?`<button class="row" data-a="gwrongall" style="width:100%;text-align:left"><div class="t"><div><b>错题本</b></div><small>${S.gwrong.length} 道题等你重练</small></div></button>`:''}
+ <div class="sec">时态</div>${GRAM.filter(g=>g.g==='时态').map(row).join('')}
+ <div class="sec">句子和语法</div>${GRAM.filter(g=>g.g==='句子').map(row).join('')}`;
+}
+function renderGramMod(id){
+ const g=GRAM_BY[id],s=gStat(id),w=gWrong(id).length;
+ $('#title').textContent=g.n;
+ $('#gramv').innerHTML=`<div class="note" style="margin-top:0">${esc(g.en)} · ${s.n?`练了 ${s.n} 题，正确率 ${Math.round(100*s.ok/s.n)}%`:'还没练过'}</div>
+ <div class="card"><b>① 什么时候用</b><div style="margin-top:4px">${esc(g.use)}</div></div>
+ <div class="card"><b>句子怎么搭</b><ul style="margin:6px 0 0;padding-left:18px;line-height:1.75">${g.form.map(f=>`<li>${esc(f)}</li>`).join('')}</ul><div class="note" style="margin:6px 0 0">常见信号词：${esc(g.sig)}</div></div>
+ <div class="sec">② 跟读例句（点 ▶ 听，点 🎤 跟读，点单词查意思）</div>
+ ${g.ex.map(([en,zh])=>`<div class="card say" data-en="${esc(en)}" data-zh="${esc(zh)}"><div class="t"><div class="en" style="font-size:16px;font-weight:600">${richText(en,false)}</div><span>${esc(zh)}</span></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button></div>`).join('')}
+ <div class="sec">常见错误</div>
+ ${g.err.map(([a,b,why])=>`<div class="card fix" style="max-width:none"><button class="ib" data-a="pf" data-en="${esc(b)}" style="width:28px;height:28px">${I.play}</button><span class="from">${esc(a)}</span><br><span class="to">${esc(b)}</span><div class="why">${esc(why)}</div></div>`).join('')}
+ <div class="sec">③ 造句练习 · ④ 对话实战</div>
+ <button class="btn" data-a="gdrill" data-id="${id}">造句练习（8 题，说出来或打出来）</button>
+ <div class="btns"><button class="btn g" data-a="gchat" data-id="${id}">和 Sam 对话实战</button><button class="btn g" data-a="gcall" data-id="${id}">📞 打电话实战</button></div>
+ ${w?`<div class="btns"><button class="btn r" data-a="gwrong" data-id="${id}">错题重练（${w} 道）</button></div>`:''}`;
+}
+/* 造句练习 */
+const SYS_DRILL=g=>`You write speaking drills for ONE English grammar point for a learner whose spoken English is limited. Grammar point: ${g.en} (${g.n}). Structure: ${g.form.join(' / ')}.
+Output exactly 8 lines, nothing else, from easy to harder, about everyday life (daily routine, study, research, food, travel, friends, work):
+Q: T || <a short English sentence that is NOT yet in the target form> || <中文指令，例如：改成一般过去时，加上 yesterday>
+Q: C || <一个中文句子，必须用到这个语法才能翻译对> || <中文提示，例如：用一般过去时>
+Write 3 T lines first, then 5 C lines. Every item must require ${g.en}. Do not give answers.`;
+const SYS_GRADE=g=>`You are a strict but kind English grammar coach. The learner is practicing ONE grammar point: ${g.en} (${g.n}). Judge mainly whether the target grammar is used correctly; also fix any other serious mistake. Ignore capitalization and punctuation (the answer may come from speech recognition). Output exactly these lines, nothing else:
+RESULT: right | almost | wrong
+BEST: <the best natural answer>
+WHY: <用中文一两句，重点讲这个语法点；答对了就简单说为什么对>`;
+let GD=null;
+async function startDrill2(id,fromWrong){
+ const g=GRAM_BY[id]||GRAM_BY[(S.gwrong[0]||{}).mod];
+ GD={g,items:[],i:0,res:[],wrongMode:!!fromWrong};
+ if(fromWrong){
+  GD.items=(fromWrong==='all'?S.gwrong:gWrong(id)).slice(0,8).map(w=>({type:w.type,q:w.q,hint:w.hint,mod:w.mod}));
+  if(!GD.items.length)return toast('没有错题了');
+  return drillItem();
+ }
+ sheet(sheetHead(esc(g.n)+' · 造句练习')+`<div class="note">正在出 8 道只练「${esc(g.n)}」的题…</div>`);
+ try{
+  const t=await askAI(SYS_DRILL(g),'Generate the 8 lines now.');
+  GD.items=t.split('\n').map(l=>l.replace(/\*\*/g,'').trim().match(/^Q\s*[:：]\s*([TC])\s*\|\|\s*(.+?)\s*\|\|\s*(.+)$/i)).filter(Boolean).map(m=>({type:m[1].toUpperCase(),q:m[2],hint:m[3],mod:g.id}));
+  if(GD.items.length<4)throw new Error('出题没成功，请再试一次');
+  drillItem();
+ }catch(e){if($('#sheet h3'))$('#sheet').insertAdjacentHTML('beforeend',`<div class="note" style="color:var(--bad)">${esc(e.message)}</div>`)}
+}
+function drillItem(){
+ const it=GD.items[GD.i];if(!it)return drillEnd();
+ const g=GRAM_BY[it.mod]||GD.g;
+ sheet(sheetHead(`${esc(g.n)} · 第 ${GD.i+1}/${GD.items.length} 题`)+`<div class="card"><span class="tag">${it.type==='T'?'句型转换':'中译英造句'}</span><div style="font-size:18px;margin:8px 0 4px;font-weight:600">${esc(it.q)}</div><div class="note" style="margin:0">${esc(it.hint)}</div></div>
+  <textarea id="gans" rows="3" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);font-size:16px" placeholder="说出来（点麦克风）或者打字"></textarea>
+  <div id="gst" class="note" style="min-height:18px"></div>
+  <div class="btns" id="gbtns"><button class="btn g" data-a="gmic" id="gmic">🎤 说出来</button><button class="btn" data-a="gsub">提交</button></div>
+  <div class="btns" id="gskipw"><button class="btn r" data-a="gskip">不会，看答案</button></div>
+  <div id="gres"></div>`);
+}
+async function drillSubmit(skip){
+ const it=GD.items[GD.i],g=GRAM_BY[it.mod]||GD.g;
+ const ans=skip?'(no answer)':($('#gans').value||'').trim();
+ if(!ans)return toast('先说或写一个答案');
+ if(REC)REC.abort();
+ $('#gbtns').style.display='none';$('#gskipw').style.display='none';$('#gres').innerHTML='<div class="note">批改中…</div>';
+ try{
+  const o=tagLines(await askAI(SYS_GRADE(g),`Task type: ${it.type==='T'?'transform the sentence':'translate Chinese to English'}\nTask: ${it.q}\nInstruction: ${it.hint}\nLearner answer: ${ans}`));
+  let r=(o.RESULT||'').toLowerCase();r=skip?'wrong':/right/.test(r)?'right':/almost/.test(r)?'almost':'wrong';
+  const sc=r==='right'?1:r==='almost'?.5:0;
+  GD.res.push({it,ans,r,best:o.BEST||'',why:o.WHY||''});
+  S.gram=S.gram||{};const st=S.gram[it.mod]||{n:0,ok:0};st.n++;st.ok+=sc;S.gram[it.mod]=st;
+  S.gwrong=S.gwrong||[];
+  const key=w=>w.mod===it.mod&&w.q===it.q;
+  if(r==='right')S.gwrong=S.gwrong.filter(w=>!key(w));
+  else if(!S.gwrong.some(key))S.gwrong.unshift({mod:it.mod,type:it.type,q:it.q,hint:it.hint,best:o.BEST||'',t:Date.now()});
+  if(S.gwrong.length>200)S.gwrong.length=200;
+  save();
+  const col=r==='right'?'var(--ok)':r==='almost'?'var(--warn)':'var(--bad)';
+  $('#gres').innerHTML=`<div class="card" style="border-left:3px solid ${col}"><b style="color:${col}">${r==='right'?'答对了 ✓':r==='almost'?'差一点':'再看看'}</b>
+   ${skip?'':`<div class="note" style="margin:4px 0">你的答案：${esc(ans)}</div>`}
+   <div class="say" data-en="${esc(o.BEST||'')}" style="margin-top:6px"><div class="t"><span style="font-size:12.5px;color:var(--sub);display:block">参考答案</span><b class="en">${richText(o.BEST||'',false)}</b></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button></div>
+   <div class="why" style="margin-top:6px">${esc(o.WHY||'')}</div></div>
+   <button class="btn" data-a="gnext">${GD.i+1<GD.items.length?'下一题':'看结果'}</button>`;
+  speak(o.BEST||'');
+ }catch(e){$('#gres').innerHTML=`<div class="note" style="color:var(--bad)">${esc(e.message)}</div>`;$('#gbtns').style.display='';$('#gskipw').style.display=''}
+}
+function drillEnd(){
+ const n=GD.res.length,ok=GD.res.reduce((a,x)=>a+(x.r==='right'?1:x.r==='almost'?.5:0),0),g=GD.g;
+ sheet(sheetHead(esc(g.n)+' · 练习结果')+`<div class="card" style="text-align:center"><div class="score" style="color:${ok/n>=.8?'var(--ok)':ok/n>=.5?'var(--warn)':'var(--bad)'}">${ok} / ${n}</div><div class="note">${ok/n>=.8?'这个语法点掌握得不错！':ok/n>=.5?'有进步，错的那几题已经收进错题本':'别急，先回去把例句跟读几遍，再练一轮'}</div></div>
+  ${GD.res.map(x=>`<div class="card"><div class="note" style="margin:0">${x.r==='right'?'✓':x.r==='almost'?'△':'✗'} ${esc(x.it.q)}</div><b>${esc(x.best)}</b></div>`).join('')}
+  <div class="btns"><button class="btn" data-a="gdrill" data-id="${g.id}">再练 8 题</button><button class="btn g" data-a="gchat" data-id="${g.id}">对话实战</button></div>`);
+ if(gramCur&&$('#gramv').classList.contains('on'))renderGramMod(gramCur);
+}
+async function drillMic(){
+ if(REC){REC.stop();return}
+ if(LISTENING)return;
+ freshAudio();const b=$('#gmic'),st=$('#gst');b.textContent='说完点这里';
+ try{const t=await listen('en',(x,s)=>{if(st)st.textContent=s||x||''});if($('#gans')&&t)$('#gans').value=(($('#gans').value||'')+' '+t).trim();if(st)st.textContent=t?'':'没听到声音，再试一次'}
+ catch(e){if(st)st.textContent=e.message}
+ if($('#gmic'))$('#gmic').textContent='🎤 说出来';
+}
+
 /* ---------- 导航与事件 ---------- */
 function go(v){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===v));
  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
  $('#composer').classList.toggle('on',v==='chatv');
  renderHeader(v);
- if(v==='chatv')renderChat(true);if(v==='scenev')renderScenes();if(v==='bookv')renderBook();if(v==='mev')renderMe();
+ if(v==='chatv')renderChat(true);if(v==='scenev')renderScenes();if(v==='gramv')renderGram();if(v==='bookv')renderBook();if(v==='mev')renderMe();
  renderBar2();if(v!=='chatv')$('#main').scrollTop=0;
 }
-$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
-
-function startScene(id){
- if(id==='custom'){
-  sheet(sheetHead('自定义场景')+`<textarea id="cust" rows="4" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card)" placeholder="例如：我在美国租房，和房东沟通热水器坏了要修"></textarea><div class="btns"><button class="btn" data-a="custgo">开始</button></div>`);
-  setTimeout(()=>$('#cust').focus(),300);return;
- }
- const s=newSession(id);go('chatv');runAI(s,'(Start the role-play now: say your short opening line in character.)');
-}
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.v==='gramv'&&$('#gramv').classList.contains('on'))gramCur=null;go(b.dataset.v)};
 
 document.body.addEventListener('click',async e=>{
+ const wd=e.target.closest('.w');
+ if(wd&&!wd.closest('.blur')&&!wd.closest('.hidecap')){const sn=wd.closest('.sn');e.preventDefault();return lookupWord(wd.textContent,sn?sn.textContent.trim():wd.textContent)}
  const t=e.target.closest('[data-a],[data-chip],[data-scene]');if(!t)return;
  if(t.dataset.chip){txt.value=t.dataset.chip;sendText(t.dataset.chip);return}
- if(t.dataset.scene)return startScene(t.dataset.scene);
+ if(t.dataset.scene)return sceneIntro(t.dataset.scene);
  const a=t.dataset.a,msgEl=t.closest('.msg'),s=curSess();
  const m=msgEl&&s?s.msgs[+msgEl.dataset.i]:null;
  const card=t.closest('[data-en]');
  switch(a){
   case 'close':return closeSheet();
+  case 'psn':{document.querySelectorAll('.sn.on').forEach(x=>x.classList.remove('on'));const sn=t.closest('.sn');if(sn)sn.classList.add('on');if(CALL&&REC)REC.abort();return speak(t.dataset.s).then(()=>sn&&sn.classList.remove('on'))}
+  case 'pw':return speak(t.dataset.en);
+  case 'wfav':{const on=addBook({en:t.dataset.en,zh:t.dataset.zh,note:t.dataset.note});t.textContent=on?'已在表达本':'收藏这个词';t.classList.toggle('g',!!on);return}
+  case 'sintro':return sceneIntro(t.dataset.id);
+  case 'sgo':return startLesson(t.dataset.id,false);
+  case 'scall':return startLesson(t.dataset.id,true);
+  case 'custcall':{const v=($('#cust').value||'').trim();if(!v)return toast('写一句场景描述');return startLesson('custom',true,v)}
+  case 'nextscene':return sceneIntro(nextScene().id);
+  case 'gopen':gramCur=t.dataset.id;go('gramv');$('#main').scrollTop=0;return;
+  case 'gback':gramCur=null;return go('gramv');
+  case 'gdrill':return startDrill2(t.dataset.id);
+  case 'gwrong':return startDrill2(t.dataset.id,true);
+  case 'gwrongall':return startDrill2((S.gwrong[0]||{}).mod,'all');
+  case 'gchat':case 'gcall':{closeSheet();const s2=newSession('g:'+t.dataset.id);go('chatv');if(a==='gcall'){freshAudio();return enterCall()}return runAI(s2,openerFor(s2,false))}
+  case 'gagain':{const id=(s.scene||'').slice(2);const s2=newSession('g:'+id);go('chatv');return runAI(s2,openerFor(s2,false))}
+  case 'gsub':return drillSubmit(false);
+  case 'gskip':return drillSubmit(true);
+  case 'gnext':GD.i++;return drillItem();
+  case 'gmic':return drillMic();
   case 'play':return speak(m.text);
   case 'slow':return speak(m.text,true);
   case 'reveal':if(m&&!m.shown&&S.cfg.blurEn){m.shown=true;t.classList.remove('blur');save()}return;
@@ -1107,8 +1528,8 @@ document.body.addEventListener('click',async e=>{
   case 'review':return openReview();
   case 'call':return enterCall();
   case 'addall':{const o=sheet.review;if(!o)return;let n=0;o.fix.forEach(f=>{if(!inBook(f.to)){addBook({en:f.to,zh:'改地道：'+f.from,note:f.why},true);n++}});o.say.forEach(x=>{if(!inBook(x.en)){addBook(x,true);n++}});document.querySelectorAll('#sheet .say [data-a=fav]').forEach(b=>b.classList.add('on'));toast(`收藏了 ${n} 条`);return}
-  case 'topic':{const s2=newSession('opinion');go('chatv');return runAI(s2,'(Pick a fun, random everyday topic, different from remote work, and start chatting about it with a short opener and a question.)')}
-  case 'custgo':{const v=($('#cust').value||'').trim();if(!v)return toast('写一句场景描述');closeSheet();const s2=newSession('custom',v);go('chatv');return runAI(s2,'(Start the role-play now: say your short opening line in character.)')}
+
+  case 'custgo':{const v=($('#cust').value||'').trim();if(!v)return toast('写一句场景描述');return startLesson('custom',false,v)}
   case 'sp':return speak(sheet.shadow.en);
   case 'sps':return speak(sheet.shadow.en,true);
   case 'srec':return doShadow();
@@ -1160,6 +1581,7 @@ $('#mev').addEventListener('change',e=>{
  if(id==='c-zh')S.cfg.showZh=e.target.checked;
  if(id==='c-blur')S.cfg.blurEn=e.target.checked;
  if(id==='c-sayfix')S.cfg.sayFix=e.target.checked;
+ if(id==='c-autolisten')S.cfg.autoListen=e.target.checked;
  save();
 });
 $('#mev').addEventListener('input',e=>{if(e.target.id==='c-rate'){S.cfg.rate=+e.target.value;$('#ratev').textContent=S.cfg.rate.toFixed(2);save()}});
