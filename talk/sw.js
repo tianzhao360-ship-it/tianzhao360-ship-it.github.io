@@ -1,5 +1,5 @@
 // 网络优先：有网时拿最新版本并更新缓存，没网时用缓存打开界面
-const CACHE = 'talk-v11';
+const CACHE = 'talk-v12';
 const FILES = ['/talk/', '/talk/index.html', '/talk/manifest.webmanifest', '/talk/icon-180.png', '/talk/icon-512.png', '/talk/vocab.js'];
 
 self.addEventListener('install', e => {

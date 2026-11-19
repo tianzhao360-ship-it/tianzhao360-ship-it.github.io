@@ -288,7 +288,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.9.0';
+const VER='1.9.1';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -641,7 +641,16 @@ try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 S=Object.assign(structuredClone(DEF),S||{});S.cfg=Object.assign(structuredClone(DEF.cfg),S.cfg||{});
 if(S.v<2){if(S.cfg.tts==='system')S.cfg.tts='auto';if(S.cfg.prov==='deepseek'&&!Object.values(S.cfg.keys).some(Boolean))S.cfg.prov='qwen';S.v=2}
 const STANDALONE=!!(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('存储空间不足，请删除一些旧对话')}};
+let saveWarn=0;
+const save=()=>{
+ let cut=0;
+ for(let i=0;i<40;i++){
+  try{localStorage.setItem(KEY,JSON.stringify(S));if(cut&&Date.now()-saveWarn>60000){saveWarn=Date.now();toast(`手机存储快满了，已自动清理最早的 ${cut} 段对话`,3500)}return true}
+  catch(e){let j=S.sessions.length-1;while(j>=0&&S.sessions[j].id===S.cur)j--;if(j<0)break;S.sessions.splice(j,1);cut++}
+ }
+ if(Date.now()-saveWarn>60000){saveWarn=Date.now();toast('手机存储空间不足，新内容可能没保存',3500)}
+ return false;
+};
 
 function toast(t,ms=2200){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>el.style.display='none',ms)}
 
@@ -690,7 +699,7 @@ async function apiErr(r,chat){
  return new Error((map[r.status]||('服务出错 '+r.status))+(m?'：'+m:''));
 }
 async function listModels(){
- const r=await fetch(base()+'/models',{headers:authHeaders()});
+ const r=await fetchR(base()+'/models',{headers:authHeaders()});
  if(!r.ok)throw await apiErr(r,true);
  const j=await r.json();return (j.data||[]).map(x=>x.id).filter(Boolean);
 }
@@ -776,8 +785,10 @@ const SYS_EXPLAIN='你是耐心的美式英语老师。用中文简洁讲解用�
 function parseOut(t){
  const o={reply:'',zh:'',mean:'',better:'',step:'',coach:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
  for(const raw of t.replace(/\*\*/g,'').split('\n')){
-  const line=raw.trim();if(!line)continue;
-  const m=line.match(/^[-•]?\s*(REPLY|ZH|MEAN|BETTER|FIX|SAY|OPT|SUMMARY|GOOD|NEXT|STEP|COACH)\s*[:：]\s*(.*)$/i);
+  let line=raw.trim();if(!line)continue;
+  const TAG=/^[-•]?\s*(REPLY|ZH|MEAN|BETTER|FIX|SAY|OPT|SUMMARY|GOOD|NEXT|STEP|COACH)\s*[:：]\s*(.*)$/i;
+  let m=line.match(TAG);
+  while(m&&TAG.test(m[2])){line=m[2];m=line.match(TAG)}
   if(m){cur=m[1].toUpperCase();const v=m[2];
    if(cur==='FIX'||cur==='SAY'||cur==='OPT')o[cur.toLowerCase()].push(v);else o[cur.toLowerCase()]=v;}
   else if(cur==='FIX'&&/=>/.test(line))o.fix.push(line.replace(/^FIX\s*[:：]\s*/i,''));
@@ -829,8 +840,11 @@ function stopSpeak(){
 }
 /* 句子边界：. ! ? 后面跟空白 */
 const BOUND=/[.!?]+["”’')]*(?=\s)/g;
-function sentences(t){t=clean(t);const out=[];let a=0,m;BOUND.lastIndex=0;while((m=BOUND.exec(t))){out.push(t.slice(a,m.index+m[0].length).trim());a=m.index+m[0].length}const rest=t.slice(a).trim();if(rest)out.push(rest);return out.filter(Boolean).flatMap(s=>s.length>500?s.match(/.{1,500}(\s|$)/g):[s])}
-function lastBound(t,from){let m,end=from;BOUND.lastIndex=from;while((m=BOUND.exec(t)))end=m.index+m[0].length;return end}
+/* Dr. / Prof. / a.m. 这类缩写后面的点不算句号 */
+const ABBR=/(?:^|[\s("'])(?:mr|mrs|ms|dr|prof|st|jr|sr|vs|etc|e\.g|i\.e|a\.m|p\.m|u\.s|inc|approx)\.$/i;
+const isEnd=(t,e)=>!ABBR.test(t.slice(Math.max(0,e-10),e));
+function sentences(t){t=clean(t);const out=[];let a=0,m;BOUND.lastIndex=0;while((m=BOUND.exec(t))){const e=m.index+m[0].length;if(!isEnd(t,e))continue;out.push(t.slice(a,e).trim());a=e}const rest=t.slice(a).trim();if(rest)out.push(rest);return out.filter(Boolean).flatMap(s=>s.length>500?s.match(/.{1,500}(\s|$)/g):[s])}
+function lastBound(t,from){let m,end=from;BOUND.lastIndex=from;while((m=BOUND.exec(t))){const e=m.index+m[0].length;if(isEnd(t,e))end=e}return end}
 /* 一次说话：可以边生成边往里加句子，按顺序播放；每句的合成在加入时就开始 */
 function newSpeech(slow,dv){
  stopSpeak();setSession('playback');
@@ -1061,6 +1075,7 @@ function toggleLang(){
 
 /* ---------- 会话 ---------- */
 const curSess=()=>S.sessions.find(s=>s.id===S.cur);
+const whoName=s=>s&&isLesson(s)?SCENE_BY[s.scene].ch.n:'Sam';
 function newSession(scene='free',custom=''){
  const s={id:uid(),scene,custom,created:Date.now(),msgs:[]};S.sessions.unshift(s);
  if(S.sessions.length>60)S.sessions.length=60;S.cur=s.id;save();return s;
@@ -1078,8 +1093,9 @@ async function sendText(text){
  $('#txt').value='';autoGrow();renderChat(true);
  await runAI(s);
 }
+let hungUp=false;
 async function runAI(s,hiddenUser){
- busy=true;ctrl=new AbortController();
+ busy=true;hungUp=false;ctrl=new AbortController();
  if(hiddenUser)s.msgs.push({role:'user',text:hiddenUser,hidden:true});
  const m={role:'ai',text:'',t:Date.now(),live:true};s.msgs.push(m);renderChat(true);
  const hist=s.msgs.filter(x=>x!==m&&x.role!=='err'&&x.role!=='note').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
@@ -1116,6 +1132,7 @@ async function runAI(s,hiddenUser){
   if(CALL){callCap(m);if(sp)await sp.done;if(!CALL)return;if(S.cfg.autoListen)callNext();else{const n=lkOn()?lkList(m.text).length:0;callState('idle',n?`这句有 ${n} 处连读（橙色），点“连读”跟读；想回答时点圆圈`:'轮到你了：可以先跟读，想回答时点圆圈')}}
  }catch(e){
   busy=false;s.msgs.splice(s.msgs.indexOf(m),1);
+  if(e.name==='AbortError'&&hungUp)s.msgs.push({role:'err',text:'电话挂断时，这一句还没回复。点“重试”让对方接着说。'});
   if(e.name!=='AbortError'){s.msgs.push({role:'err',text:e.message||String(e)});if(e instanceof NeedKey)setTimeout(()=>{go('mev');toast('先在这里填好 AI 密钥')},600)}
   save();renderChat(true);if(CALL&&e.name!=='AbortError'){callState('idle','出错了：'+(e.message||e).slice(0,60))}
  }
@@ -1143,18 +1160,18 @@ function renderChat(scroll){
    2. 找到“API-Key”页面，创建一个并复制<br>
    3. 点下面按钮粘贴进去，再点“测试连接”
    <div class="btns"><button class="btn" data-a="toset">去填密钥</button></div></div>`)+`<div class="empty"><h2>Hi, I'm Sam 👋</h2><div><b>点一下麦克风</b>开口说，说完<b>再点一下</b>发送，中间想多久都行。<br>用英语聊天，或者用中文问“…用英语怎么说”。</div>
-  <div class="chips">${['“我现在在桌子前用电脑呢”用英语怎么说？','Can we just chat for a bit?','“我有点社恐”地道的说法是什么？','帮我练一下点咖啡','How do Americans say “加油”?'].map(t=>`<button class="chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+  <div class="chips">${['“我现在在桌子前用电脑呢”用英语怎么说？','Can we just chat for a bit?','“我有点社恐”地道的说法是什么？','How do Americans say “加油”?'].map(t=>`<button class="chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}<button class="chip" data-a="sintro" data-id="coffee">去场景里练：咖啡店点单</button></div>
   <div class="chips"><button class="chip" data-a="call" style="border-color:var(--pri);color:var(--pri);font-weight:600">📞 给 Sam 打电话，像真打电话一样聊</button></div></div>`;
  }else{const lessonS=isLesson(s)?SCENE_BY[s.scene]:null;el.innerHTML=s.msgs.map((m,i)=>{
   if(m.hidden)return '';
   if(m.role==='note'&&m.kind==='scene')return `<div class="stage"><span class="tag">场景</span>${esc(m.text)}</div>`;
   if(m.role==='note'&&m.kind==='done'&&m.stars)return debriefHTML(m,s);
-  if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${m.mean||m.better?`<div class="card fix">${m.mean?`<div class="why" style="font-size:13.5px">Sam 理解的：${esc(m.mean)}</div>`:''}${m.better?`<div class="say" data-en="${esc(m.better)}" data-zh="${esc(m.mean||'')}" style="margin-top:4px"><div class="t"><span style="color:var(--sub);font-size:12.5px;display:block">完整地道说法</span><b style="color:var(--ok)">${esc(m.better)}</b></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib ${inBook(m.better)?'on':''}" data-a="fav">${I.star}</button></div>`:''}</div>`:''}${(m.fix||[]).map(f=>`<div class="card fix"><button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px">${I.play}</button><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
+  if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${m.mean||m.better?`<div class="card fix">${m.mean?`<div class="why" style="font-size:13.5px">${esc(whoName(s))} 理解的：${esc(m.mean)}</div>`:''}${m.better?`<div class="say" data-en="${esc(m.better)}" data-zh="${esc(m.mean||'')}" style="margin-top:4px"><div class="t"><span style="color:var(--sub);font-size:12.5px;display:block">完整地道说法</span><b style="color:var(--ok)">${esc(m.better)}</b></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib ${inBook(m.better)?'on':''}" data-a="fav">${I.star}</button></div>`:''}</div>`:''}${(m.fix||[]).map(f=>`<div class="card fix"><button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px">${I.play}</button><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
   if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}${m.kind==='done'?'<button data-a="review">复盘</button><button data-a="nextscene">下一课</button>':''}${m.kind==='gdone'?'<button data-a="review">复盘</button><button data-a="gagain">再来一轮</button>':''}${m.kind==='vdone'?'<button data-a="review">复盘</button><button data-a="vagain">再来一轮</button>':''}</div>`;
   if(m.role==='err')return `<div class="msg ai"><div class="bub err">${esc(m.text)}<div class="tools"><button data-a="retry">重试</button><button data-a="toset">去设置</button></div></div></div>`;
   return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}>${lessonS?`<div class="who">${esc(lessonS.ch.n)} · ${esc(lessonS.ch.r)}</div>`:''}<div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${m.live?esc(m.text):richText(m.text)}</div>
    ${m.zh?`<div class="zh" ${zhShown(m)?'':'hidden'}>${esc(m.zh)}</div>`:''}
-   ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button><button data-a="zh" class="${zhShown(m)&&m.zh?'act':''}">中文</button><button data-a="ex">讲解</button><button data-a="sh">跟读</button>${lkOn()&&lkList(m.text).length?`<button data-a="lkall" class="lkbtn">连读 ${lkList(m.text).length}</button>`:''}<button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
+   ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button><button data-a="zh" class="${zhShown(m)&&m.zh?'act':''}">中文</button><button data-a="ex">讲解</button><button data-a="sh">跟读</button>${(()=>{const n=lkOn()?lkList(m.text).length:0;return n?`<button data-a="lkall" class="lkbtn">连读 ${n}</button>`:''})()}<button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
    ${m.coach&&!m.live?`<div class="card coach" data-coach="${esc(m.coach)}"><span class="tag">教练</span><div class="en">${richText(m.coach,false)}</div><button class="ib" data-a="pcoach">${I.play}</button></div>`:''}
    ${(m.say||[]).map(x=>sayCard(x)).join('')}</div>`;
  }).join('');
@@ -1200,7 +1217,7 @@ function renderMe(){
  $('#mev').innerHTML=`<div class="stats"><div class="stat"><b>${mins}</b><span>今日分钟</span></div><div class="stat"><b>${streak()}</b><span>连续天数</span></div><div class="stat"><b>${S.turns}</b><span>累计开口</span></div><div class="stat"><b>${S.book.length}</b><span>收藏表达</span></div></div>
  <div class="card"><div style="display:flex;justify-content:space-between;font-size:14px"><b>今天 ${mins} / ${goal} 分钟</b><span style="color:var(--sub)">${mins>=goal?'今天的目标完成了 ✓':`还差 ${goal-mins} 分钟`}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>
  <div class="sec">历史对话</div>
- ${S.sessions.filter(s=>s.msgs.some(m=>!m.hidden)).slice(0,8).map(s=>{const l=s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').slice(-1)[0];return `<div class="row" data-sid="${s.id}"><div class="t" data-a="open"><div><b>${esc(sessTitle(s))}</b></div><small>${new Date(s.created).toLocaleDateString('zh-CN')} · ${esc((l&&l.text||'').slice(0,40))}</small></div><button class="ib" data-a="sdel">${I.del}</button></div>`}).join('')||'<div class="note">还没有对话记录。</div>'}
+ ${(()=>{const all=S.sessions.filter(s=>s.msgs.some(m=>!m.hidden));renderMe.n=all.length;return all.slice(0,renderMe.all?999:8)})().map(s=>{const l=s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').slice(-1)[0];return `<div class="row" data-sid="${s.id}"><div class="t" data-a="open"><div><b>${esc(sessTitle(s))}</b></div><small>${new Date(s.created).toLocaleDateString('zh-CN')} · ${esc((l&&l.text||'').slice(0,40))}</small></div><button class="ib" data-a="sdel">${I.del}</button></div>`}).join('')||'<div class="note">还没有对话记录。</div>'}${!renderMe.all&&renderMe.n>8?`<button class="btn g" data-a="histall">查看全部 ${renderMe.n} 段对话</button>`:''}
  <div class="sec">AI 服务</div>
  <div class="set">
   <label><span>服务商</span><select id="c-prov">${Object.entries(PROV).map(([k,v])=>`<option value="${k}" ${k===c.prov?'selected':''}>${v.name}</option>`).join('')}</select></label>
@@ -1243,7 +1260,7 @@ function renderMe(){
 }
 
 /* ---------- 弹层 ---------- */
-function sheet(html){$('#sheet').innerHTML=html;$('#mask').style.display='block';sheet.open=true;setTimeout(()=>{if(sheet.open)$('#sheet').classList.add('on')},16)}
+function sheet(html){$('#sheet').innerHTML=html;$('#sheet').scrollTop=0;$('#mask').style.display='block';sheet.open=true;setTimeout(()=>{if(sheet.open)$('#sheet').classList.add('on')},16)}
 function closeSheet(){sheet.open=false;$('#sheet').classList.remove('on');$('#mask').style.display='none';if(REC)REC.abort();if(sheet.ctrl)sheet.ctrl.abort()}
 $('#mask').onclick=closeSheet;
 const sheetHead=t=>`<h3><span>${t}</span><button class="ib" data-a="close">${I.x}</button></h3>`;
@@ -1254,7 +1271,7 @@ async function streamSheet(title,sys,user,render){
  try{const t=await askAI(sys,user,t=>{const el=$('#sp');if(el)el.textContent=render?'生成中…':t},sheet.ctrl.signal);if(render)render(t)}
  catch(e){if(e.name!=='AbortError'){const el=$('#sp');if(el)el.textContent=e.message;if(e instanceof NeedKey){closeSheet();go('mev')}}}
 }
-const transcript=s=>s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').map(m=>(m.role==='ai'?'Sam: ':'Learner: ')+m.text).join('\n');
+const transcript=s=>s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').map(m=>(m.role==='ai'?whoName(s)+': ':'Learner: ')+m.text).join('\n');
 
 function hintCtx(s){if(!isLesson(s))return '';const sc=SCENE_BY[s.scene],n=s.step?s.step[0]:0,t=sc.tasks[Math.min(n,sc.tasks.length-1)];return `Situation: ${sc.sceneEn} The other person is ${sc.ch.n}, ${sc.ch.rEn}. The learner plays: ${sc.youEn}. The learner's current task: ${t[1]}. Suggestions must fit this situation and help with this task.\n`}
 function openHint(){
@@ -1268,8 +1285,8 @@ function openHint(){
 }
 function openReview(){
  const s=curSess();if(!s||!s.msgs.some(m=>m.role==='user'&&!m.hidden))return toast('先聊几句再复盘');
- sheet(sheetHead('这次对话复盘')+`<div class="pre" id="sp">Sam 正在看你们的对话…</div>`);sheet.ctrl=new AbortController();
- askAI(SYS_REVIEW,'Conversation:\n'+transcript(s).slice(-8000),null,sheet.ctrl.signal).then(t=>{
+ sheet(sheetHead('这次对话复盘')+`<div class="pre" id="sp">正在看你们的对话…</div>`);sheet.ctrl=new AbortController();
+ askAI(SYS_REVIEW,hintCtx(s).replace('Suggestions must fit this situation and help with this task.','This was a role-play lesson; also judge how well the learner handled the situation.')+'Conversation:\n'+transcript(s).slice(-8000),null,sheet.ctrl.signal).then(t=>{
   const o=parseOut(t);if(!$('#sp'))return;
   s.review=o;save();
   $('#sp').outerHTML=`${o.summary?`<div class="card">${esc(o.summary)}</div>`:''}${o.good?`<div class="card"><b style="color:var(--ok)">做得好：</b>${esc(o.good)}</div>`:''}
@@ -1310,7 +1327,7 @@ async function doShadow(){
  const {en}=sheet.shadow,res=$('#sres'),b=$('#srec');
  if(REC){REC.stop();return}
  if(LISTENING)return;
- stopSpeak();b.textContent='说完点这里结束';b.style.background='var(--bad)';
+ freshAudio();stopSpeak();b.textContent='说完点这里结束';b.style.background='var(--bad)';
  try{
   const said=await listen('en',(t,st)=>res.textContent=st||t||'正在听…');
   b.textContent='再说一次';b.style.background='';
@@ -1354,7 +1371,7 @@ const ORB_TXT={listen:'说完<br>点我发送',think:'…',speak:'点我<br>打�
 function callState(st,txt){
  if(!CALL)return;$('#call').className='on '+st;
  $('#orbt').innerHTML=ORB_TXT[st]||'';
- $('#cstate').textContent=txt||{listen:'在听你说…中间停顿没关系',think:'Sam 在想…',speak:'Sam 在说',idle:'点圆圈继续说',wait:''}[st]||'';
+ const wn=whoName(curSess());$('#cstate').textContent=txt||{listen:'在听你说…中间停顿没关系',think:wn+' 在想…',speak:wn+' 在说',idle:'点圆圈继续说',wait:''}[st]||'';
 }
 function lastAI(){const s=curSess();return s&&[...s.msgs].reverse().find(x=>x.role==='ai'&&!x.live)}
 function callCap(m,opts){
@@ -1374,7 +1391,7 @@ function levelLoop(){clearInterval(levelRaf);levelRaf=setInterval(()=>{if(!CALL)
 async function keepAwake(){try{if(navigator.wakeLock&&!document.hidden)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
 async function enterCall(){
  if(CALL)return;
- if(busy)return toast('Sam 还在回复，等这句说完再打');
+ if(busy)return toast('还在回复，等这句说完再打');
  if(!apiKey()){go('mev');return toast('先填好密钥才能打电话')}
  let s=curSess();if(!s)s=newSession();
  if(REC)REC.abort();stopSpeak();
@@ -1391,7 +1408,7 @@ async function enterCall(){
 function exitCall(){
  if(!CALL)return;
  CALL=false;clearInterval(callTimer);clearInterval(levelRaf);$('#orb').style.transform='';
- $('#call').className='';if(REC)REC.abort();stopSpeak();if(ctrl&&busy)ctrl.abort();
+ $('#call').className='';if(REC)REC.abort();stopSpeak();if(ctrl&&busy){hungUp=true;ctrl.abort()}
  try{wakeLock&&wakeLock.release()}catch(e){}wakeLock=null;
  const s=curSess(),sec=Math.round((Date.now()-callT0)/1000);
  if(s&&callTurns>0){s.msgs.push({role:'note',kind:'call',text:`通话 ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} · 你说了 ${callTurns} 句`,t:Date.now()});save()}
@@ -1441,7 +1458,7 @@ $('#mic').onclick=async()=>{
  if(REC){REC.stop();return}
  freshAudio();
  if(LISTENING)return;
- if(busy)return toast('Sam 还在回复…');
+ if(busy)return toast('对方还在回复…');
  stopSpeak();recCancel=false;
  const mic=$('#mic'),comp=$('#composer'),rt=$('#rectext'),before=txt.value;
  mic.classList.add('rec');mic.innerHTML=OK_SVG;comp.classList.add('recording');$('#lang').innerHTML=I.x;rt.textContent='正在听…';
@@ -1523,7 +1540,7 @@ function startLesson(id,call,custom){
 }
 function handleStep(s,step){
  const m=String(step).match(/(\d+)\s*\/\s*(\d+)/);if(!m)return;
- const n=+m[1],t=+m[2];if(!t)return;s.step=[Math.min(n,t),t];
+ const t=+m[2];if(!t)return;const n=Math.max(s.step&&s.step[1]===t?s.step[0]:0,Math.min(+m[1],t));s.step=[n,t];
  if(n>=t&&!s.passed){
   s.passed=true;
   const kind=s.scene.startsWith('g:')?'gdone':s.scene.startsWith('v:')?'vdone':'done';
@@ -1558,9 +1575,6 @@ Also output this line: STEP: <number of different category words the learner has
  if(sc.tasks)return scenePrompt(sess,sc);
  const levelP=sc.lv===4||!SCENE_LV[sc.lv].p?LEVELS[S.cfg.level].p:SCENE_LV[sc.lv].p;
  let scene=id==='custom'?'Role-play this situation the learner described (in Chinese or English): '+sess.custom+'. Stay in character and stay inside this situation.':(sc.role||'');
- if(sc.tasks)scene+=`\n\nThis is a structured lesson: "${sc.t}". The learner's tasks, in order:\n${sc.tasks.map((x,i)=>(i+1)+') '+x[1]).join('\n')}
-RULES FOR THIS LESSON: Stay strictly inside this scene. Guide the learner through the tasks one at a time, in order; each of your questions should lead them to do the next task. If they go off-topic, answer in at most one short sentence and bring them back to the current task. Never start unrelated topics. When every task is done, congratulate them briefly and say the scene is complete.
-Also output this line: STEP: <number of tasks the learner has completed so far>/${sc.tasks.length}`;
  return corePrompt(levelP,scene);
 }
 
@@ -1958,7 +1972,7 @@ REPLY is read aloud: plain words only, no emojis, asterisks, brackets or stage d
 const starsOf=id=>{const n=(S.sstars||{})[id];return n?'★'.repeat(n)+'☆'.repeat(3-n):sceneDone(id)?'✓':''};
 function renderScenes(){
  const nx=nextScene();
- const going=S.sessions.find(x=>isLesson(x)&&!x.passed&&x.msgs.some(m=>m.role==='user'&&!m.hidden));
+ const lastL=S.sessions.find(x=>isLesson(x)),going=lastL&&!lastL.passed&&lastL.msgs.some(m=>m.role==='user'&&!m.hidden)?lastL:null;
  let h='';
  if(going){const sc=SCENE_BY[going.scene];h+=`<button class="srow cont" data-a="sresume" data-sid="${going.id}">${sicon(sc.ic,SCENE_LV[sc.lv].c)}<div class="t"><small>接着上次</small><b>${esc(sc.t)}</b><small>已完成 ${going.step?going.step[0]:0}/${sc.tasks.length} 项 · ${esc(sc.ch.n)}在等你</small></div><span class="hb">继续</span></button>`}
  if(nx&&nx.tasks){const lv=SCENE_LV[nx.lv];h+=`<button class="shero" data-a="sintro" data-id="${nx.id}" style="--c:${lv.c}">${sicon(nx.ic,'rgba(255,255,255,.22)')}<div class="t"><div class="shero-lv">下一课 · ${esc(lv.ch)}</div><div class="shero-t">${esc(nx.t)}</div><div class="shero-p">${esc(nx.place)} · ${esc(nx.time)}</div><div class="shero-p">对方：${esc(nx.ch.n)}，${esc(nx.ch.r)}</div></div></button>`}
@@ -2040,6 +2054,7 @@ document.body.addEventListener('click',async e=>{
   case 'vcall':return vocChat(t.dataset.id,true);
   case 'vagain':{const id=(s.scene||'').slice(2);if(!VOC)await loadVocab();return vocChat(id,false)}
   case 'goal':S.cfg.goal=+t.dataset.m;save();return renderMe();
+  case 'histall':renderMe.all=true;return renderMe();
   case 'psn':{document.querySelectorAll('.sn.on').forEach(x=>x.classList.remove('on'));const sn=t.closest('.sn');if(sn)sn.classList.add('on');if(CALL&&REC)REC.abort();const vv=sceneVoices(curSess()),inAI=t.closest('.msg.ai')||t.closest('#ccap');return speak(t.dataset.s,false,inAI?(t.closest('.coach')?vv.coach:vv.main):null).then(()=>sn&&sn.classList.remove('on'))}
   case 'pw':return speak(t.dataset.en);
   case 'wfav':{const on=addBook({en:t.dataset.en,zh:t.dataset.zh,note:t.dataset.note});t.textContent=on?'已在表达本':'收藏这个词';t.classList.toggle('g',!!on);return}
@@ -2151,7 +2166,7 @@ $('#impf').onchange=async e=>{
  const f=e.target.files[0];if(!f)return;
  try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.sessions)||!Array.isArray(d.book))throw 0;
   if(!confirm(`恢复备份：${d.sessions.length} 段对话、${d.book.length} 条表达。当前数据会被替换（密钥保留），继续？`))return;
-  const keep={keys:S.cfg.keys,oaiKey:S.cfg.oaiKey};S=Object.assign(structuredClone(DEF),d);S.cfg=Object.assign(structuredClone(DEF.cfg),d.cfg||{},keep);save();toast('已恢复');renderMe();
+  const keep={keys:S.cfg.keys,oaiKey:S.cfg.oaiKey,aliKey:S.cfg.aliKey,aliRoot:S.cfg.aliRoot};S=Object.assign(structuredClone(DEF),d);S.cfg=Object.assign(structuredClone(DEF.cfg),d.cfg||{},keep);save();toast('已恢复');go('mev');
  }catch(err){toast('这不是口语陪练的备份文件')}
  e.target.value='';
 };
