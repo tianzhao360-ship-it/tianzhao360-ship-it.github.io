@@ -385,7 +385,7 @@ button:not(#orb):not(.sp):active{transform:scale(.96)}
 </div>
 <script>
 'use strict';
-const VER='2.0.0';
+const VER='2.0.1';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -927,13 +927,29 @@ function schedule(buf){
  const at=Math.max(ac.currentTime+.02,PL.t);s.start(at);PL.t=at+buf.duration;PL.srcs.push(s);
  s.onended=()=>{const i=PL.srcs.indexOf(s);if(i>=0)PL.srcs.splice(i,1)};
 }
-const playedOut=()=>nap((PL.t-actx().currentTime)*1000+30);
+const audioOk=()=>!!ACTX&&ACTX.state==='running';
+/* 等这一段播完；途中音频被系统打断（iPhone 上常见）就报错，交给外面改用完整音频文件重播 */
+function playedOut(){
+ const tok=speakTok;
+ return new Promise((res,rej)=>{
+  const tick=()=>{
+   if(tok!==speakTok)return res();
+   if(!audioOk())return rej(new Error('INTERRUPTED'));
+   const left=(PL.t-ACTX.currentTime)*1000;
+   if(left<=30)return res();
+   nap(Math.min(120,left)).then(tick);
+  };
+  tick();
+ });
+}
 function stopSpeak(){
  speakTok++;SPEAKING=false;
  PL.srcs.splice(0).forEach(s=>{try{s.stop()}catch(e){}});PL.t=0;
  if(speakEnd){const f=speakEnd;speakEnd=null;f()}
  [...waiters].forEach(f=>f());
- try{AU.pause()}catch(e){}if('speechSynthesis' in window)speechSynthesis.cancel();
+ try{AU.pause()}catch(e){}
+ /* iPhone 上调用系统朗读的“取消”会抢走音频通道，把正在播放的真人发音掐断：只在系统朗读真的在说话时才取消 */
+ if('speechSynthesis' in window&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();
 }
 /* 句子边界：. ! ? 后面跟空白 */
 const BOUND=/[.!?]+["”’')]*(?=\s)/g;
@@ -943,26 +959,31 @@ const isEnd=(t,e)=>!ABBR.test(t.slice(Math.max(0,e-10),e));
 function sentences(t){t=clean(t);const out=[];let a=0,m;BOUND.lastIndex=0;while((m=BOUND.exec(t))){const e=m.index+m[0].length;if(!isEnd(t,e))continue;out.push(t.slice(a,e).trim());a=e}const rest=t.slice(a).trim();if(rest)out.push(rest);return out.filter(Boolean).flatMap(s=>s.length>500?s.match(/.{1,500}(\s|$)/g):[s])}
 function lastBound(t,from){let m,end=from;BOUND.lastIndex=from;while((m=BOUND.exec(t))){const e=m.index+m[0].length;if(isEnd(t,e))end=e}return end}
 /* 一次说话：可以边生成边往里加句子，按顺序播放；每句的合成在加入时就开始 */
-function newSpeech(slow,dv){
+function newSpeech(slow,dv,live){
  stopSpeak();setSession('playback');
  const tok=speakTok,eng=ttsEngine(),q=[];let ended=false,wake=null;SPEAKING=true;
- const sp={push(t,v){for(const s of sentences(t)){q.push(makeJob(s,eng,slow,tok,v||dv))}wake&&wake()},end(){ended=true;wake&&wake()}};
+ const sp={push(t,v){for(const s of sentences(t)){q.push(makeJob(s,eng,slow,tok,v||dv,live))}wake&&wake()},end(){ended=true;wake&&wake()}};
  sp.done=(async()=>{
   for(;;){
    if(tok!==speakTok)return;
    if(!q.length){if(ended)break;await new Promise(r=>wake=r);wake=null;continue}
    const j=q.shift();
    try{await j.play()}
-   catch(e){if(tok!==speakTok)return;toast(ENG_NAME[eng]+'发音没成功，改用手机声音：'+String(e&&e.message||e).slice(0,40),3500);await speakSys(j.text,slow,j.voice)}
+   catch(e){
+    if(tok!==speakTok)return;
+    /* 边收边播被打断：停掉残留的片段，用完整音频文件把这一句重新播一遍 */
+    if(eng==='ali'){PL.srcs.splice(0).forEach(x=>{try{x.stop()}catch(_){}});PL.t=0;
+     try{const u=await synth(j.text,'ali',j.voice);if(tok!==speakTok)return;await playUrl(u,slow);continue}catch(e2){}}
+    toast(ENG_NAME[eng]+'发音没成功，改用手机声音：'+String(e&&e.message||e).slice(0,40),3500);await speakSys(j.text,slow,j.voice)}
   }
   if(tok===speakTok)SPEAKING=false;
  })();
  return sp;
 }
 function speak(text,slow=false,voice){const sp=newSpeech(slow,voice);sp.push(text);sp.end();return sp.done}
-function makeJob(text,eng,slow,tok,voice){
+function makeJob(text,eng,slow,tok,voice,live){
  if(eng==='system')return {text,voice,play:()=>speakSys(text,slow,voice)};
- if(eng==='ali'&&!slow&&Math.abs(S.cfg.rate-1)<.01&&actx())return Object.assign(aliStreamJob(text,tok,voice),{voice});
+ if(eng==='ali'&&!slow&&Math.abs(S.cfg.rate-1)<.01&&actx()&&(live||text.split(/\s+/).length>4))return Object.assign(aliStreamJob(text,tok,voice),{voice});
  const p=synth(text,eng,voice);p.catch(()=>{});
  return {text,voice,play:async()=>{const u=await p;if(tok===speakTok)await playUrl(u,slow)}};
 }
@@ -989,8 +1010,10 @@ function aliStreamJob(text,tok,voice){
  const J=j;
  return {text,play:async()=>{
   let i=0;
+  if(!audioOk()){try{await ACTX.resume()}catch(e){}if(!audioOk())throw new Error('INTERRUPTED')}
   for(;;){
    if(tok!==speakTok)return;
+   if(!audioOk())throw new Error('INTERRUPTED');
    while(i<J.bufs.length)schedule(J.bufs[i++]);
    if(J.done){if(J.err&&!i)throw J.err;break}
    await new Promise(r=>{J.ls.push(r);waiters.add(r)});
@@ -1062,7 +1085,7 @@ function unlockAudio(){
  const n=800,b=new ArrayBuffer(44+n*2),d=new DataView(b);const w=(o,s)=>[...s].forEach((c,i)=>d.setUint8(o+i,c.charCodeAt(0)));
  w(0,'RIFF');d.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,16000,true);d.setUint32(28,32000,true);d.setUint16(32,2,true);d.setUint16(34,16,true);w(36,'data');d.setUint32(40,n*2,true);
  AU.src=URL.createObjectURL(new Blob([b],{type:'audio/wav'}));AU.play().catch(()=>{});
- if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}
+ if('speechSynthesis' in window&&ttsEngine()==='system'){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}
  actx();
 }
 document.addEventListener('pointerdown',unlockAudio,{once:true});
@@ -1205,7 +1228,7 @@ async function runAI(s,hiddenUser){
  const feed=(reply,final)=>{
   if(!want||fin||!reply)return;
   const cut=final?reply.length:lastBound(reply,fed);
-  if(cut>fed){if(!sp){sp=newSpeech(false,vp.main);if(CALL)callState('speak')}sp.push(reply.slice(fed,cut));fed=cut}
+  if(cut>fed){if(!sp){sp=newSpeech(false,vp.main,true);if(CALL)callState('speak')}sp.push(reply.slice(fed,cut));fed=cut}
   if(final)fin=true;
  };
  try{
@@ -1224,7 +1247,7 @@ async function runAI(s,hiddenUser){
   if(o.step)handleStep(s,o.step);
   save();busy=false;renderChat(true);
   feed(m.text,true);
-  if(want&&m.coach&&(zeroLv||S.cfg.sayFix!==false)){if(!sp)sp=newSpeech(false,vp.main);sp.push(m.coach,vp.coach)}
+  if(want&&m.coach&&(zeroLv||S.cfg.sayFix!==false)){if(!sp)sp=newSpeech(false,vp.main,true);sp.push(m.coach,vp.coach)}
   if(sp)sp.end();
   if(CALL){callCap(m);if(sp)await sp.done;if(!CALL)return;if(S.cfg.autoListen)callNext();else{const n=lkOn()?lkList(m.text).length:0;callState('idle',n?`这句有 ${n} 处连读（橙色），点“连读”跟读；想回答时点圆圈`:'轮到你了：可以先跟读，想回答时点圆圈')}}
  }catch(e){
