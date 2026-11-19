@@ -38,9 +38,6 @@ p{margin:8px 0}
 .bar>i{display:block;height:100%;border-radius:inherit;background:var(--lv,var(--accent));transition:width .4s}
 .hero.lv-over .big{color:var(--over)}
 .tip{margin-top:10px;padding:8px 10px;border-radius:10px;font-size:14px;background:color-mix(in srgb,var(--lv) 14%,transparent)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.mini{background:var(--card);border-radius:14px;padding:12px}
-.mini b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
 .notice{background:color-mix(in srgb,var(--accent) 14%,var(--card));font-size:15px}
 .row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line)}
 .row:last-child{border-bottom:0}
@@ -104,6 +101,7 @@ svg.chart{width:100%;height:auto;display:block;margin-top:8px}
 .addrow input,.addrow select{flex:1 1 30%}
 .rowbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:13px 0;border-bottom:.5px solid var(--line);color:var(--accent);font-size:15px}
 .rowbtn:last-child{border-bottom:0}
+.rowbtn.danger{color:var(--over)}
 .note{font-size:13px;color:var(--sub);margin:6px 4px}
 .center{text-align:center}
 .switch{width:50px;height:30px;flex:none;border-radius:15px;background:var(--fill);position:relative;transition:.2s}
@@ -129,6 +127,14 @@ html.lock,html.lock body{overflow:hidden}
 .quick{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 10px;padding:0 16px;scrollbar-width:none}
 .quick::-webkit-scrollbar{display:none}
 .setup{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.today-list{margin-top:10px;border-top:.5px solid var(--line)}
+.todo{padding:10px 0;font-size:15px;border-top:.5px solid var(--line)}
+.alert+.todo,.card>.todo:first-child{border-top:0}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sum3>div{min-width:0;display:flex;flex-direction:column;gap:2px}
+.sum3 b{font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fld .delgap{width:28px;flex:none}
+.fld .link.danger{width:28px;flex:none;padding:6px 0}
 .form,.form2{display:grid;gap:10px;margin:8px 0 10px}
 .form label,.form2 label{display:grid;gap:4px;font-size:13px;color:var(--sub)}
 .form input,.form select{background:var(--card)}
@@ -151,8 +157,6 @@ html.lock,html.lock body{overflow:hidden}
 .btn2.sm{flex:none;padding:6px 12px;font-size:14px}
 .warnline .btn2.sm{margin-top:6px;display:block}
 .fld.sub{min-height:36px;padding-left:12px;font-size:14px}
-.smokebtn{border:0;border-radius:22px;background:var(--text);color:var(--bg);font-weight:700;font-size:17px;padding:10px 18px;flex:none}
-.smokebtn:active{transform:scale(.95)}
 .amt{text-align:right;padding:6px 4px 10px}
 .amt .expr{display:block;color:var(--sub);font-size:14px;min-height:20px}
 .amt .amtv{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -217,7 +221,7 @@ html.lock,html.lock body{overflow:hidden}
 <script>
 'use strict';
 const KEY = 'selfrestraint.v1';
-const APP_VERSION = 'v1.4';
+const APP_VERSION = 'v1.5';
 const DEFAULT_CATS = [
   {id:'food',   name:'餐饮',   emoji:'🍜', color:'#ff9f0a'},
   {id:'snack',  name:'零食饮料', emoji:'🧋', color:'#ff6482'},
@@ -241,14 +245,13 @@ const DAY_NAMES = ['日','一','二','三','四','五','六'];
 function fresh(){
   // accounts: 账户余额（分）。花呗/信用卡 type:'credit'，余额记成负数（欠多少）
   // flows: 收入 in / 转账还款 move / 校准 fix，支出仍在 records 里（带 acct 字段）
-  // plans: 分期 {acct 挂在哪个花呗/白条, name, per 每期金额, left 剩余期数}；smokes: 每根烟的时间戳
+  // plans: 分期 {acct 挂在哪个花呗/白条, name, per 每期金额, left 剩余期数}
   // income: 生活费周期 mode none/month/interval，genUntil 之前的到账日已经处理过
   return {v:1, records:[], cats:DEFAULT_CATS.map(c=>({...c})), recurring:[], wishes:[], lastCat:'food',
-    accounts:[], flows:[], lastAcct:'', plans:[], smokes:[],
+    accounts:[], flows:[], lastAcct:'', plans:[],
     settings:{daily:0, weekly:0, monthly:0, big:20000, cooldown:72, catBudgets:{}, badge:false, lastOpen:'', lastBackup:0,
       reserve:0, lowBal:10000, balanceGuard:true,
-      income:{mode:'none', day:1, every:15, last:'', amt:0, acct:'', auto:true, genUntil:''},
-      smokeOn:true, smokeGoal:0, packPrice:0, packSize:20}};
+      income:{mode:'none', day:1, every:15, last:'', amt:0, acct:'', auto:true, genUntil:''}}};
 }
 function merge(s){
   const f = fresh(), m = Object.assign(f, s, {settings:Object.assign(f.settings, s.settings)});
@@ -291,7 +294,7 @@ const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const today = () => ymd(new Date());
 // 金额一律用「分」存整数，避免 0.1+0.2 这类浮点误差
 const yuan = c => (c/100).toLocaleString('zh-CN', {minimumFractionDigits: c%100 ? 2 : 0, maximumFractionDigits: 2});
-const fmt = c => '¥' + yuan(c);
+const fmt = c => (c < 0 ? '-' : '') + '¥' + yuan(Math.abs(c));
 const toCents = v => Math.round(parseFloat(v || 0) * 100) || 0;
 const pct = (a, b) => b ? Math.min(100, Math.round(a / b * 100)) : 0;
 const sum = rs => rs.reduce((a, r) => a + r.amt, 0);
@@ -313,9 +316,15 @@ function budgets(live = false){
   const st = S.settings, dim = daysIn(new Date());
   let daily = st.daily || (st.monthly ? Math.floor(st.monthly / dim) : 0);
   let source = st.daily ? '' : daily ? 'month' : '';
+  const weekly = st.weekly || daily * 7; // 周预算按你设的日预算算，不跟着今天的收紧变
+  // 首页只给一个「今天最多花」：日预算、月预算剩下的钱、余额撑得住的，三者取最严的那个
+  if (live && st.monthly) {
+    const now = new Date(), t = today(), spentBefore = sum(inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t).filter(r => r.d < t));
+    const monthLeft = Math.max(0, Math.floor((st.monthly - spentBefore) / (dim - now.getDate() + 1)));
+    if (!daily || monthLeft < daily) { daily = Math.max(1, monthLeft); source = 'monthleft'; }
+  }
   const bi = live && st.balanceGuard ? balanceInfo() : null;
   if (bi && (!daily || bi.perDay < daily)) { daily = Math.max(1, bi.perDay); source = 'balance'; }
-  const weekly = st.weekly || daily * 7;
   return {daily, weekly, monthly: st.monthly, source, dailyDerived: source === 'month'};
 }
 
@@ -471,65 +480,6 @@ function streaks(){
 }
 const wishLeft = w => w.created + S.settings.cooldown * 3600e3 - Date.now();
 
-/* ---------- 抽烟 ---------- */
-function fmtDur(ms){ const m = Math.max(1, Math.round(ms / 60000)); return m < 60 ? `${m} 分钟` : `${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分` : ''}`; }
-function smokeInfo(){
-  const now = new Date(), t = today(), byDay = {};
-  S.smokes.forEach(ts => { const k = ymd(new Date(ts)); byDay[k] = (byDay[k] || 0) + 1; });
-  const first = S.smokes.length ? ymd(new Date(Math.min(...S.smokes))) : t, y = ymd(addDays(now, -1));
-  const past = [];
-  for (let i = 1; i <= 7; i++) { const d = ymd(addDays(now, -i)); if (d >= first) past.push(byDay[d] || 0); }
-  const avg7 = past.length ? past.reduce((a, b) => a + b, 0) / past.length : null;
-  // 自动目标：最近 7 天日均再少 1 根；手动设了就用手动的
-  const goal = S.settings.smokeGoal || (avg7 !== null ? Math.max(0, Math.ceil(avg7) - 1) : null);
-  const last = S.smokes.length ? Math.max(...S.smokes) : 0;
-  const ySame = S.smokes.filter(ts => ymd(new Date(ts)) === y && ts + 864e5 <= Date.now()).length;
-  const recent = S.smokes.filter(ts => ts > Date.now() - 7 * 864e5).sort((a, b) => a - b), gaps = [];
-  for (let i = 1; i < recent.length; i++) if (ymd(new Date(recent[i])) === ymd(new Date(recent[i - 1]))) gaps.push(recent[i] - recent[i - 1]);
-  const avgGap = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
-  let streak = 0;
-  if (goal !== null) for (let i = 1; i < 400; i++) { const d = ymd(addDays(now, -i)); if (d < first || (byDay[d] || 0) > goal) break; streak++; }
-  const per = S.settings.packPrice ? S.settings.packPrice / S.settings.packSize : 0, mk = monthKey(now);
-  const month = S.smokes.filter(ts => monthKey(new Date(ts)) === mk).length;
-  const n = byDay[t] || 0;
-  return {n, y: byDay[y] || 0, ySame, avg7, goal, last, avgGap, streak, per, month, monthCost: Math.round(month * per), byDay,
-    todayTs: S.smokes.filter(ts => ymd(new Date(ts)) === t).sort((a, b) => a - b),
-    lv: goal === null ? 'none' : n < goal ? 'ok' : n === goal ? 'warn' : 'over'};
-}
-function smokeMsg(si){
-  if (!S.smokes.length) return '每抽一根就点一下「+1 根」。先看清楚自己一天抽多少，再一点点往下减。';
-  const gap = Date.now() - si.last, parts = [];
-  parts.push(gap >= 3600e3 ? `已经 ${fmtDur(gap)} 没抽了${gap >= 6 * 3600e3 ? '，非常厉害 🏆' : gap >= 3 * 3600e3 ? '，继续保持 💪' : ''}` : `上一根在 ${fmtDur(gap)} 前`);
-  if (si.goal !== null) parts.push(si.n < si.goal ? `今天最多还能抽 ${si.goal - si.n} 根，能少就少` : si.n === si.goal ? '今天的量到了，后面忍一忍 🙏' : `超过目标 ${si.n - si.goal} 根了，后面一根都别再抽`);
-  if (si.ySame > si.n) parts.push(`比昨天这个时候少 ${si.ySame - si.n} 根 👍`);
-  if (si.avgGap && si.n && si.lv !== 'over') { const at = si.last + si.avgGap * 1.2; if (at > Date.now()) parts.push(`下一根试着等到 ${hm(new Date(at))} 以后`); }
-  return parts.join(' · ');
-}
-function smokeCard(){
-  const si = smokeInfo(), undo = si.last && Date.now() - si.last < 10 * 60e3 && si.n;
-  return `<div class="card lv-${si.lv}"><div class="split"><div><div class="muted">🚬 今天抽了</div>
-      <div class="num">${si.n} 根${si.goal !== null ? ` <span class="muted" style="font-size:15px;font-weight:400">/ 目标 ${si.goal} 根</span>` : ''}</div></div>
-      <button class="smokebtn" data-act="smoke">+1 根</button></div>
-    ${si.goal !== null ? `<div class="bar sm"><i style="width:${si.goal ? pct(si.n, si.goal) : si.n ? 100 : 0}%"></i></div>` : ''}
-    <div class="tip">${smokeMsg(si)}</div>
-    ${undo ? '<button class="link" data-act="smokeUndo">点错了，撤销刚才那根</button>' : ''}</div>`;
-}
-function smokeSection(){
-  const si = smokeInfo(), now = new Date(), vals = [], labels = [];
-  for (let i = 13; i >= 0; i--) { const d = addDays(now, -i); vals.push(si.byDay[ymd(d)] || 0); labels.push(i ? md(d) : '今天'); }
-  let h = `<div class="card"><div class="split"><b>🚬 抽烟记录</b><button class="smokebtn" data-act="smoke">+1 根</button></div>
-    <div class="stat3"><div><span class="muted">今天</span><b>${si.n} 根</b></div><div><span class="muted">昨天</span><b>${si.y} 根</b></div><div><span class="muted">近 7 天日均</span><b>${si.avg7 === null ? '—' : si.avg7.toFixed(1) + ' 根'}</b></div></div>
-    <div class="stat3" style="margin-top:8px"><div><span class="muted">每天目标</span><b>${si.goal === null ? '—' : si.goal + ' 根'}</b></div><div><span class="muted">连续没超标</span><b>${si.streak} 天</b></div><div><span class="muted">本月抽烟花了</span><b>${si.per ? fmt(si.monthCost) : '—'}</b></div></div>
-    ${S.smokes.length ? barChart(vals, labels, si.goal || 0, v => v + ' 根', '目标') : ''}
-    ${si.todayTs.length ? `<p class="muted xs">今天的时间：${si.todayTs.map(ts => hm(new Date(ts))).join('、')}</p>` : ''}
-    <div class="tip lv-${si.lv}">${smokeMsg(si)}</div>`;
-  if (si.goal && si.streak >= 7) h += `<div class="warnline lv-ok">🎉 已经连续 ${si.streak} 天没超过 ${si.goal} 根了！要不要把目标降到 ${si.goal - 1} 根？
-    <button class="btn2 sm" data-act="smokeGoalSet" data-v="${si.goal - 1}">降到 ${si.goal - 1} 根</button></div>`;
-  h += si.per ? `<p class="muted">每天少抽 1 根，一个月能省 ${fmt(Math.round(si.per * 30))}，一年省 ${fmt(Math.round(si.per * 365))}。</p>`
-    : '<p class="muted xs">在设置里填一包烟多少钱，就能看到抽烟一共花了多少。</p>';
-  return h + '</div>';
-}
-
 function balanceCard(){
   const bi = balanceInfo();
   if (!bi) return `<div class="card"><b>💰 我的余额</b><p class="muted">填上微信和支付宝里现在有多少钱。之后每记一笔都会从对应账户扣掉，并按「离下次生活费到账还有几天」告诉你每天最多能花多少。</p>
@@ -541,7 +491,8 @@ function balanceCard(){
   const cash = S.accounts.filter(a => !isCredit(a)), credit = S.accounts.filter(isCredit);
   const nextTxt = !bi.next.known ? '月底' : `${md(bi.next.date)} ${bi.next.allowance ? '生活费到账' : '下次进账'}`;
   const lastDay = addDays(bi.next.date, -1);
-  const formula = `${fmt(bi.cashTotal)}${bi.dueSoon ? ` − 要还 ${fmt(bi.dueSoon)}` : ''}${st.reserve ? ` − 留着 ${fmt(st.reserve)}` : ''} ÷ ${bi.days} 天`;
+  const minus = (bi.dueSoon ? ` − 要还 ${fmt(bi.dueSoon)}` : '') + (st.reserve ? ` − 留着 ${fmt(st.reserve)}` : '');
+  const formula = minus ? `（${fmt(bi.cashTotal)}${minus}）÷ ${bi.days} 天` : `${fmt(bi.cashTotal)} ÷ ${bi.days} 天`;
   const todayLeft = bi.perDay - bi.spentToday;
   let h = `<div class="card"><div class="split"><div><div class="muted">现在手里的钱${st.reserve ? `（含留着不动的 ${fmt(st.reserve)}）` : ''}</div>
       <div class="big2 ${bi.cashTotal < 0 ? 'red' : ''}">${fmt(bi.cashTotal)}</div></div>
@@ -550,13 +501,12 @@ function balanceCard(){
     <div class="calc"><div class="split"><span>离 ${nextTxt}</span><b>还有 ${bi.days} 天</b></div>
       ${bi.dueSoon ? `<div class="split"><span>到账前要还</span><b class="red">−${fmt(bi.dueSoon)}</b></div>` : ''}
       ${st.reserve ? `<div class="split"><span>留着不动</span><b>−${fmt(st.reserve)}</b></div>` : ''}
-      <div class="split big-line"><span>从现在起每天最多花</span><b>${fmt(bi.perDayNow)}</b></div>
+      <div class="split big-line"><span>按余额，每天最多能花</span><b>${fmt(bi.perDayNow)}</b></div>
       <div class="muted xs">${formula}（今天到 ${md(lastDay)}，含今天）${bi.next.known ? '' : '。在设置里填生活费周期，会算得更准'}</div>
-      ${bi.spentToday ? `<div class="muted xs">${todayLeft >= 0 ? `今天已花 ${fmt(bi.spentToday)}，按今天早上的余额，今天还能花 ${fmt(todayLeft)}。`
-        : `今天已花 ${fmt(bi.spentToday)}，比今天该花的 ${fmt(bi.perDay)} 多了 <b class="red">${fmt(-todayLeft)}</b>，所以后面每天能花的变少了。`}</div>` : ''}</div>
+      ${todayLeft < 0 ? `<div class="muted xs">今天已花 ${fmt(bi.spentToday)}，比今天该花的 ${fmt(bi.perDay)} 多了 <b class="red">${fmt(-todayLeft)}</b>，所以后面每天能花的变少了。</div>` : ''}</div>
     ${!bi.cycle ? '' : bi.cycle.dues >= st.income.amt
       ? `<div class="warnline lv-over">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：期间要还 ${fmt(bi.cycle.dues)}，比生活费 ${fmt(st.income.amt)} 还多 ${fmt(bi.cycle.dues - st.income.amt)}。这次的生活费不够还款，现在手里的钱要尽量留着。</div>`
-      : `<p class="muted">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：生活费 ${fmt(st.income.amt)}${bi.cycle.dues ? ` − 期间要还 ${fmt(bi.cycle.dues)}` : ''} ÷ ${bi.cycle.len} 天，平均每天约 <b>${fmt(bi.cycle.perDay)}</b>。</p>`}
+      : `<p class="muted">下一个周期 ${md(bi.cycle.from)}–${md(bi.cycle.to)}（${bi.cycle.len} 天）：${bi.cycle.dues ? `（生活费 ${fmt(st.income.amt)} − 期间要还 ${fmt(bi.cycle.dues)}）` : `生活费 ${fmt(st.income.amt)} `}÷ ${bi.cycle.len} 天，平均每天约 <b>${fmt(bi.cycle.perDay)}</b>。</p>`}
     ${lowLv ? `<div class="warnline lv-${lowLv}">${bi.availNow <= 0 ? `🛑 扣掉要还的钱，手里已经没有能花的了，${bi.next.known ? `撑到 ${md(bi.next.date)}` : '接下来'}只能花必要的钱。` : `⚠️ 扣掉要还的钱，能动用的只剩 ${fmt(bi.availNow)}，请只花必要的钱。`}</div>` : ''}
     ${set && bi.perDay < set ? `<div class="warnline lv-warn">你的日预算 ${fmt(set)} 比余额撑得住的 ${fmt(bi.perDay)} 高，${st.balanceGuard ? '今天已按余额收紧' : '照这样花撑不到下次到账'}。</div>` : ''}
     <div class="btnrow"><button class="btn2" data-act="flow" data-v="in">＋ 记收入</button><button class="btn2" data-act="flow" data-v="move">⇄ 转账</button></div>
@@ -581,43 +531,39 @@ function renderHome(){
   const tSum = sum(S.records.filter(r => r.d === t));
   const wSum = sum(inRange(ymd(startOfWeek(now)), t));
   const mSum = sum(inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t));
-  const s7 = sum(inRange(ymd(addDays(now, -6)), t)), s30 = sum(inRange(ymd(addDays(now, -29)), t));
+  const s30 = sum(inRange(ymd(addDays(now, -29)), t));
   const lv = budgetLevel(tSum, b.daily, dayProgress());
   const tips = {none:'先定一个每月最多花多少，之后每天都会告诉你今天还能花多少：', ok:'节奏不错，继续保持 👍', warn:'花得有点快了，接下来悠着点 ⚠️', over:'今天已经超预算了，剩下的时间尽量别再花钱 🛑'};
   let h = `<header class="top"><div><div class="muted">${now.getMonth()+1}月${now.getDate()}日 周${DAY_NAMES[now.getDay()]}</div><h1>Self restraint</h1></div>
     <button class="icon" data-act="settings" aria-label="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button></header>`;
   if (!navigator.standalone && /iPhone|iPad/.test(navigator.userAgent))
     h += `<div class="card notice">📲 先把我放到主屏幕：点 Safari 的「分享」按钮 →「添加到主屏幕」。从主屏幕打开，数据保存更稳定。</div>`;
+  const srcTxt = {month:'按月预算折算', monthleft:'按本月预算剩下的钱算', balance:'按余额算'}[b.source] || '你设的日预算';
+  const sk = streaks(), tr = sorted(S.records.filter(r => r.d === t));
   h += `<div class="card hero lv-${lv}">
     <div class="muted">今日已花</div><div class="big">${fmt(tSum)}</div>
     ${b.daily ? `<div class="bar"><i style="width:${pct(tSum, b.daily)}%"></i></div>
-      <div class="split"><span>${tSum <= b.daily ? `还能花 <b>${fmt(b.daily - tSum)}</b>` : `已超支 <b class="red">${fmt(tSum - b.daily)}</b>`}</span>
-      <span class="muted">日预算 ${fmt(b.daily)}${{month:'（按月折算）', balance:'（按余额）'}[b.source] || ''}</span></div>` : ''}
+      <div class="split"><span>${b.daily <= 1 ? '<b class="red">没有能花的余量了</b>' : tSum <= b.daily ? `还能花 <b>${fmt(b.daily - tSum)}</b>` : `已超支 <b class="red">${fmt(tSum - b.daily)}</b>`}</span>
+      <span class="muted">${b.daily > 1 ? `今天最多 ${fmt(b.daily)}` : ''}</span></div>
+      <div class="muted xs">${srcTxt}${sk && sk.cur ? ` · 🔥 连续 ${sk.cur} 天没超（最长 ${sk.best} 天）` : sk && sk.best ? ` · 最长连续 ${sk.best} 天没超` : ''}</div>` : ''}
     <div class="tip">${tips[lv]}</div>
-    ${b.daily ? '' : `<div class="setup"><input id="quickBudget" type="number" inputmode="decimal" enterkeyhint="done" placeholder="每月预算，例如 1500"><button class="btn" data-act="quickBudget">设好了</button></div>`}</div>`;
-  h += balanceCard();
-  if (S.settings.smokeOn) h += smokeCard();
+    ${b.daily ? '' : `<div class="setup"><input id="quickBudget" type="number" inputmode="decimal" enterkeyhint="done" placeholder="每月预算，例如 1500"><button class="btn" data-act="quickBudget">设好了</button></div>`}
+    ${tr.length ? `<div class="today-list">${tr.map(rowHTML).join('')}</div>` : '<div class="empty" style="padding-bottom:4px">今天还没记账，花了钱就马上点下面的 ＋</div>'}</div>`;
+  // 需要处理的事放在一起：分类超预算、冷静期到了、该备份了
+  const alerts = catBudgetAlerts(false), ready = S.wishes.filter(w => w.status === 'wait' && wishLeft(w) <= 0).length;
   const lastB = S.settings.lastBackup, ref = lastB || S.records.reduce((m, r) => Math.min(m, r.ts || m), Date.now());
-  if (S.records.length >= 10 && Date.now() - ref > 30 * 864e5)
-    h += `<div class="card notice" data-act="backup">📦 ${lastB ? `距离上次备份已经 ${Math.floor((Date.now() - lastB) / 864e5)} 天` : '记录只存在这台手机上，还没有备份过'}，点这里备份一份到「文件」→</div>`;
-  const mini = (label, v, budget, prog, sub) => `<div class="mini lv-${budgetLevel(v, budget, prog)}"><span class="muted">${label}</span><b>${fmt(v)}</b>
-    ${budget ? `<div class="bar sm"><i style="width:${pct(v, budget)}%"></i></div><span class="muted xs">预算 ${fmt(budget)}</span>` : `<span class="muted xs">${sub || ''}</span>`}</div>`;
-  h += `<div class="grid2">${mini('本周', wSum, b.weekly, weekProgress())}${mini('本月', mSum, b.monthly, monthProgress())}
-    ${mini('近7天', s7, 0, 1, '日均 ' + fmt(Math.round(s7/7)))}${mini('近30天', s30, 0, 1, '日均 ' + fmt(Math.round(s30/30)))}</div>`;
-  if (b.monthly) {
-    const left = daysIn(now) - now.getDate() + 1, per = Math.max(0, Math.floor((b.monthly - (mSum - tSum)) / left));
-    h += `<div class="card"><div class="split"><b>本月计划</b><span class="muted">还剩 ${left} 天</span></div><p>${b.monthly >= mSum
-      ? `本月还能花 <b>${fmt(b.monthly - mSum)}</b>。从今天起每天平均不超过 <b>${fmt(per)}</b>，就能守住月预算。`
-      : `本月已经超预算 <b class="red">${fmt(mSum - b.monthly)}</b>，剩下的日子请只花必要的钱。`}</p></div>`;
-  }
-  const alerts = catBudgetAlerts(false);
-  if (alerts.length) h += `<div class="card"><b>分类预算提醒</b>${alerts.map(a => `<div class="alert lv-${a.lv}"><span>${a.c.emoji} ${esc(a.c.name)}${a.lv==='over'?' 已超':''}</span><span>${fmt(a.spent)} / ${fmt(a.budget)}</span><div class="bar sm"><i style="width:${pct(a.spent, a.budget)}%"></i></div></div>`).join('')}</div>`;
-  const sk = streaks();
-  if (sk) h += `<div class="card split"><div><div class="muted">连续不超日预算</div><div class="num">${sk.cur} 天</div></div><div class="right"><div class="muted">最长纪录</div><div class="num">${sk.best} 天</div></div></div>`;
-  const ready = S.wishes.filter(w => w.status === 'wait' && wishLeft(w) <= 0).length;
-  if (ready) h += `<div class="card notice" data-act="go" data-v="restraint">🧊 冷静清单里有 ${ready} 件东西冷静期到了，去做个决定 →</div>`;
-  const tr = sorted(S.records.filter(r => r.d === t));
-  h += `<div class="card"><div class="split"><b>今日明细</b><span class="muted">${tr.length} 笔</span></div>${tr.length ? tr.map(rowHTML).join('') : '<div class="empty">今天还没记账。花了钱就马上点下面的 ＋ 记一笔 ✍️</div>'}</div>`;
+  const needBackup = S.records.length >= 10 && Date.now() - ref > 30 * 864e5;
+  if (alerts.length || ready || needBackup) h += `<div class="card">
+    ${alerts.map(a => `<div class="alert lv-${a.lv}"><span>${a.c.emoji} ${esc(a.c.name)}${a.lv === 'over' ? ' 本月已超' : ' 快用完了'}</span><span>${fmt(a.spent)} / ${fmt(a.budget)}</span><div class="bar sm"><i style="width:${pct(a.spent, a.budget)}%"></i></div></div>`).join('')}
+    ${ready ? `<div class="todo" data-act="go" data-v="restraint">🧊 冷静清单里有 ${ready} 件东西冷静期到了，去做个决定 →</div>` : ''}
+    ${needBackup ? `<div class="todo" data-act="backup">📦 ${lastB ? `距离上次备份已经 ${Math.floor((Date.now() - lastB) / 864e5)} 天` : '还没有备份过'}，点这里备份到「文件」→</div>` : ''}</div>`;
+  h += balanceCard();
+  const mLeft = b.monthly - mSum;
+  const cell = (label, v, budget, prog, sub) => `<div class="lv-${budgetLevel(v, budget, prog)}"><span class="muted xs">${label}</span><b>${fmt(v)}</b>
+    ${budget ? `<div class="bar sm"><i style="width:${pct(v, budget)}%"></i></div>` : ''}<span class="muted xs">${sub}</span></div>`;
+  h += `<div class="card sum3">${cell('本周', wSum, b.weekly, weekProgress(), b.weekly ? `预算 ${fmt(b.weekly)}` : '')}
+    ${cell('本月', mSum, b.monthly, monthProgress(), b.monthly ? (mLeft >= 0 ? `还剩 ${fmt(mLeft)}` : `<span class="red">超了 ${fmt(-mLeft)}</span>`) : '')}
+    ${cell('近30天', s30, 0, 1, `日均 ${fmt(Math.round(s30 / 30))}`)}</div>`;
   $('#home').innerHTML = h;
 }
 
@@ -702,7 +648,7 @@ function renderStats(){
     <div class="monthnav"><button class="icon" data-act="statNav" data-v="-1">‹</button><b>${p.label}</b><button class="icon" data-act="statNav" data-v="1" ${statOff >= 0 ? 'disabled' : ''}>›</button></div>
     <div class="card"><div class="muted">总支出</div><div class="big" style="margin-bottom:4px">${fmt(total)}</div>
     <div class="stat3"><div><span class="muted">日均</span><b>${fmt(elapsed ? Math.round(total / elapsed) : 0)}</b></div><div><span class="muted">笔数</span><b>${rs.length}</b></div>
-    <div><span class="muted">${statOff === 0 ? '比上期同期' : '比上一期'}</span><b class="${chg > 0 ? 'red' : 'green'}">${chg === null ? '—' : (chg > 0 ? '↑' : '↓') + Math.abs(chg) + '%'}</b></div></div>
+    <div><span class="muted">${statOff === 0 ? '比上期同期' : '比上一期'}</span><b class="${chg === null ? 'muted' : chg > 0 ? 'red' : 'green'}">${chg === null ? '—' : (chg > 0 ? '↑' : '↓') + Math.abs(chg) + '%'}</b></div></div>
     ${inc ? `<div class="stat3" style="margin-top:10px"><div><span class="muted">收入</span><b class="green">${fmt(inc)}</b></div><div><span class="muted">结余</span><b class="${inc < total ? 'red' : 'green'}">${fmt(inc - total)}</b></div><div><span class="muted">花掉收入的</span><b>${Math.round(total / inc * 100)}%</b></div></div>` : ''}</div>`;
   if (!rs.length) { $('#stats').innerHTML = h + '<div class="empty">这段时间没有支出记录</div>'; return; }
   let vals = [], labels = [], line;
@@ -738,7 +684,7 @@ function renderRestraint(){
   const waiting = S.wishes.filter(w => w.status === 'wait').sort((a, b) => a.created - b.created);
   const done = S.wishes.filter(w => w.status !== 'wait').sort((a, b) => b.decided - a.decided).slice(0, 8);
   const mRs = inRange(ymd(new Date(now.getFullYear(), now.getMonth(), 1)), t), mSum = sum(mRs), want = sum(mRs.filter(r => r.need === 'want'));
-  let h = `<header class="top"><h1>克制</h1></header>${S.settings.smokeOn ? smokeSection() : ''}
+  let h = `<header class="top"><h1>克制</h1></header>
     <div class="card"><div class="muted">靠冷静期忍住没买，一共省下</div><div class="big green">${fmt(savedSum)}</div><div class="muted">忍住了 ${saved.length} 次</div></div>
     <div class="card"><b>🧊 冷静清单</b><p class="muted">想买但还没付钱的东西先放这里，等 ${S.settings.cooldown} 小时后还想要再买。大多数冲动会自己消失。</p>
     <div class="wishform"><input id="wName" placeholder="想买什么" maxlength="30"><input id="wPrice" type="number" inputmode="decimal" placeholder="价格"><button class="btn" data-act="wishAdd">放进去</button></div>
@@ -991,21 +937,14 @@ function renderSettings(){
         <select id="pAcct">${acctOpts('', S.accounts.filter(isCredit))}</select><input id="pName" placeholder="买的什么，如 手机" maxlength="12"><input id="pPer" type="number" inputmode="decimal" placeholder="每期还多少"><input id="pLeft" type="number" inputmode="numeric" placeholder="还剩几期"><button class="btn" data-act="planAdd">添加分期</button></div>` : ''}
       <div class="addrow"><span class="muted xs" style="flex-basis:100%">添加平台</span>${[['花呗','🧾'],['京东白条','🐶'],['信用卡','💳'],['抖音月付','🎵']].filter(([n]) => !S.accounts.some(a => a.name === n)).map(([n, e]) => `<button class="chip" data-act="creditPreset" data-v="${n}|${e}">＋ ${e} ${n}</button>`).join('')}</div></div>
     <p class="note">分期每期的钱会在还款日前自动从「每天能花」里预留。还了钱就点首页的「还这期」，剩余期数会自动减一。</p>
-    <h4>抽烟记录</h4><div class="group">
-      <div class="fld"><span>在首页显示抽烟卡片</span><input type="checkbox" class="switch" id="smokeT" ${st.smokeOn ? 'checked' : ''}></div>
-      <label class="fld"><span>每天最多几根（空着 = 自动）</span><input type="number" inputmode="numeric" data-set="smokeGoal" value="${st.smokeGoal || ''}" placeholder="自动"></label>
-      ${field('一包烟多少钱（元）', 'packPrice')}
-      <label class="fld"><span>一包几根</span><input type="number" inputmode="numeric" data-set="packSize" value="${st.packSize}"></label></div>
-    <p class="note">自动目标 = 最近 7 天平均每天抽的根数再少 1 根，抽得越少目标越低，一点点往下减。</p>
     <h4>克制</h4><div class="group">${field('大额提醒线（单笔，元）', 'big')}
       <label class="fld"><span>冷静期（小时）</span><input type="number" inputmode="numeric" data-set="cooldown" value="${st.cooldown}"></label></div>
     <p class="note">单笔达到提醒线时会弹窗，让你选择先放进冷静清单。</p>
-    <h4>分类月预算（元）</h4><div class="group">${S.cats.map(c => `<label class="fld"><span>${c.emoji} ${esc(c.name)}</span><input type="number" inputmode="decimal" placeholder="不限" data-cb="${c.id}" value="${st.catBudgets[c.id] ? st.catBudgets[c.id] / 100 : ''}"></label>`).join('')}</div>
     <h4>固定收支（每月自动记一笔）</h4><div class="group">${S.recurring.map(r => `<div class="fld"><span>每月${r.day}日 · ${r.kind === 'in' ? '💰 收入' : catOf(r.cat).emoji} ${esc(r.name)}${acctOf(r.acct) ? `<br><span class="muted xs">${r.kind === 'in' ? '到' : '从'}${esc(acctOf(r.acct).name)}</span>` : ''}</span><span class="${r.kind === 'in' ? 'green' : ''}">${r.kind === 'in' ? '+' : ''}${fmt(r.amt)}</span><button class="link danger" data-act="recDel" data-v="${r.id}">删除</button></div>`).join('')}
       <div class="addrow"><select id="rKind"><option value="out">支出</option><option value="in">收入（如生活费）</option></select><input id="rName" placeholder="名称，如 话费" maxlength="12"><input id="rAmt" type="number" inputmode="decimal" placeholder="金额"><input id="rDay" type="number" inputmode="numeric" placeholder="每月几号"><select id="rCat">${catOpts}</select>
         ${S.accounts.length ? `<select id="rAcct"><option value="">不动余额</option>${acctOpts(S.accounts[0].id)}</select>` : ''}<button class="btn" data-act="recAdd">添加</button></div></div>
     <p class="note">固定收入（比如每月 1 号的生活费）会自动加到账户里，也会用来算「离下次到账还有几天」。</p>
-    <h4>分类管理</h4><div class="group">${S.cats.map(c => `<div class="fld"><span>${c.emoji} ${esc(c.name)}</span>${c.id === 'other' ? '' : `<button class="link danger" data-act="catDel" data-v="${c.id}">删除</button>`}</div>`).join('')}
+    <h4>分类与月预算（元）</h4><div class="group">${S.cats.map(c => `<div class="fld"><span>${c.emoji} ${esc(c.name)}</span><input type="number" inputmode="decimal" placeholder="不限" data-cb="${c.id}" value="${st.catBudgets[c.id] ? st.catBudgets[c.id] / 100 : ''}" aria-label="${esc(c.name)}月预算">${c.id === 'other' ? '<span class="delgap"></span>' : `<button class="link danger" data-act="catDel" data-v="${c.id}" aria-label="删除${esc(c.name)}">✕</button>`}</div>`).join('')}
       <div class="addrow"><input id="cEmoji" placeholder="图标😀" maxlength="4" style="flex:0 0 90px"><input id="cName" placeholder="新分类名称" maxlength="6"><button class="btn" data-act="catAdd">添加</button></div></div>
     <h4>提醒</h4><div class="group"><div class="fld"><span>App 图标角标显示今日已花（元）</span><input type="checkbox" class="switch" id="badgeT" ${st.badge ? 'checked' : ''}></div></div>
     <p class="note">角标在每次打开 App 时更新，需要先添加到主屏幕并允许通知。<br><br>
@@ -1081,10 +1020,6 @@ function dailyReview(){
   }
   const bi = balanceInfo();
   if (bi) msg += `\n手里还有 ${fmt(bi.cashTotal)}${bi.dueSoon ? `（到账前要还 ${fmt(bi.dueSoon)}）` : ''}，离${bi.next.known ? '下次生活费' : '月底'}还有 ${bi.days} 天，今天最多花 ${fmt(bi.perDay)}`;
-  if (S.settings.smokeOn && S.smokes.length) {
-    const si = smokeInfo(), ys = si.byDay[y] || 0, yy = si.byDay[ymd(addDays(new Date(), -2))] || 0;
-    msg += `\n昨天抽了 ${ys} 根烟${ys < yy ? `，比前天少 ${yy - ys} 根，很棒 👏` : ys > yy ? `，比前天多 ${ys - yy} 根，今天争取少一点` : ''}`;
-  }
   ask('📒 昨日回顾', msg, [{t:'知道了', v:1, primary:true}]);
 }
 
@@ -1255,23 +1190,6 @@ const actions = {
     if (S.settings.income.acct === id) S.settings.income.acct = '';
     save(); refresh();
   },
-  smoke: () => {
-    const prev = S.smokes.length ? Math.max(...S.smokes) : 0, now = Date.now();
-    const before = smokeInfo(); // 加这一根之前的平均间隔，用来判断这次忍得够不够久
-    S.smokes.push(now); save(); render();
-    const si = smokeInfo(), gap = prev ? now - prev : 0;
-    let msg = `今天第 ${si.n} 根`;
-    if (si.goal !== null && si.n > si.goal) msg += '，已经超过目标了。下一根试着再推迟 30 分钟？';
-    else if (si.goal !== null && si.n === si.goal) msg += '，今天的目标量到了，后面就别抽了 💪';
-    else if (si.ySame > si.n) msg += `，比昨天这个时候少 ${si.ySame - si.n} 根 👍`;
-    if (gap && before.avgGap && gap > before.avgGap * 1.2) msg += `。这次忍了 ${fmtDur(gap)}，比平时久 👏`;
-    toast(msg, si.lv === 'none' ? 'none' : si.lv);
-  },
-  smokeUndo: () => {
-    const last = Math.max(...S.smokes);
-    S.smokes = S.smokes.filter(ts => ts !== last); save(); render(); toast('已撤销');
-  },
-  smokeGoalSet: v => { S.settings.smokeGoal = Math.max(0, +v); save(); render(); toast(`目标改成每天最多 ${v} 根，加油 💪`, 'ok'); },
   restore: () => $('#fileIn').click(),
   reset: async () => {
     if (!await ask('清空所有数据？', '所有记录、预算、清单都会被删除，没有备份就找不回来。', [{t:'全部清空', v:1, danger:true}, {t:'取消', v:0}])) return;
@@ -1292,8 +1210,7 @@ document.addEventListener('change', e => {
   const el = e.target;
   if (el.dataset.set) {
     const k = el.dataset.set;
-    S.settings[k] = ['cooldown', 'smokeGoal'].includes(k) ? Math.max(0, parseInt(el.value) || 0)
-      : k === 'packSize' ? Math.max(1, parseInt(el.value) || 20)
+    S.settings[k] = k === 'cooldown' ? Math.max(0, parseInt(el.value) || 0)
       : Math.max(0, toCents(el.value));
     save(); render();
   } else if (el.dataset.inc) {
@@ -1312,7 +1229,6 @@ document.addEventListener('change', e => {
     save(); render();
   } else if (el.id === 'badgeT') toggleBadge(el.checked);
   else if (el.id === 'guardT') { S.settings.balanceGuard = el.checked; save(); render(); }
-  else if (el.id === 'smokeT') { S.settings.smokeOn = el.checked; save(); render(); }
   else if (el.id === 'fileIn' && el.files[0]) { importFile(el.files[0]); el.value = ''; }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
