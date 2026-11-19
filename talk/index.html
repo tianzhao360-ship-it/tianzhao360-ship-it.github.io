@@ -160,6 +160,48 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .note-msg{align-self:center;text-align:center;font-size:13px;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:7px 12px;margin:12px auto;max-width:92%}
 .note-msg button{color:var(--pri);font-weight:600;margin-left:6px}
 .hide{display:none!important}
+/* 剧本场景 */
+.sic{width:44px;height:44px;border-radius:14px;background:var(--c);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.sic svg{width:24px;height:24px}
+.srow{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 12px;margin-bottom:8px}
+.srow .t{flex:1;min-width:0}.srow .t b{display:block;font-size:16px}.srow .t small{display:block;color:var(--sub);font-size:12.5px;line-height:1.45}
+.srow.nx{border-color:var(--c,var(--pri));box-shadow:0 0 0 1px var(--c,var(--pri)) inset}
+.srow.cont{border-color:var(--pri)}
+.sst{color:var(--warn);font-size:13px;letter-spacing:1px;flex:none}
+.shero{width:100%;display:flex;gap:14px;align-items:center;text-align:left;color:#fff;border-radius:18px;padding:16px 14px;margin:2px 0 6px;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 60%,#1d2033))}
+.shero .sic{background:rgba(255,255,255,.22);width:52px;height:52px}
+.shero .t{flex:1;min-width:0}.shero-lv{font-size:12.5px;opacity:.85}.shero-t{font-size:20px;font-weight:700;margin:2px 0}.shero-p{font-size:13px;opacity:.92;line-height:1.5}
+.chap{margin:18px 2px 8px}.chap-h{display:flex;align-items:baseline;justify-content:space-between}.chap-h b{font-size:17px}.chap-h em{font-style:normal;font-weight:700}
+.stage{position:relative;background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:12px 12px 12px 14px;margin:8px 0;font-size:15px;line-height:1.7;color:var(--ink)}
+.stage .tag{margin-right:6px}
+.whoc{display:flex;align-items:center;gap:10px}.whoc .t{flex:1}.whoc small{display:block;color:var(--sub);font-size:13px}
+.av{width:40px;height:40px;border-radius:50%;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex:none}
+.rl{margin:6px 0 0;padding-left:20px;line-height:1.8}
+.prop{margin:8px 0;border-radius:14px;padding:14px 14px 12px}
+.prop-h{font-weight:800;letter-spacing:1.5px;margin-bottom:8px;font-size:15px}
+.prop-r{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:14.5px}.prop-r b{font-weight:600;text-align:right}
+.prop-n{margin-top:8px;font-size:12.5px;opacity:.8}
+.prop-menu{background:#26352c;color:#f3efe2;font-family:Georgia,"Times New Roman",serif}.prop-menu .prop-h{text-align:center;font-size:17px;border-bottom:1px solid rgba(243,239,226,.3);padding-bottom:8px}
+.prop-receipt{background:#fffdf7;color:#222;font-family:"SF Mono",Menlo,monospace;border:1px solid #e6e1d3;box-shadow:0 1px 3px rgba(0,0,0,.08)}.prop-receipt .prop-h{text-align:center;border-bottom:1px dashed #bbb;padding-bottom:8px}.prop-receipt .prop-n{border-top:1px dashed #bbb;padding-top:8px}
+.prop-ticket{background:#fff;color:#1d2033;border-left:8px solid #4f5bd5;box-shadow:0 1px 3px rgba(0,0,0,.1)}.prop-ticket .prop-h{color:#4f5bd5}
+.prop-tag{background:#ffe066;color:#2b2200;border-radius:6px 14px 14px 6px}.prop-tag .prop-r b{font-size:16px}
+.prop-note{background:#fff6c7;color:#3a3300;transform:rotate(-.6deg);box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.sstick{position:sticky;top:0;z-index:5;background:var(--bg);padding:2px 0 6px;margin:0 -2px}
+.sbar{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.sbar .sic{width:36px;height:36px;border-radius:11px}.sbar .sic svg{width:20px;height:20px}
+.sbar .t{flex:1;min-width:0}.sbar .t b{display:block;font-size:14.5px}.sbar .t small{display:block;color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbar .hb{font-size:12.5px;padding:5px 9px}
+.stasks{display:flex;gap:6px;overflow-x:auto;padding:6px 1px 0;scrollbar-width:none}
+.stk{flex:none;font-size:12.5px;padding:4px 10px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--sub);white-space:nowrap}
+.stk.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.stk.cur{border-color:var(--pri);color:var(--pri);font-weight:600}
+.msg.ai .who{font-size:12px;color:var(--sub);margin:0 0 3px 6px}
+.coach{display:flex;align-items:center;gap:8px;border-left:3px solid var(--ok);max-width:92%}
+.coach .tag{background:#e6f6ee;color:var(--ok);flex:none}
+.coach .en{flex:1;font-size:15px}
+.debrief{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 12px;margin:14px 0}
+.dstars{font-size:30px;color:var(--warn);letter-spacing:4px;margin-bottom:4px}
+@media (prefers-color-scheme:dark){.coach .tag{background:#173a2a}.stage{background:#1d2133}}
 .w.lk{text-decoration:underline;text-decoration-color:var(--lkc);text-decoration-thickness:2px;text-underline-offset:3px}
 .lkm{color:var(--lkc);font-weight:700;cursor:pointer;padding:0 1px;margin:0 -1px;display:inline-block;transform:translateY(3px)}
 .lkph{color:var(--lkc);font-weight:700}
@@ -226,7 +268,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 <div id="toast"></div>
 <input type="file" id="impf" accept=".json,application/json" hidden>
 <div id="call">
-  <div class="top"><span><b>Sam</b> · <span id="cscene"></span></span><span id="ctime">00:00</span></div>
+  <div class="top"><span><b id="cwho">Sam</b> · <span id="cscene"></span></span><span id="ctime">00:00</span></div>
   <button id="orb"><i id="orbt">接通中</i></button>
   <div id="cstate"></div>
   <div id="ccap"></div>
@@ -246,7 +288,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 </div>
 <script>
 'use strict';
-const VER='1.8.0';
+const VER='1.9.0';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -275,138 +317,270 @@ const PROV={
 const FAST={qwen:[['qwen-plus','推荐：回复快，纠错质量好'],['qwen-flash','最省钱，速度差不多'],['deepseek-v4.1-flash-1017','DeepSeek，已自动关掉深度思考']]};
 const OAI_VOICES=['marin','cedar','coral','nova','shimmer','sage','alloy','ash','ballad','echo','fable','onyx','verse'];
 const LEVELS={easy:{n:'入门',p:'The learner is a beginner (about CEFR A2). Use very common words and short sentences (under 12 words each). Avoid idioms.'},mid:{n:'中级',p:'The learner is intermediate (about CEFR B1-B2). Use everyday vocabulary and natural but clear sentences; an occasional common idiom is fine.'},high:{n:'高级',p:'The learner is advanced (about CEFR C1). Talk like a native American adult would: idioms, phrasal verbs and slang are welcome.'}};
-/* ---------- 场景：五个等级 ---------- */
+/* ---------- 场景：剧本 ---------- */
 const SCENE_LV=[
- {n:'零基础',d:'照着说就行，先敢开口',p:'The learner is a complete beginner (pre-A1). Use very short, very simple sentences (3-8 words) and speak about one thing at a time. Ask only ONE very easy question per turn. EVERY REPLY, including your very first line, MUST end with a ready-made answer they can copy, in this form: You can say: "...". Keep that model answer under 8 words. For personal facts (name, city, job, age) put ___ in the model answer so the learner fills in their own, e.g. You can say: "My name is ___."'},
- {n:'入门',d:'简单问答，说完整短句',p:'The learner is a beginner (A1-A2). Use short simple sentences (under 12 words). Ask one simple question at a time. If they seem stuck or answer in Chinese, give a short model answer in this form: You can say: "...".'},
- {n:'中等',d:'真实场景，处理小状况',p:'The learner is intermediate (B1). Use everyday vocabulary and natural but clear sentences. Add one small realistic complication during the scene so they practice handling it.'},
- {n:'高级',d:'协商、投诉、讲经历、谈观点',p:'The learner is upper-intermediate (B2-C1). Talk naturally like a native adult, with common idioms and phrasal verbs. Push them to give longer answers with reasons and details.'},
- {n:'随心所欲',d:'自由发挥，什么都能聊',p:null}
+ {n:"零基础",ch:"第一章 · 先敢开口",d:"对方说得很慢，教练每句都告诉你可以怎么说",c:"#16a06b",p:"The learner is a complete beginner (pre-A1). Use very short, very simple sentences (3-8 words), ask only ONE very easy question per turn, and be warm and patient."},
+ {n:"入门",ch:"第二章 · 日常办事",d:"点单、买东西、问路、订位，把日常小事办成",c:"#4f5bd5",p:"The learner is a beginner (A1-A2). Use short, simple sentences (under 12 words) and ask one simple question at a time."},
+ {n:"中等",ch:"第三章 · 遇到状况",d:"超重、生病、退货、房间出问题，学会应对",c:"#e8590c",p:"The learner is intermediate (B1). Use everyday vocabulary and natural but clear sentences."},
+ {n:"高级",ch:"第四章 · 深入交流",d:"面试、讲研究、投诉、谈价钱，说出完整的想法",c:"#8e44ad",p:"The learner is upper-intermediate (B2-C1). Talk naturally like a native adult, with common idioms and phrasal verbs, and push for longer answers with reasons and details."},
+ {n:"随心所欲",ch:"自由练习",d:"不设剧本，想聊什么聊什么",c:"#0f8f7e",p:null}
 ];
-/* t 标题 d 说明 goal 学会什么 tasks [中文, English] ph 关键句 role 角色设定 */
+const SICON={
+ smile:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8.5 14a4 4 0 0 0 7 0M9 9.5v.5M15 9.5v.5",
+ globe:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18",
+ bottle:"M10 2h4v3l2 3v12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-3zM8 12h8",
+ heart:"M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z",
+ sun:"M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",
+ clock:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
+ cup:"M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 9h1.5a2.5 2.5 0 0 1 0 5H17M8 3v2M12 3v2",
+ fork:"M7 3v8M5 3v4a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 2-2 6 0 8v10",
+ shirt:"M8 3l-5 3 2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z",
+ pin:"M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12zM12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5",
+ users:"M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 6.5M22 20a6 6 0 0 0-4-5.6",
+ cal:"M4 5h16v16H4zM4 10h16M8 3v4M16 3v4",
+ phone:"M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2",
+ plane:"M3 13l18-7-5 14-3.5-5.5L3 13zM12.5 14.5L21 6",
+ bed:"M3 19V7M3 13h18v6M21 13a3 3 0 0 0-3-3h-8v3M6.5 12a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3",
+ med:"M9 3h6v6h6v6h-6v6H9v-6H3V9h6z",
+ receipt:"M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3",
+ home:"M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+ key:"M8 15a4 4 0 1 1 3.5-6L21 9v3h-2v2h-2v-2h-5.5A4 4 0 0 1 8 15zM7 11h.01",
+ chat:"M4 5h16v11H9l-5 4z",
+ brief:"M3 8h18v12H3zM9 8V5h6v3M3 13h18",
+ flask:"M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M7.5 15h9",
+ alert:"M12 3l10 18H2zM12 10v4M12 17v.5",
+ scale:"M12 3v18M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0zM8 21h8",
+ screen:"M3 4h18v12H3zM12 16v4M8 20h8",
+ tag:"M3 12V4h8l10 10-8 8zM7.5 8.5h.01",
+ book:"M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5M8 7h7",
+ shuffle:"M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3",
+ bolt:"M13 2L4 14h7l-1 8 9-12h-7z",
+ pencil:"M4 20h4L19 9l-4-4L4 16zM14 6l4 4"
+};
+const sicon=(k,c)=>`<span class="sic" style="--c:${c}"><svg viewBox="0 0 24 24"><path d="${SICON[k]||SICON.chat}"/></svg></span>`;
+/* 字段：place 地点 time 时间 scene 旁白 sceneEn 给模型的设定 ch 对方角色{n 名字,g 性别,r 身份,rEn,v 性格,vEn}
+   you 你的角色卡 youEn prop 道具 tw 随机状况[中文,English] twNow 状况开场就出现 tasks 任务[中文,English] ph 关键句 */
 const SCENE_DATA=[
- /* 零基础 */
- {id:'hello',lv:0,t:'打招呼、说名字',d:'第一次见面的三句话',goal:'能打招呼、介绍自己的名字、问对方名字、说再见',
-  tasks:[['打招呼','Say hello'],['说出你的名字','Say your name'],['问 Sam 的名字','Ask Sam\'s name'],['说再见','Say goodbye']],
-  ph:[["Hi! I'm Ken.",'你好！我是 Ken。'],['Nice to meet you.','很高兴认识你。'],["What's your name?",'你叫什么名字？'],['See you!','再见！']],
-  role:'You meet the learner for the first time at a friendly event.'},
- {id:'wherefrom',lv:0,t:'说你从哪里来',d:'国家、城市、住在哪',goal:'能说自己来自哪里、住在哪个城市，并反问对方',
-  tasks:[['说你来自哪里','Say where you are from'],['说你住在哪个城市','Say which city you live in'],['问 Sam 来自哪里','Ask where Sam is from']],
-  ph:[["I'm from Japan.",'我来自日本。'],['I live in Tokyo.','我住在东京。'],['Where are you from?','你是哪里人？']],
-  role:'You are chatting with the learner at an international student lounge.'},
- {id:'water',lv:0,t:'买一瓶水',d:'数字、价钱、付钱',goal:'能买东西、问价钱、听懂数字并付钱',
-  tasks:[['说你想要一瓶水','Ask for a bottle of water'],['问多少钱','Ask how much it is'],['付钱','Pay'],['说谢谢','Say thank you']],
-  ph:[['Can I have a water, please?','请给我一瓶水。'],['How much is it?','多少钱？'],['Here you go.','给你。'],['Thank you!','谢谢！']],
-  role:'You are a cashier at a small convenience store. Prices are simple, like two dollars.'},
- {id:'likes',lv:0,t:'说你喜欢什么',d:'食物、爱好、喜欢和不喜欢',goal:'能说喜欢和不喜欢的东西，并问对方',
-  tasks:[['说一个你喜欢的食物','Say a food you like'],['说一个你喜欢的爱好','Say a hobby you like'],['说一个你不喜欢的东西','Say something you do not like'],['问 Sam 喜欢什么','Ask what Sam likes']],
-  ph:[['I like sushi.','我喜欢寿司。'],['I like reading.','我喜欢看书。'],["I don't like spicy food.",'我不喜欢辣的。'],['What do you like?','你喜欢什么？']],
-  role:'You are a new friend getting to know the learner.'},
- {id:'feel',lv:0,t:'今天怎么样',d:'说感觉、说正在做什么',goal:'能回答 How are you，说自己的状态和现在在做什么',
-  tasks:[['回答今天好不好','Answer how you are today'],['说你现在在做什么','Say what you are doing now'],['说你累不累或忙不忙','Say if you are tired or busy']],
-  ph:[["I'm good, thanks.",'我很好，谢谢。'],["I'm a little tired.",'我有点累。'],["I'm studying now.",'我现在在学习。']],
-  role:'You are a friend who calls the learner to check in.'},
- {id:'time',lv:0,t:'问时间、约时间',d:'几点、几点起床、几点见',goal:'能问时间、说自己的作息、约一个见面时间',
-  tasks:[['问现在几点','Ask what time it is'],['说你几点起床','Say what time you get up'],['约一个见面的时间','Suggest a time to meet']],
-  ph:[['What time is it?','现在几点？'],['I get up at seven.','我七点起床。'],['How about three o\'clock?','三点怎么样？']],
-  role:'You are a classmate planning to study together with the learner.'},
- /* 入门 */
- {id:'coffee',lv:1,t:'咖啡店点单',d:'点饮料、选杯型、外带',goal:'能独立完成一次点咖啡',
-  tasks:[['点一杯饮料','Order a drink'],['选杯型','Choose a size'],['回答要不要加奶或糖','Answer about milk or sugar'],['说堂食还是外带','Say for here or to go'],['付钱','Pay']],
-  ph:[['Can I get a latte, please?','请给我一杯拿铁。'],['A medium, please.','中杯，谢谢。'],['No sugar, please.','不要糖。'],['To go, please.','外带。']],
-  role:'You are a cheerful barista at a busy coffee shop in Seattle. The learner is the customer.'},
- {id:'food',lv:1,t:'餐厅点餐',d:'几位、点菜、结账',goal:'能在餐厅点菜和结账',
-  tasks:[['说几个人用餐','Say how many people'],['点一道主菜','Order a main dish'],['点一杯饮料','Order a drink'],['要账单','Ask for the check']],
-  ph:[['A table for two, please.','两位。'],["I'll have the chicken.",'我要鸡肉。'],['Can I get some water?','能给我点水吗？'],['Can we get the check?','可以结账吗？']],
-  role:'You are a friendly server at a casual American restaurant.'},
- {id:'shop',lv:1,t:'买衣服',d:'找东西、问尺码、问价钱',goal:'能在店里找东西、问尺码价钱并决定买不买',
-  tasks:[['说你在找什么','Say what you are looking for'],['问有没有你的尺码','Ask for your size'],['问价钱','Ask the price'],['决定买还是不买','Decide to buy it or not']],
-  ph:[["I'm looking for a jacket.",'我在找一件外套。'],['Do you have this in medium?','这个有中号吗？'],['How much is this?','这个多少钱？'],["I'll take it.",'我买了。']],
-  role:'You are a store associate at a clothing store in a US mall.'},
- {id:'way',lv:1,t:'问路',d:'车站在哪、怎么走、多远',goal:'能问路并听懂简单的路线',
-  tasks:[['问车站在哪','Ask where the station is'],['确认怎么走','Check the directions'],['问要走多久','Ask how long it takes'],['道谢','Say thanks']],
-  ph:[['Excuse me, where is the station?','请问车站在哪？'],['Go straight and turn left?','直走然后左转？'],['How long does it take?','要多久？'],['Thanks a lot!','太谢谢了！']],
-  role:'You are a friendly local in New York. The learner stops you to ask for directions.'},
- {id:'intro',lv:1,t:'自我介绍',d:'新朋友聚会上介绍自己',goal:'能用 4–5 句话介绍自己，并问对方问题',
-  tasks:[['说名字和来自哪里','Say your name and where you are from'],['说你在做什么（学习或工作）','Say what you do'],['说一个爱好','Say a hobby'],['问 Sam 一个问题','Ask Sam a question']],
-  ph:[["I'm Ken, and I'm from Osaka.",'我是 Ken，来自大阪。'],["I'm a grad student.",'我是研究生。'],['I like hiking on weekends.','我周末喜欢爬山。'],['What about you?','你呢？']],
-  role:'You just met the learner at an international student welcome party.'},
- {id:'weekend',lv:1,t:'聊周末',d:'用过去式讲你做了什么',goal:'能用一般过去时讲周末去了哪、做了什么',
-  tasks:[['说你周末去了哪里','Say where you went'],['说你做了什么','Say what you did'],['说感觉怎么样','Say how it was'],['问 Sam 的周末','Ask about Sam\'s weekend']],
-  ph:[['I went to the beach.','我去了海边。'],['I watched a movie.','我看了一部电影。'],['It was really fun.','真的很好玩。'],['How was your weekend?','你周末怎么样？']],
-  role:'You are a friend catching up with the learner on Monday morning. Focus on the past tense.'},
- {id:'call',lv:1,t:'打电话订位',d:'日期、时间、人数、留名字',goal:'能打电话完成一次预约',
-  tasks:[['说你想订位','Say you want a reservation'],['说日期和时间','Give the date and time'],['说人数','Say how many people'],['留你的名字','Give your name']],
-  ph:[["I'd like to make a reservation.",'我想订个位。'],['For Friday at seven.','周五七点。'],['For four people.','四个人。'],["It's under Ken.",'名字写 Ken。']],
-  role:'This is a phone call. You are the host at a restaurant taking reservations. Confirm details like on a real call.'},
- /* 中等 */
- {id:'airport',lv:2,t:'机场值机和安检',d:'证件、行李、座位、登机口',goal:'能独立完成值机并问清登机信息',
-  tasks:[['出示证件说目的地','Show your ID and say your destination'],['托运行李','Check your bag'],['选座位','Choose a seat'],['问登机口和登机时间','Ask about the gate and boarding time']],
-  ph:[["I'm flying to Chicago.",'我飞芝加哥。'],["I'd like to check one bag.",'我要托运一件行李。'],['Can I get a window seat?','能要靠窗的座位吗？'],['What time does boarding start?','几点开始登机？']],
-  role:'You are an airline check-in agent at San Francisco airport. Add a small issue, for example the bag is a little overweight.'},
- {id:'hotel',lv:2,t:'酒店入住',d:'入住、设施、房间出问题',goal:'能办入住，并说明和解决房间问题',
-  tasks:[['办入住','Check in'],['问早餐和 Wi-Fi','Ask about breakfast and Wi-Fi'],['反映房间的问题','Report a problem with the room'],['要求解决','Ask for a solution']],
-  ph:[['I have a reservation under Ken.','我用 Ken 的名字订了房。'],['What time is breakfast?','早餐几点？'],["The air conditioner isn't working.",'空调坏了。'],['Could I change rooms?','能换个房间吗？']],
-  role:'You are a front desk clerk at a hotel in Chicago.'},
- {id:'doctor',lv:2,t:'看医生',d:'描述症状、听医嘱',goal:'能说清楚哪里不舒服，并确认医生的建议',
-  tasks:[['描述症状','Describe your symptoms'],['说持续了多久','Say how long it has lasted'],['回答过敏和用药情况','Answer about allergies and medicine'],['确认医生的建议','Confirm the doctor\'s advice']],
-  ph:[['I have a sore throat and a fever.','我嗓子疼还发烧。'],["It started two days ago.",'两天前开始的。'],["I'm not allergic to anything.",'我没有过敏。'],['So I should rest and drink water?','所以我应该休息多喝水？']],
-  role:'You are a doctor at an urgent care clinic in the US.'},
- {id:'return',lv:2,t:'退换货',d:'说明原因、选择退款或换货',goal:'能礼貌地完成退货或换货',
-  tasks:[['说明要退什么','Say what you want to return'],['说原因','Explain why'],['出示小票','Show the receipt'],['选择退款或换货','Choose a refund or an exchange']],
-  ph:[["I'd like to return these shoes.",'我想退这双鞋。'],["They're too small.",'太小了。'],["Here's my receipt.",'这是小票。'],['Can I exchange them for a bigger size?','能换大一号吗？']],
-  role:'You are a customer service associate at a shoe store.'},
- {id:'campus',lv:2,t:'和室友商量',d:'提出问题、一起想办法',goal:'能委婉地提出问题并和对方达成约定',
-  tasks:[['提出一个问题（太吵或卫生）','Bring up a problem'],['说你的感受','Say how you feel'],['一起想办法','Suggest a solution together'],['达成约定','Agree on a plan']],
-  ph:[['Can we talk for a minute?','能聊一下吗？'],["It's been a little loud at night.",'晚上有点吵。'],['How about we take turns cleaning?','我们轮流打扫怎么样？'],['Sounds like a plan.','就这么定了。']],
-  role:'You are the learner\'s American roommate. Be friendly but have your own point of view.'},
- {id:'apartment',lv:2,t:'租房看房',d:'房租、押金、设施、交通',goal:'能问清租房的关键信息',
-  tasks:[['问房租和押金','Ask about rent and deposit'],['问包含哪些设施','Ask what is included'],['问交通','Ask about transportation'],['约下一步','Arrange the next step']],
-  ph:[["How much is the rent?",'房租多少？'],['Is the deposit refundable?','押金能退吗？'],['Are utilities included?','水电费包含吗？'],['When can I move in?','什么时候能搬进来？']],
-  role:'You are a landlord showing an apartment to the learner.'},
- {id:'daily',lv:2,t:'和同学同事闲聊',d:'开话题、接话、自然结束',goal:'能和人自然地闲聊几分钟',
-  tasks:[['打开话题','Start the conversation'],['聊学习或工作','Talk about study or work'],['聊周末计划','Talk about weekend plans'],['自然地结束对话','End the chat naturally']],
-  ph:[['How\'s it going?','最近怎么样？'],["Work's been busy lately.",'最近工作挺忙的。'],['Any plans for the weekend?','周末有什么计划？'],['Nice talking to you!','跟你聊天很开心！']],
-  role:'You are a friendly colleague the learner runs into at the coffee machine.'},
- /* 高级 */
- {id:'job',lv:3,t:'求职面试',d:'自我介绍、讲成就、说优缺点',goal:'能在面试中有条理地讲自己的经历',
-  tasks:[['自我介绍','Introduce yourself'],['讲一个过去的成就','Describe a past achievement'],['说你的优点和缺点','Talk about your strengths and weaknesses'],['问面试官一个问题','Ask the interviewer a question']],
-  ph:[["I'm currently a researcher in Japan.",'我目前在日本做研究。'],['I led a project that improved accuracy by 20%.','我主导的项目把准确率提高了 20%。'],['One of my weaknesses is public speaking.','我的一个弱点是公开演讲。'],['What does a typical day look like?','这份工作通常一天怎么过？']],
-  role:'You are a friendly hiring manager interviewing the learner for an engineering position at a US tech company. Ask follow-up questions like a real interviewer.'},
- {id:'research',lv:3,t:'介绍我的研究',d:'学术会议茶歇被同行追问',goal:'能用通俗的话讲清楚研究内容、方法和结果',
-  tasks:[['用一句话说研究是什么','Say what your research is in one sentence'],['说它解决什么问题','Explain the problem it solves'],['说方法和结果','Explain your method and results'],['回答一个追问','Answer a follow-up question']],
-  ph:[["My research is about...",'我的研究是关于……'],['The main problem is that...','主要问题是……'],['We found that...','我们发现……'],["That's a great question.",'这是个好问题。']],
-  role:'You are a curious American researcher at an academic conference coffee break. Ask the learner about their research with accessible, encouraging follow-up questions.'},
- {id:'complain',lv:3,t:'投诉与协商',d:'航班取消、被多收费',goal:'能礼貌但坚定地投诉并争取结果',
-  tasks:[['说明问题','Explain the problem'],['礼貌地表达不满','Politely express that you are unhappy'],['提出你的要求','Say what you want'],['协商出一个结果','Negotiate an outcome']],
-  ph:[['I was charged twice for this.','这个被扣了两次钱。'],["I'm a little frustrated, to be honest.",'说实话我有点不满。'],["I'd like a full refund.",'我要全额退款。'],['Is there anything else you can do?','还有别的办法吗？']],
-  role:'You are a customer service agent. At first you can only offer a partial solution, so the learner has to negotiate.'},
- {id:'opinion',lv:3,t:'观点讨论',d:'说观点、给理由、回应反方',goal:'能清楚地表达观点并用理由支持',
-  tasks:[['说出你的观点','State your opinion'],['给出两个理由','Give two reasons'],['回应 Sam 的反对意见','Respond to Sam\'s counterpoint'],['总结','Sum up']],
-  ph:[['In my opinion,...','我认为……'],['First of all,... Also,...','首先……另外……'],['I see your point, but...','我明白你的意思，但是……'],['So overall, I think...','所以总的来说我觉得……']],
-  role:'Pick one everyday debate topic (for example remote work or social media). Ask for the learner\'s opinion, then politely take the other side.'},
- {id:'meeting',lv:3,t:'开会汇报进度',d:'讲完成了什么、问题和下一步',goal:'能在会上清楚汇报进度',
-  tasks:[['汇报已经完成的工作','Report what you have finished'],['说遇到的问题','Explain a problem'],['说下一步计划','Explain your next steps'],['请别人帮忙','Ask for help']],
-  ph:[["This week, I've finished...",'这周我完成了……'],["We've run into an issue with...",'我们在……上遇到了问题。'],['Next, I\'m going to...','接下来我打算……'],['Could you help me with...?','能帮我……吗？']],
-  role:'You are the learner\'s team lead in a weekly progress meeting. Ask clarifying questions.'},
- {id:'negotiate',lv:3,t:'讨价还价',d:'二手交易、谈价格和条件',goal:'能谈价格并说出理由',
-  tasks:[['问价钱和情况','Ask about the price and condition'],['提出更低的价格','Offer a lower price'],['说出你的理由','Give your reasons'],['成交或礼貌放弃','Make a deal or politely walk away']],
-  ph:[['Is the price negotiable?','价格能商量吗？'],['Would you take 200?','200 卖吗？'],["It has a few scratches, so...",'它有些划痕，所以……'],["It's a deal.",'成交。']],
-  role:'You are selling a used bike online and meeting the learner. Do not accept the first offer.'},
- {id:'story',lv:3,t:'讲一段经历',d:'时间、经过、感受、收获',goal:'能有条理地讲完一个完整的故事',
-  tasks:[['交代时间和地点','Set the time and place'],['讲发生了什么','Tell what happened'],['讲你的感受','Say how you felt'],['讲你学到了什么','Say what you learned']],
-  ph:[['A few years ago, when I was in...','几年前我在……的时候'],['Suddenly,...','突然……'],['I was really nervous.','我当时很紧张。'],['Looking back, I learned that...','回头看，我学到了……']],
-  role:'You are a friend who asks the learner to tell a memorable experience and asks natural follow-up questions.'},
- /* 随心所欲 */
- {id:'free',lv:4,t:'自由聊天',d:'想聊什么都行，也能用中文问“…怎么说”',role:''},
- {id:'topic',lv:4,t:'随机话题',d:'Sam 随机抛一个有意思的话题',role:'Pick a fun, random everyday topic and start chatting about it with a short opener and a question.'},
- {id:'debate',lv:4,t:'辩论模式',d:'Sam 故意站在你的对立面',role:'Pick an interesting debate topic, ask for the learner\'s opinion, and always argue the opposite side politely so they keep explaining.'},
- {id:'custom',lv:4,t:'自定义场景',d:'自己描述一个想练的场景',role:null}
+ /* 第一章 · 零基础 */
+ {id:"hello",lv:0,ic:"smile",t:"实验室第一天",goal:"能打招呼、说名字、问对方名字、说再见",place:"大学实验室",time:"周一上午",
+  scene:"今天是你第一天到实验室报到。一位同事端着咖啡走过来，冲你笑了笑。",sceneEn:"It is the learner's first day at a university lab in the US. A labmate walks over with a cup of coffee and smiles.",
+  ch:{n:"Emily",g:"f",r:"实验室同事",rEn:"a PhD student in the same lab",v:"友好、说话慢，很照顾新人",vEn:"warm, speaks slowly, makes newcomers feel comfortable"},
+  you:["你今天第一天来实验室","打个招呼，说出你的名字","问问她叫什么，最后礼貌地说再见"],youEn:"a new member of the lab on their first day",
+  prop:{type:"note",title:"你的门禁卡",rows:[["Name","（你的名字）"],["Lab","Robotics Lab, Room 214"],["Start","Today"]]},
+  tw:[["她没听清你的名字，请你再说一遍","You did not catch the learner's name the first time, so ask them to say it again."],["她两分钟后要去开会，得快点结束","You have a meeting in two minutes, so you need to wrap up soon."],["她约你下午一起喝咖啡","Invite the learner to grab a coffee together this afternoon."]],
+  tasks:[["打招呼","Say hello"],["说出你的名字","Say your name"],["问她的名字","Ask her name"],["说再见","Say goodbye"]],
+  ph:[["Hi! I'm Ken.","你好！我是 Ken。"],["Nice to meet you.","很高兴认识你。"],["What's your name?","你叫什么名字？"],["See you later!","回头见！"]]},
+ {id:"wherefrom",lv:0,ic:"globe",t:"迎新会上认识新朋友",goal:"能说自己来自哪里、住在哪，并反问对方",place:"国际学生迎新会",time:"周五傍晚",
+  scene:"迎新会上大家拿着饮料到处聊天。一个男生端着一块披萨，坐到了你旁边。",sceneEn:"An international student welcome party. People are chatting with drinks. A guy with a slice of pizza sits down next to the learner.",
+  ch:{n:"Jake",g:"m",r:"同样刚来的新生",rEn:"another new student",v:"外向，对各个国家都很好奇",vEn:"outgoing and curious about other countries"},
+  you:["你是新来的研究生","告诉他你来自哪里、住在哪个城市","再问问他是哪里人"],youEn:"a new graduate student",
+  prop:{type:"note",title:"名牌贴纸",rows:[["HELLO","my name is ______"]]},
+  tw:[["他去过你的国家，特别兴奋","You visited the learner's home country once and get excited about it."],["他把你的城市名听错了","You mishear the name of the learner's city, so they have to clarify."],["他问你喜不喜欢这里的天气","Ask how the learner likes the weather here."]],
+  tasks:[["说你来自哪里","Say where you are from"],["说你住在哪个城市","Say which city you live in"],["问他来自哪里","Ask where he is from"]],
+  ph:[["I'm from Japan.","我来自日本。"],["I live in Tokyo.","我住在东京。"],["Where are you from?","你是哪里人？"]]},
+ {id:"water",lv:0,ic:"bottle",t:"便利店买一瓶水",goal:"能买东西、问价钱、听懂数字并付钱",place:"街角便利店",time:"晚上 9 点",
+  scene:"你跑完步口渴得不行，走进街角的便利店。收银台后面的店员正在刷手机。",sceneEn:"A small corner convenience store at 9 pm. The learner just finished a run and is thirsty. The clerk is behind the counter.",
+  ch:{n:"Carlos",g:"m",r:"便利店店员",rEn:"a convenience store clerk",v:"随和、爱打招呼",vEn:"laid-back and friendly, greets everyone with Hey, how's it going?"},
+  you:["你想买一瓶水","你只带了一张 5 美元的纸币"],youEn:"a customer who wants to buy a bottle of water and only has a five-dollar bill",
+  prop:{type:"tag",title:"价签",rows:[["Water 16.9 oz","$1.99"],["Sparkling water","$2.49"],["Sports drink","$2.79"]]},
+  tw:[["他问你要不要袋子","Ask if they need a bag."],["他问你要冰的还是常温的","Ask whether they want a cold one from the fridge or one from the shelf."],["找零时他问要不要小票","When giving the change, ask if they want the receipt."]],
+  tasks:[["说你想要一瓶水","Ask for a bottle of water"],["问多少钱","Ask how much it is"],["付钱","Pay"],["说谢谢","Say thank you"]],
+  ph:[["Can I get a water, please?","请给我一瓶水。"],["How much is it?","多少钱？"],["Here you go.","给你。"],["Thank you!","谢谢！"]]},
+ {id:"likes",lv:0,ic:"heart",t:"食堂里聊喜好",goal:"能说喜欢和不喜欢的东西，并问对方",place:"学校食堂",time:"中午",
+  scene:"中午的食堂很热闹。你和刚认识的朋友 Maya 端着餐盘坐下，她看了看你的盘子。",sceneEn:"A busy university cafeteria at lunchtime. The learner sits down with a new friend, Maya, who looks at the learner's tray.",
+  ch:{n:"Maya",g:"f",r:"新认识的朋友",rEn:"a new friend from class",v:"开朗、爱吃，问题特别多",vEn:"cheerful, loves food and asks lots of questions"},
+  you:["说一样你喜欢吃的东西、一个爱好","说一样你不喜欢的","再问问她喜欢什么"],youEn:"a student having lunch with a new friend",
+  prop:{type:"menu",title:"TODAY'S LUNCH",rows:[["Chicken teriyaki bowl","$8.50"],["Veggie burger","$7.25"],["Caesar salad","$6.75"],["Spicy ramen","$9.00"]]},
+  tw:[["她发现你们喜欢同一样东西","You find out you both like the same thing and get excited."],["她约你周末一起去做那个爱好","Invite the learner to do the hobby together this weekend."],["她不能吃辣，问你能不能","You can't handle spicy food and ask if the learner can."]],
+  tasks:[["说一个你喜欢的食物","Say a food you like"],["说一个你喜欢的爱好","Say a hobby you like"],["说一个你不喜欢的东西","Say something you don't like"],["问她喜欢什么","Ask what she likes"]],
+  ph:[["I like sushi.","我喜欢寿司。"],["I like reading.","我喜欢看书。"],["I don't like spicy food.","我不喜欢辣的。"],["What about you?","你呢？"]]},
+ {id:"feel",lv:0,ic:"sun",t:"电梯里遇到邻居",goal:"能回答 How are you，说自己的状态和要去做什么",place:"公寓电梯",time:"早上 7:50",
+  scene:"你拎着包走进电梯，住楼上的邻居 Tom 已经在里面了，他冲你点点头。",sceneEn:"An apartment building elevator at 7:50 am. The learner is heading out. Their upstairs neighbor Tom is already inside and nods hello.",
+  ch:{n:"Tom",g:"m",r:"楼上的邻居",rEn:"the learner's upstairs neighbor, a retired teacher",v:"有礼貌，喜欢简短地寒暄两句",vEn:"polite and likes a little short small talk"},
+  you:["你正要出门","回答他问你今天怎么样","说说你要去做什么、累不累"],youEn:"a resident heading out in the morning",
+  tw:[["电梯突然停了几秒","The elevator stops for a few seconds and then starts again; react naturally."],["他说昨晚听到你很晚才回来","Mention that you heard the learner come home late last night."],["他提醒你今天会下雨","Tell the learner it is going to rain today."]],
+  tasks:[["回答今天怎么样","Answer how you are today"],["说你要去做什么","Say where you are going or what you are doing"],["说你累不累或忙不忙","Say if you are tired or busy"]],
+  ph:[["I'm good, thanks.","我很好，谢谢。"],["I'm a little tired.","我有点累。"],["I'm going to the lab.","我去实验室。"]]},
+ {id:"time",lv:0,ic:"clock",t:"约同学一起学习",goal:"能问时间、说自己什么时候有空、约好时间地点",place:"图书馆门口",time:"周三下午",
+  scene:"下课后，同组的同学 Ryan 叫住你，想约个时间一起准备下周的报告。你的手机正好没电了。",sceneEn:"Outside the library after class. A classmate, Ryan, wants to set a time to prepare next week's presentation together. The learner's phone is dead.",
+  ch:{n:"Ryan",g:"m",r:"同组同学",rEn:"a classmate on the same project team",v:"有点忙、很务实，边说边看日历",vEn:"busy and practical, checks his calendar while talking"},
+  you:["你的手机没电了，不知道现在几点","你周四下午 3 点以后有空，周五全天有空"],youEn:"a student whose phone is dead and who is free Thursday after 3 pm and all day Friday",
+  prop:{type:"note",title:"你的日程",rows:[["Wed","Lab 9–5"],["Thu","Class 10–12, free after 3 pm"],["Fri","Free all day"]]},
+  tw:[["他周四下午也有课","He has a class on Thursday afternoon too, so you need another time."],["他提议在咖啡店见","He suggests meeting at a coffee shop instead of the library."],["他问要不要叫上另一个同学","He asks if they should invite another classmate."]],
+  tasks:[["问现在几点","Ask what time it is"],["说你什么时候有空","Say when you are free"],["约好具体时间和地点","Agree on a time and place"]],
+  ph:[["What time is it?","现在几点？"],["I'm free after three.","我三点以后有空。"],["How about Friday?","周五怎么样？"],["See you there.","到时候见。"]]},
+ /* 第二章 · 入门 */
+ {id:"coffee",lv:1,ic:"cup",t:"咖啡店点单",goal:"能独立点一杯咖啡，处理小意外",place:"西雅图 · 街角咖啡店",time:"工作日早上 8:40",
+  scene:"门口排着长队，咖啡机嗡嗡作响。终于轮到你了，咖啡师抬起头冲你笑。",sceneEn:"A busy coffee shop in Seattle at 8:40 on a weekday morning. There is a line behind the learner. It is finally their turn.",
+  ch:{n:"Jess",g:"f",r:"咖啡师",rEn:"a barista",v:"热情、语速有点快，喜欢顺口聊两句",vEn:"cheerful, talks a bit fast, likes a bit of small talk"},
+  you:["你要一杯大杯燕麦拿铁，少冰，外带","不要糖","用信用卡付"],youEn:"a customer who wants a large iced oat milk latte with light ice, no sugar, to go, paying by card",
+  prop:{type:"menu",title:"MENU",rows:[["Drip coffee","$3.25 / 3.75 / 4.25"],["Latte","$4.75 / 5.25 / 5.75"],["Cappuccino","$4.75 / 5.25"],["Cold brew","$4.95 / 5.45"],["Matcha latte","$5.25 / 5.75"]],note:"Small / Medium / Large · Oat or almond milk +$0.75"},
+  tw:[["燕麦奶卖完了","You are out of oat milk today; offer almond or soy milk instead."],["刷卡机第一次没反应","The card reader doesn't work the first time; ask them to try tapping again."],["她要写名字在杯子上，还把名字念错了","Ask for a name for the cup and repeat it back slightly wrong."]],
+  tasks:[["点一杯饮料","Order a drink"],["选杯型","Choose a size"],["说要不要加糖","Answer about sugar"],["说外带","Say it is to go"],["付钱","Pay"]],
+  ph:[["Can I get a large iced latte with oat milk?","请给我一杯大杯冰燕麦拿铁。"],["Light ice, please.","少冰。"],["No sugar, thanks.","不要糖，谢谢。"],["It's to go.","外带。"]]},
+ {id:"food",lv:1,ic:"fork",t:"餐厅吃晚饭",goal:"能入座、点菜、说明过敏、结账",place:"洛杉矶 · 美式餐馆",time:"周六晚上 7 点",
+  scene:"餐厅里放着音乐，很热闹。你和朋友两个人刚进门，服务员拿着菜单迎了过来。",sceneEn:"A lively casual American diner in Los Angeles on Saturday at 7 pm. The learner and one friend have just walked in.",
+  ch:{n:"Mike",g:"m",r:"服务员",rEn:"a server",v:"精力充沛，爱推荐菜，隔一会儿就来问",vEn:"energetic, loves recommending dishes, checks in often"},
+  you:["你们两个人","你想点一道主菜和一杯饮料","你对花生过敏","吃完结账，你们想分开付"],youEn:"a diner with one friend, who is allergic to peanuts and wants to split the check",
+  prop:{type:"menu",title:"MAIN STREET DINER",rows:[["Classic cheeseburger","$16"],["BBQ chicken sandwich","$15"],["Grilled salmon","$24"],["Thai peanut noodles","$17"],["Mac and cheese","$12"],["Iced tea / Lemonade","$3.50 / $4"]],note:"Burgers come with fries · Ask about today's special"},
+  tw:[["今天的特价菜卖完了","Today's special is sold out."],["他热情推荐花生酱面","Enthusiastically recommend the Thai peanut noodles, so the learner has to mention the allergy."],["结账时他问要不要分开付","At the end, ask if they want to split the check."]],
+  tasks:[["说几个人","Say how many people"],["点一道主菜","Order a main dish"],["点饮料","Order a drink"],["说明你对花生过敏","Mention the peanut allergy"],["要账单","Ask for the check"]],
+  ph:[["A table for two, please.","两位。"],["I'll have the cheeseburger.","我要芝士汉堡。"],["I'm allergic to peanuts.","我对花生过敏。"],["Can we get the check?","可以结账吗？"]]},
+ {id:"shop",lv:1,ic:"shirt",t:"商场买外套",goal:"能找东西、问尺码价钱、决定买不买",place:"购物中心 · 服装店",time:"周日下午",
+  scene:"店里在打折，到处挂着 SALE 的牌子。你看中了一件外套，店员走过来问你需不需要帮忙。",sceneEn:"A clothing store in a US mall on Sunday afternoon, with SALE signs everywhere. The learner is looking at jackets.",
+  ch:{n:"Olivia",g:"f",r:"店员",rEn:"a store associate",v:"热心、爱推荐，说话很有活力",vEn:"helpful and upbeat, likes to suggest things"},
+  you:["你在找一件黑色外套","你平时穿 M 码","预算 90 美元以内"],youEn:"a shopper looking for a black jacket in size medium with a budget of about 90 dollars",
+  prop:{type:"tag",title:"价签",rows:[["Puffer jacket","$129 → $89"],["Denim jacket","$79"],["Rain jacket","$69"],["Sizes","XS  S  M  L  XL"]],note:"Extra 10% off at checkout today"},
+  tw:[["黑色 M 码卖完了","Black in size medium is out of stock; offer another color or to order it online."],["结账时可以再打九折","At checkout, mention the extra 10% off."],["她一直劝你试穿","Keep encouraging the learner to try it on in the fitting room."]],
+  tasks:[["说你在找什么","Say what you are looking for"],["问有没有你的尺码","Ask for your size"],["问价钱","Ask the price"],["决定买还是不买","Decide to buy it or not"]],
+  ph:[["I'm looking for a black jacket.","我在找一件黑色外套。"],["Do you have this in a medium?","这个有 M 码吗？"],["How much is this one?","这件多少钱？"],["I'll take it.","我买了。"]]},
+ {id:"way",lv:1,ic:"pin",t:"纽约街头问路",goal:"能问路、听懂路线、确认怎么走",place:"纽约 · 时代广场附近",time:"下午 3 点",
+  scene:"你要去中央公园，可手机没信号了。路口有位本地人在等红绿灯，看起来挺友善。",sceneEn:"A busy street corner near Times Square in New York at 3 pm. The learner wants to get to Central Park but their phone has no signal.",
+  ch:{n:"Linda",g:"f",r:"纽约本地人",rEn:"a friendly local New Yorker",v:"热心，说话快，边说边比划",vEn:"friendly, talks fast, gives directions with lots of gestures"},
+  you:["你要去中央公园","手机没信号，看不了地图","想知道走过去要多久"],youEn:"a visitor who wants to get to Central Park and whose phone has no signal",
+  prop:{type:"note",title:"你记下的地址",rows:[["要去","Central Park, 5th Ave & 59th St"],["你在","Times Square, 42nd St"]]},
+  tw:[["她说走路要 20 分钟，建议坐地铁","Say walking takes about 20 minutes and suggest taking the subway."],["她说得太快，你得请她再说一遍","Speak quite fast at first so the learner needs to ask you to repeat or slow down."],["她顺路，可以带你走一段","You are going the same way and offer to walk with them for a few blocks."]],
+  tasks:[["问中央公园怎么走","Ask how to get to Central Park"],["确认路线","Check the directions"],["问要多久","Ask how long it takes"],["道谢","Say thanks"]],
+  ph:[["Excuse me, how do I get to Central Park?","请问去中央公园怎么走？"],["So I go straight and turn left?","所以我直走再左转？"],["How long does it take?","要多久？"],["Thanks so much!","太感谢了！"]]},
+ {id:"intro",lv:1,ic:"users",t:"派对上自我介绍",goal:"能用 4–5 句话介绍自己，并接着聊",place:"国际学生派对",time:"周五晚上",
+  scene:"屋里有点吵，有人在放音乐。主办人 Chris 端着两杯饮料走过来，递给你一杯。",sceneEn:"A noisy international student party on Friday night with music playing. The host, Chris, walks over and hands the learner a drink.",
+  ch:{n:"Chris",g:"m",r:"派对主办人",rEn:"the host of the party",v:"外向、好奇、爱笑",vEn:"outgoing, curious, laughs a lot"},
+  you:["你是新来的研究生","介绍名字、来自哪里、在做什么、一个爱好","也问问他"],youEn:"a new graduate student meeting people at a party",
+  tw:[["他的朋友也在做类似的研究","Mention that a friend of yours works on something similar."],["他把你介绍给另一个朋友","Introduce the learner to another friend and ask them to say a bit about themselves again."],["他约你周末一起去爬山","Invite the learner to go hiking this weekend."]],
+  tasks:[["说名字和来自哪里","Say your name and where you are from"],["说你在做什么","Say what you do"],["说一个爱好","Say a hobby"],["问他一个问题","Ask him a question"]],
+  ph:[["I'm Ken, and I'm from Osaka.","我是 Ken，来自大阪。"],["I'm a grad student here.","我是这里的研究生。"],["I'm really into hiking.","我很喜欢爬山。"],["How about you?","你呢？"]]},
+ {id:"weekend",lv:1,ic:"cal",t:"周一聊周末",goal:"能用过去式讲周末去了哪、做了什么",place:"办公室茶水间",time:"周一早上",
+  scene:"周一早上，你在茶水间倒咖啡。同事 Ashley 也来了，伸了个懒腰问你周末过得怎么样。",sceneEn:"The office kitchen on Monday morning. A coworker, Ashley, comes in, stretches and asks about the weekend.",
+  ch:{n:"Ashley",g:"f",r:"同事",rEn:"a coworker",v:"爱聊天，也会讲自己的事",vEn:"chatty and curious, also shares her own stories"},
+  you:["你周末去了一个地方（自己定）","用过去式讲你做了什么、感觉怎么样"],youEn:"an employee chatting about their weekend",
+  tw:[["她也去过同一个地方","You have been to the same place and ask about a detail."],["她问你有没有拍照","Ask if they took any pictures."],["她周末过得很糟，想吐槽两句","Your own weekend was rough and you want to vent a little."]],
+  tasks:[["说你周末去了哪里","Say where you went"],["说你做了什么","Say what you did"],["说感觉怎么样","Say how it was"],["问她的周末","Ask about her weekend"]],
+  ph:[["I went to the beach.","我去了海边。"],["We had a barbecue.","我们烧烤了。"],["It was so much fun.","特别好玩。"],["How was your weekend?","你周末怎么样？"]]},
+ {id:"call",lv:1,ic:"phone",t:"打电话订餐厅",goal:"能打电话订位，确认日期、时间、人数、名字",place:"电话 · 意大利餐厅",time:"周三下午",
+  scene:"你想周五晚上请朋友吃饭，拨通了餐厅的电话。响了两声，有人接起来了。",sceneEn:"A phone call to an Italian restaurant on Wednesday afternoon. The learner wants a table for Friday night.",
+  ch:{n:"Anna",g:"f",r:"餐厅接待",rEn:"the host at an Italian restaurant answering the phone",v:"有礼貌、效率高，每个细节都会确认",vEn:"polite and efficient, confirms every detail"},
+  you:["你想订周五晚上 7 点","4 个人","名字用你自己的"],youEn:"a caller who wants a table for four this Friday at 7 pm",
+  prop:{type:"note",title:"Luigi's 营业时间",rows:[["Mon–Thu","5 pm – 10 pm"],["Fri–Sat","5 pm – 11 pm"],["Sun","Closed"]]},
+  tw:[["7 点满了，只有 6:30 或 8:30","7 pm is fully booked; offer 6:30 or 8:30 instead."],["她要你留电话号码","Ask for a phone number to hold the reservation."],["她请你把名字拼一下","Ask the learner to spell their name."]],
+  tasks:[["说你想订位","Say you want a reservation"],["说日期和时间","Give the day and time"],["说人数","Say how many people"],["留名字","Give your name"]],
+  ph:[["I'd like to make a reservation.","我想订个位。"],["For Friday at seven.","周五七点。"],["For four people.","四个人。"],["It's under Ken.","名字写 Ken。"]]},
+ /* 第三章 · 中等 */
+ {id:"airport",lv:2,ic:"plane",t:"机场值机",goal:"能值机、托运行李、选座位，处理超重或延误",place:"旧金山机场 · 值机柜台",time:"早上 6:15",
+  scene:"广播一遍遍响着。你推着箱子排到柜台前，地勤抬头看了你一眼。",sceneEn:"The check-in counter at San Francisco airport at 6:15 am, with announcements in the background. The learner is flying to Chicago.",
+  ch:{n:"David",g:"m",r:"值机地勤",rEn:"an airline check-in agent",v:"专业，有点赶时间，但很客气",vEn:"professional, a little rushed but polite"},
+  you:["你飞芝加哥，航班 UA 512","一个托运箱子、一个随身包","想要靠窗的座位"],youEn:"a passenger on flight UA 512 to Chicago with one checked bag and one carry-on who wants a window seat",
+  prop:{type:"ticket",title:"BOOKING",rows:[["Passenger","（你的名字）"],["Flight","UA 512  SFO → ORD"],["Departs","8:05 AM"],["Bags","1 checked bag included"]]},
+  tw:[["箱子超重 3 磅","The checked bag is 3 lbs overweight; offer to charge 100 dollars or let them move some things to the carry-on."],["航班延误 1 小时","The flight is delayed by one hour; give the new boarding time."],["靠窗座位没了","There are no window seats left; offer an aisle seat or an exit row."]],
+  tasks:[["出示证件说目的地","Show ID and say your destination"],["托运行李","Check your bag"],["选座位","Choose a seat"],["问登机口和时间","Ask about the gate and boarding time"]],
+  ph:[["I'm flying to Chicago.","我飞芝加哥。"],["I'd like to check one bag.","我要托运一件行李。"],["Can I get a window seat?","能要靠窗的座位吗？"],["What time does boarding start?","几点开始登机？"]]},
+ {id:"hotel",lv:2,ic:"bed",t:"酒店入住出状况",goal:"能办入住，并说清楚房间的问题、要求解决",place:"芝加哥 · 市中心酒店",time:"晚上 10 点",
+  scene:"你拖着行李走进大堂，累了一整天。前台放下电话，冲你微笑。",sceneEn:"A downtown Chicago hotel lobby at 10 pm. The learner arrives tired after a long day. After check-in they will come back to the front desk to report a problem with the room.",
+  ch:{n:"Sarah",g:"f",r:"前台",rEn:"a front desk clerk",v:"冷静、礼貌，出了问题会道歉",vEn:"calm and polite, apologetic when something goes wrong"},
+  you:["你订了两晚","想问早餐和 Wi-Fi","进房间后发现有问题，要回来反映"],youEn:"a guest with a two-night reservation",
+  prop:{type:"ticket",title:"RESERVATION",rows:[["Guest","（你的名字）"],["Nights","2 · Nov 20–22"],["Room","Queen, non-smoking"],["Breakfast","Included"]]},
+  tw:[["房间空调坏了","After check-in, the learner comes back because the AC in the room isn't working."],["房间还没打扫","After check-in, the learner comes back because the room hasn't been cleaned."],["一开始查不到订单","At first you can't find the reservation and ask for the confirmation email."]],
+  tasks:[["办入住","Check in"],["问早餐和 Wi-Fi","Ask about breakfast and Wi-Fi"],["反映房间的问题","Report a problem with the room"],["要求解决","Ask for a solution"]],
+  ph:[["I have a reservation under Ken.","我用 Ken 的名字订了房。"],["What time is breakfast?","早餐几点？"],["The AC in my room isn't working.","我房间的空调坏了。"],["Could I switch rooms?","能换个房间吗？"]]},
+ {id:"doctor",lv:2,ic:"med",t:"诊所看病",goal:"能说清楚症状和过敏，听懂医嘱",place:"社区急诊诊所",time:"周二上午",
+  scene:"你嗓子疼了两天，还有点发烧。护士量完体温出去了，医生推门走了进来。",sceneEn:"An urgent care clinic exam room on Tuesday morning. The learner has had a sore throat and a mild fever for two days. The nurse has taken their temperature.",
+  ch:{n:"Dr. Patel",g:"m",r:"医生",rEn:"a doctor",v:"冷静、和蔼，问题问得很清楚",vEn:"calm and kind, asks clear questions"},
+  you:["嗓子疼、有点发烧，两天了","你对青霉素过敏","想知道要不要请假"],youEn:"a patient with a sore throat and mild fever for two days, allergic to penicillin",
+  prop:{type:"note",title:"就诊登记",rows:[["Temperature","100.8°F（约 38.2°C）"],["Allergies","Penicillin"],["Insurance","Student health plan"]]},
+  tw:[["医生要看你喉咙，让你说 aah","Ask to look at the throat and say: Open wide and say aah."],["医生想开阿莫西林（青霉素类）","Start to prescribe amoxicillin, so the learner has to mention the penicillin allergy."],["医生问要不要开病假条","Offer a doctor's note for school or work."]],
+  tasks:[["描述症状","Describe your symptoms"],["说持续多久","Say how long it has lasted"],["说明过敏","Mention your allergy"],["确认医生的建议","Confirm the doctor's advice"]],
+  ph:[["I have a sore throat and a fever.","我嗓子疼还发烧。"],["It started two days ago.","两天前开始的。"],["I'm allergic to penicillin.","我对青霉素过敏。"],["So I should rest and drink fluids?","所以我应该休息多喝水？"]]},
+ {id:"return",lv:2,ic:"receipt",t:"去鞋店退换货",goal:"能说明退货原因，谈出换货或退款",place:"商场 · 运动鞋店",time:"周六中午",
+  scene:"上周买的跑鞋穿了一次就磨脚。你带着鞋盒和小票回到店里。",sceneEn:"A sneaker store at the mall on Saturday. The learner bought running shoes last week, wore them once, and they are too small.",
+  ch:{n:"Kevin",g:"m",r:"店员",rEn:"a store associate",v:"客气，按店里规定办事",vEn:"polite and follows store policy"},
+  you:["上周买的跑鞋，偏小","你带了小票","想换大半码，没有就退款"],youEn:"a customer returning running shoes that are too small, with the receipt",
+  prop:{type:"receipt",title:"RECEIPT",rows:[["Running shoes  Size 9","$89.99"],["Tax","$7.42"],["Total","$97.41"],["Date","Nov 12"]],note:"Returns within 30 days with receipt"},
+  tw:[["大半码没货了","Size 9.5 is out of stock; offer a refund or store credit."],["鞋子穿过了，一开始只给购物券","Because the shoes were worn, at first offer store credit only."],["退款要 3–5 天才回到卡上","Explain the refund goes back to the original card in 3 to 5 business days."]],
+  tasks:[["说明要退什么","Say what you want to return"],["说原因","Explain why"],["出示小票","Show the receipt"],["选择换货或退款","Choose an exchange or a refund"]],
+  ph:[["I'd like to return these shoes.","我想退这双鞋。"],["They're a little too small.","有点小。"],["Here's my receipt.","这是小票。"],["Can I exchange them for a half size up?","能换大半码吗？"]]},
+ {id:"campus",lv:2,ic:"home",t:"跟室友谈噪音",goal:"能委婉地提出问题，和对方商量出办法",place:"合租公寓 · 客厅",time:"晚上 11 点",
+  scene:"连着三晚，室友都在客厅打游戏到很晚。你明早 7 点要起床，今晚你决定跟他好好聊聊。",sceneEn:"The living room of a shared apartment at 11 pm. The roommate, Tyler, has been gaming loudly late at night for three nights in a row.",
+  ch:{n:"Tyler",g:"m",r:"室友",rEn:"the learner's roommate",v:"随和，一开始有点不服气，但讲道理",vEn:"easygoing, a little defensive at first, but fair"},
+  you:["他晚上太吵","你早上 7 点要起床","想一起定个规矩"],youEn:"a roommate who has to get up at 7 am and wants to talk about the noise",
+  tw:[["他反过来说你没及时洗碗","Bring up that the learner sometimes leaves dishes in the sink."],["他提议 11 点后戴耳机","Suggest wearing headphones after 11 pm."],["他根本不知道会吵到你，马上道歉","You had no idea it was bothering them and apologize right away."]],
+  tasks:[["提出问题","Bring up the problem"],["说你的感受和原因","Explain how it affects you"],["一起想办法","Suggest a solution together"],["达成约定","Agree on a plan"]],
+  ph:[["Hey, do you have a minute?","嘿，有空聊两句吗？"],["It's been a little loud at night.","晚上有点吵。"],["I have to get up at seven.","我七点得起床。"],["How about after eleven we keep it down?","十一点以后小声一点怎么样？"]]},
+ {id:"apartment",lv:2,ic:"key",t:"看房租房",goal:"能问清房租押金、水电、交通，谈下一步",place:"波士顿 · 一居室",time:"周六上午",
+  scene:"你在网上看中一套一居室。房东在门口等你，带你从客厅开始看。",sceneEn:"A one-bedroom apartment for rent in Boston on Saturday morning. The landlord, Ray, is showing the learner around.",
+  ch:{n:"Ray",g:"m",r:"房东",rEn:"the landlord",v:"热情，但有点推销的味道",vEn:"friendly but a little salesy"},
+  you:["预算每月 1800 美元以内","想知道押金、水电、交通","打算下个月搬进来"],youEn:"a renter with a budget of 1,800 dollars a month who wants to move in next month",
+  prop:{type:"note",title:"房源信息",rows:[["1 Bed / 1 Bath","650 sq ft"],["Rent","$1,850 / month"],["Deposit","1 month"],["Utilities","Not included"],["Laundry","In the building"]]},
+  tw:[["还有别人也想租","Mention another person is interested, so the learner needs to decide soon."],["签一年可以降到 1800","Agree to lower the rent to 1,800 dollars for a 12-month lease if the learner asks."],["这里不能养宠物","Mention that no pets are allowed."]],
+  tasks:[["问房租和押金","Ask about rent and the deposit"],["问水电和设施","Ask about utilities and what's included"],["问交通","Ask about getting around"],["说下一步","Arrange the next step"]],
+  ph:[["How much is the rent?","房租多少？"],["Are utilities included?","水电包含吗？"],["How far is the subway?","离地铁多远？"],["When can I move in?","什么时候能搬进来？"]]},
+ {id:"daily",lv:2,ic:"chat",t:"咖啡机旁闲聊",goal:"能和同事自然地聊几分钟，再体面地结束",place:"公司 · 咖啡机旁",time:"周四下午",
+  scene:"下午犯困，你去打咖啡。隔壁组的同事 Nina 也在排队。",sceneEn:"By the coffee machine at the office on Thursday afternoon. A coworker from another team, Nina, is waiting in line too.",
+  ch:{n:"Nina",g:"f",r:"隔壁组同事",rEn:"a coworker from another team",v:"友好，说话带点幽默",vEn:"friendly with a dry sense of humor"},
+  you:["想自然地聊几句","聊聊工作和周末计划","然后体面地结束对话回去工作"],youEn:"an employee taking a coffee break",
+  tw:[["她刚接了一个大项目，压力很大","You just got assigned a big project and are stressed."],["她约你周末去参加问答之夜","Invite the learner to a trivia night this weekend."],["咖啡机突然坏了","The coffee machine suddenly stops working."]],
+  tasks:[["打开话题","Start the conversation"],["聊工作","Talk about work"],["聊周末计划","Talk about weekend plans"],["自然地结束对话","End the chat naturally"]],
+  ph:[["How's it going?","最近怎么样？"],["Work's been crazy this week.","这周工作忙疯了。"],["Any plans for the weekend?","周末有什么安排？"],["Well, I should get back to it.","好啦，我得回去干活了。"]]},
+ /* 第四章 · 高级 */
+ {id:"job",lv:3,ic:"brief",t:"视频面试",goal:"能有条理地讲经历、讲项目、反问面试官",place:"视频面试 · 科技公司",time:"周二上午 10:00",
+  scene:"屏幕那头，面试官 Rachel 打开了摄像头，面前放着你的简历。",sceneEn:"A video interview at 10 am for a robotics engineer role at a US tech company. The interviewer, Rachel, has the learner's resume.",
+  ch:{n:"Rachel",g:"f",r:"招聘经理",rEn:"a hiring manager",v:"专业、友好，喜欢追问细节",vEn:"professional and friendly, asks follow-up questions"},
+  you:["你在应聘机器人工程师","准备好讲一个你做过的项目","最后要问一个问题"],youEn:"a candidate interviewing for a robotics engineer position",
+  prop:{type:"note",title:"职位信息",rows:[["Role","Robotics Engineer"],["Team","Perception & Control"],["Location","Hybrid · Seattle"]]},
+  tw:[["她追问项目里最难的部分","Ask a follow-up about the hardest part of the project and how they handled it."],["她问你为什么想换工作","Ask why they want to leave their current position."],["她问你期望的薪资","Ask about salary expectations."]],
+  tasks:[["自我介绍","Introduce yourself"],["讲一个你做过的项目","Describe a project you worked on"],["说优点和不足","Talk about strengths and weaknesses"],["问面试官一个问题","Ask the interviewer a question"]],
+  ph:[["I'm currently a researcher in Japan.","我目前在日本做研究。"],["I led a project that improved accuracy by 20%.","我负责的项目把准确率提高了 20%。"],["One thing I'm working on is public speaking.","我还在提高的一点是公开演讲。"],["What does success look like in this role?","这个岗位怎样才算做得好？"]]},
+ {id:"research",lv:3,ic:"flask",t:"会议上介绍研究",goal:"能用通俗的话讲清楚研究内容、方法和结果",place:"学术会议 · 海报区",time:"下午 3:30",
+  scene:"报告刚结束，大家端着咖啡在海报区闲逛。一位教授停在你的海报前，饶有兴趣地看着。",sceneEn:"The poster session at an academic conference at 3:30 pm. A professor stops in front of the learner's poster, looking interested.",
+  ch:{n:"Prof. Miller",g:"m",r:"教授",rEn:"a professor from another university",v:"好奇，问题犀利但很友善",vEn:"curious, asks sharp but kind questions"},
+  you:["你在介绍自己的研究海报","讲清楚：做什么、解决什么问题、怎么做、结果如何"],youEn:"a researcher presenting their poster",
+  tw:[["他问方法能不能用到别的领域","Ask if the method could work in a different field."],["他质疑实验规模不够大","Politely question whether the experiments are large enough to be convincing."],["他想要你的联系方式","Ask for their email so you can follow up."]],
+  tasks:[["一句话说研究是什么","Say what your research is in one sentence"],["说它解决什么问题","Explain the problem it solves"],["说方法和结果","Explain your method and results"],["回答一个追问","Answer a follow-up question"]],
+  ph:[["My research is about...","我的研究是关于……"],["The main problem is that...","主要问题在于……"],["We found that...","我们发现……"],["That's a great question.","这是个好问题。"]]},
+ {id:"complain",lv:3,ic:"alert",t:"打电话投诉重复扣款",goal:"能礼貌但坚定地投诉，争取到结果",place:"电话 · 信用卡客服",time:"周一中午",
+  scene:"你查账单时发现同一笔 59.99 美元被扣了两次。你拨通客服电话，等了 10 分钟终于接通。",sceneEn:"A phone call to a credit card company's customer service on Monday at noon. The learner was charged 59.99 dollars twice for the same subscription.",
+  ch:{n:"Mark",g:"m",r:"信用卡客服",rEn:"a customer service agent at a credit card company",v:"客气，但一开始只按规定办",vEn:"polite but sticks to policy at first"},
+  you:["同一笔 $59.99 被扣了两次","你要把多扣的钱全部退回","态度礼貌但坚定"],youEn:"a cardholder who was charged twice and wants a full refund of the duplicate charge",
+  prop:{type:"receipt",title:"STATEMENT",rows:[["Nov 15  StreamPlus","$59.99"],["Nov 15  StreamPlus","$59.99"],["Nov 16  Grocery Mart","$42.18"]]},
+  tw:[["他一开始只答应退一半","At first you can only offer a partial credit."],["退款要 7–10 个工作日","Explain the refund will take 7 to 10 business days."],["他让你先去联系商家","Ask the learner to contact the merchant first, so they need to push back."]],
+  tasks:[["说明问题","Explain the problem"],["礼貌地表达不满","Politely say you are unhappy"],["提出你的要求","Say what you want"],["谈出一个结果","Negotiate an outcome"]],
+  ph:[["I was charged twice for the same thing.","同一笔被扣了两次。"],["To be honest, I'm a little frustrated.","说实话我有点不满。"],["I'd like the duplicate charge refunded.","我希望退回多扣的那笔。"],["Is there anything else you can do?","还有别的办法吗？"]]},
+ {id:"opinion",lv:3,ic:"scale",t:"读书会上的辩论",goal:"能说出观点、给理由、回应反对意见",place:"读书会 · 咖啡馆",time:"周日下午",
+  scene:"读书会散场后，几个人留下来闲聊。Daniel 突然抛出一个话题，转头问你怎么看。",sceneEn:"After a book club meeting at a cafe on Sunday afternoon, a few people stay to chat. Daniel brings up a topic and asks for the learner's opinion.",
+  ch:{n:"Daniel",g:"m",r:"读书会朋友",rEn:"a friend from the book club",v:"喜欢友好地抬杠，总站在反方",vEn:"loves friendly debates and plays devil's advocate"},
+  you:["说出你的观点","给出两个理由","回应他的反对意见，最后总结"],youEn:"a book club member sharing their opinion",twNow:true,
+  tw:[["话题：远程办公到底好不好","The topic is whether remote work is better than working in an office."],["话题：学生该不该用 AI 写作业","The topic is whether students should be allowed to use AI for homework."],["话题：住大城市还是小城市","The topic is whether it is better to live in a big city or a small town."]],
+  tasks:[["说出你的观点","State your opinion"],["给出两个理由","Give two reasons"],["回应他的反对意见","Respond to his counterpoint"],["总结","Sum up"]],
+  ph:[["Personally, I think...","我个人觉得……"],["For one thing,... And also,...","一方面……另外……"],["I see your point, but...","我明白你的意思，但是……"],["So overall, I'd say...","所以总的来说……"]]},
+ {id:"meeting",lv:3,ic:"screen",t:"周会汇报进度",goal:"能清楚汇报完成了什么、卡在哪、下一步",place:"线上周会",time:"周四上午",
+  scene:"每周的组会，轮到你汇报了。组长 Laura 打开了共享屏幕。",sceneEn:"The weekly team meeting on a video call on Thursday morning. It is the learner's turn to give an update. The team lead is Laura.",
+  ch:{n:"Laura",g:"f",r:"组长",rEn:"the team lead",v:"有条理，喜欢问清楚细节",vEn:"organized, asks clarifying questions"},
+  you:["这周完成了数据采集","遇到的问题：传感器偶尔掉线","下周打算做测试","需要借一台设备"],youEn:"a team member who finished data collection, has a sensor that sometimes disconnects, plans to run tests next week and needs to borrow a device",
+  prop:{type:"note",title:"会议议程",rows:[["1","Updates"],["2","Blockers"],["3","Next steps"]]},
+  tw:[["她问能不能提前一周完成","Ask if the work can be finished one week earlier."],["另一位同事也遇到过同样的问题","Mention another teammate had the same sensor issue and can help."],["她让你会后发一封总结邮件","Ask the learner to send a short summary email after the meeting."]],
+  tasks:[["汇报完成的工作","Report what you have finished"],["说遇到的问题","Explain a blocker"],["说下一步计划","Explain your next steps"],["请人帮忙","Ask for help"]],
+  ph:[["This week, I wrapped up the data collection.","这周我完成了数据采集。"],["We've run into an issue with the sensor.","我们在传感器上遇到了问题。"],["Next week, I'm planning to run the tests.","下周我打算做测试。"],["Could I borrow the spare device?","我能借一下那台备用设备吗？"]]},
+ {id:"negotiate",lv:3,ic:"tag",t:"二手自行车砍价",goal:"能谈价格、讲理由，成交或礼貌放弃",place:"公园门口",time:"周日下午",
+  scene:"你在网上看中一辆二手公路车，标价 250 美元。卖家推着车，在公园门口等你。",sceneEn:"Meeting a seller at the entrance of a park on Sunday afternoon to look at a used road bike listed for 250 dollars.",
+  ch:{n:"Jason",g:"m",r:"卖家",rEn:"the seller",v:"友好，但对价格很坚持",vEn:"friendly but firm on price"},
+  you:["你最多想出 200 美元","你注意到车身有划痕，刹车有点松"],youEn:"a buyer who wants to pay at most 200 dollars and noticed scratches and loose brakes",
+  prop:{type:"tag",title:"二手广告",rows:[["Road bike · 54 cm","$250"],["Condition","Used, good"],["Note","Price firm-ish"]]},
+  tw:[["他说已经有人出价 230","Say someone else already offered 230 dollars."],["他不降价，但愿意送一把锁","Refuse to lower the price much but offer to throw in a lock."],["他只收现金","Say you only take cash."]],
+  tasks:[["问车况","Ask about the condition"],["提出更低的价格","Offer a lower price"],["说出理由","Give your reasons"],["成交或放弃","Make a deal or walk away politely"]],
+  ph:[["Is the price negotiable?","价格能商量吗？"],["Would you take 200?","200 卖吗？"],["The brakes feel a little loose.","刹车有点松。"],["Alright, it's a deal.","好，成交。"]]},
+ {id:"story",lv:3,ic:"book",t:"聚餐时讲一段经历",goal:"能有条理地讲完一个完整的故事",place:"朋友家聚餐",time:"周五晚上",
+  scene:"饭吃到一半，大家开始轮流讲自己最难忘的一次经历。轮到你了，Grace 放下叉子看着你。",sceneEn:"A dinner party at a friend's place on Friday night. Everyone is taking turns telling their most memorable experience. It is the learner's turn. Grace is listening.",
+  ch:{n:"Grace",g:"f",r:"朋友",rEn:"a friend at the dinner",v:"很会听，反应特别多",vEn:"a great listener who reacts a lot"},
+  you:["讲一段你最难忘的经历（真实或编的都行）","按时间地点、经过、感受、收获讲"],youEn:"a guest telling a memorable personal story",
+  tw:[["她追问一个细节","Ask a detailed follow-up question about the story."],["她说她也有类似的经历","Briefly share a similar experience of your own."],["她问你如果重来一次会怎么做","Ask what they would do differently if it happened again."]],
+  tasks:[["交代时间和地点","Set the time and place"],["讲发生了什么","Tell what happened"],["讲你的感受","Say how you felt"],["讲你学到了什么","Say what you learned"]],
+  ph:[["A few years ago, when I was in...","几年前我在……的时候"],["All of a sudden,...","突然……"],["I was so nervous.","我当时特别紧张。"],["Looking back, I learned that...","现在回头看，我学到了……"]]},
+ /* 自由练习 */
+ {id:"free",lv:4,ic:"chat",t:"自由聊天",d:"想聊什么都行，也能用中文问“…怎么说”",role:""},
+ {id:"topic",lv:4,ic:"shuffle",t:"随机话题",d:"Sam 随机抛一个有意思的话题",role:"Pick a fun, random everyday topic and start chatting about it with a short opener and a question."},
+ {id:"debate",lv:4,ic:"bolt",t:"辩论模式",d:"Sam 故意站在你的对立面",role:"Pick an interesting debate topic, ask for the learner's opinion, and always argue the opposite side politely so they keep explaining."},
+ {id:"custom",lv:4,ic:"pencil",t:"自定义场景",d:"自己描述一个想练的场景",role:null}
 ];
 const SCENES=SCENE_DATA;
 const SCENE_BY=Object.fromEntries(SCENE_DATA.map(x=>[x.id,x]));
-/* 旧场景编号兼容 */
-SCENE_BY.shop2=SCENE_BY.shop;SCENE_BY.doctor2=SCENE_BY.doctor;
 
 /* ---------- 语法模块 ---------- */
 /* n 中文名 en 英文名 g 分组 use 什么时候用 form 结构 sig 信号词 ex 例句 err 常见错误[错,对,为什么] */
@@ -575,7 +749,7 @@ SAY: <useful English expression> || <中文意思> || <简短中文用法提示�
 
 How to help this learner:
 - Always work out what they are trying to say, even from broken English, mixed Chinese, fillers or speech-recognition mistakes. Never say you don't understand unless it is truly impossible; make your best guess.
-- CORRECT OUT LOUD. This is the most important rule. If the learner's latest message (in English) has any real grammar or word-choice mistake, your REPLY must correct it out loud, every single time, before moving on: after your short reaction, say the corrected sentence and a very short reason, in a friendly way. For example: "Quick tip: we say 'I went to the library yesterday', because it already happened." or "Small fix: it's 'there are so many kinds of food'." Correct only the single most important mistake out loud (the rest go in FIX lines). Never just guess their meaning and continue as if nothing was wrong.${S.cfg.sayFix===false?' (The learner turned off spoken corrections: do NOT correct out loud in REPLY; put corrections only in FIX lines.)':''}
+- CORRECT OUT LOUD. This is the most important rule. If the learner's latest message (in English) has any real grammar or word-choice mistake, your REPLY must correct it out loud, every single time, before moving on: after your short reaction, say the corrected sentence and a very short reason, in a friendly way. For example: "Quick tip: we say 'I went to the library yesterday', because it already happened." or "Small fix: it's 'there are so many kinds of food'." Correct only the single most important mistake out loud (the rest go in FIX lines). Never just guess their meaning and continue as if nothing was wrong. Natural, common American phrasings are NOT mistakes (e.g. "Can I get...", "Yeah", "Gonna"); never "correct" them.${S.cfg.sayFix===false?' (The learner turned off spoken corrections: do NOT correct out loud in REPLY; put corrections only in FIX lines.)':''}
 - If their message was broken or hard to follow, also briefly check your understanding in natural English (e.g. "Oh, you mean you love all kinds of food, like fruit, veggies and beef?"), so they hear the correct way to say it.
 - After correcting, respond to what they said and ask one simple follow-up question.
 - If they get stuck or say they can't explain something, reassure them and tell them they can say that part in Chinese; then teach them the English for it.
@@ -600,25 +774,25 @@ Give up to 6 FIX lines (most important first, only real problems in the learner'
 const SYS_EXPLAIN='你是耐心的美式英语老师。用中文简洁讲解用户给的英语句子：先给整句意思，再讲 2-4 个关键词或短语（意思和用法），最后一句说明口语里的语气或什么时候用。纯文本，不要用 markdown 符号，不要 * 或 #。';
 
 function parseOut(t){
- const o={reply:'',zh:'',mean:'',better:'',step:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
+ const o={reply:'',zh:'',mean:'',better:'',step:'',coach:'',fix:[],say:[],opt:[],summary:'',good:'',next:''};let cur=null;
  for(const raw of t.replace(/\*\*/g,'').split('\n')){
   const line=raw.trim();if(!line)continue;
-  const m=line.match(/^[-•]?\s*(REPLY|ZH|MEAN|BETTER|FIX|SAY|OPT|SUMMARY|GOOD|NEXT|STEP)\s*[:：]\s*(.*)$/i);
+  const m=line.match(/^[-•]?\s*(REPLY|ZH|MEAN|BETTER|FIX|SAY|OPT|SUMMARY|GOOD|NEXT|STEP|COACH)\s*[:：]\s*(.*)$/i);
   if(m){cur=m[1].toUpperCase();const v=m[2];
    if(cur==='FIX'||cur==='SAY'||cur==='OPT')o[cur.toLowerCase()].push(v);else o[cur.toLowerCase()]=v;}
   else if(cur==='FIX'&&/=>/.test(line))o.fix.push(line.replace(/^FIX\s*[:：]\s*/i,''));
   else if((cur==='SAY'||cur==='OPT')&&/\|\|/.test(line))o[cur.toLowerCase()].push(line);
   else if(cur===null||cur==='REPLY')o.reply+=(o.reply?' ':'')+line;
-  else if(['ZH','MEAN','BETTER','SUMMARY','GOOD','NEXT'].includes(cur))o[cur.toLowerCase()]+=line;
+  else if(['ZH','MEAN','BETTER','COACH','SUMMARY','GOOD','NEXT'].includes(cur))o[cur.toLowerCase()]+=line;
  }
  const sp=s=>s.split(/\s*\|\|\s*/).map(x=>x.trim().replace(/^["“]|["”]$/g,''));
  o.fix=o.fix.map(s=>{const [a,rest='']=s.split(/\s*=>\s*/);const [b,why='']=sp(rest);return {from:a.trim().replace(/^["“]|["”]$/g,''),to:b,why}}).filter(f=>f.to);
  o.say=o.say.map(s=>{const [en,zh='',note='']=sp(s);return {en,zh,note}}).filter(s=>s.en&&!/^[<（(]/.test(s.en));
  o.opt=o.opt.map(s=>{const [en,zh='']=sp(s);return {en,zh}}).filter(s=>s.en);
  const tidy=x=>x.replace(/\p{Extended_Pictographic}\uFE0F?/gu,'').replace(/[*_`#]+/g,'').replace(/\s{2,}/g,' ').trim();
- o.reply=tidy(o.reply);o.zh=tidy(o.zh);o.better=tidy(o.better).replace(/^["“]|["”]$/g,'');o.mean=tidy(o.mean);return o;
+ o.reply=tidy(o.reply);o.zh=tidy(o.zh);o.better=tidy(o.better).replace(/^["“]|["”]$/g,'');o.mean=tidy(o.mean);o.coach=tidy(o.coach).replace(/^<.*>$/,'');return o;
 }
-const replyDone=t=>/\n\s*(ZH|MEAN|BETTER|FIX|SAY|STEP)\s*[:：]/i.test(t);
+const replyDone=t=>/\n\s*(ZH|MEAN|BETTER|FIX|SAY|STEP|COACH)\s*[:：]/i.test(t);
 
 /* ---------- 发音 ---------- */
 const AU=new Audio();AU.playsInline=true;
@@ -658,33 +832,33 @@ const BOUND=/[.!?]+["”’')]*(?=\s)/g;
 function sentences(t){t=clean(t);const out=[];let a=0,m;BOUND.lastIndex=0;while((m=BOUND.exec(t))){out.push(t.slice(a,m.index+m[0].length).trim());a=m.index+m[0].length}const rest=t.slice(a).trim();if(rest)out.push(rest);return out.filter(Boolean).flatMap(s=>s.length>500?s.match(/.{1,500}(\s|$)/g):[s])}
 function lastBound(t,from){let m,end=from;BOUND.lastIndex=from;while((m=BOUND.exec(t)))end=m.index+m[0].length;return end}
 /* 一次说话：可以边生成边往里加句子，按顺序播放；每句的合成在加入时就开始 */
-function newSpeech(slow){
+function newSpeech(slow,dv){
  stopSpeak();setSession('playback');
  const tok=speakTok,eng=ttsEngine(),q=[];let ended=false,wake=null;SPEAKING=true;
- const sp={push(t){for(const s of sentences(t)){q.push(makeJob(s,eng,slow,tok))}wake&&wake()},end(){ended=true;wake&&wake()}};
+ const sp={push(t,v){for(const s of sentences(t)){q.push(makeJob(s,eng,slow,tok,v||dv))}wake&&wake()},end(){ended=true;wake&&wake()}};
  sp.done=(async()=>{
   for(;;){
    if(tok!==speakTok)return;
    if(!q.length){if(ended)break;await new Promise(r=>wake=r);wake=null;continue}
    const j=q.shift();
    try{await j.play()}
-   catch(e){if(tok!==speakTok)return;toast(ENG_NAME[eng]+'发音没成功，改用手机声音：'+String(e&&e.message||e).slice(0,40),3500);await speakSys(j.text,slow)}
+   catch(e){if(tok!==speakTok)return;toast(ENG_NAME[eng]+'发音没成功，改用手机声音：'+String(e&&e.message||e).slice(0,40),3500);await speakSys(j.text,slow,j.voice)}
   }
   if(tok===speakTok)SPEAKING=false;
  })();
  return sp;
 }
-function speak(text,slow=false){const sp=newSpeech(slow);sp.push(text);sp.end();return sp.done}
-function makeJob(text,eng,slow,tok){
- if(eng==='system')return {text,play:()=>speakSys(text,slow)};
- if(eng==='ali'&&!slow&&Math.abs(S.cfg.rate-1)<.01&&actx())return aliStreamJob(text,tok);
- const p=synth(text,eng);p.catch(()=>{});
- return {text,play:async()=>{const u=await p;if(tok===speakTok)await playUrl(u,slow)}};
+function speak(text,slow=false,voice){const sp=newSpeech(slow,voice);sp.push(text);sp.end();return sp.done}
+function makeJob(text,eng,slow,tok,voice){
+ if(eng==='system')return {text,voice,play:()=>speakSys(text,slow,voice)};
+ if(eng==='ali'&&!slow&&Math.abs(S.cfg.rate-1)<.01&&actx())return Object.assign(aliStreamJob(text,tok,voice),{voice});
+ const p=synth(text,eng,voice);p.catch(()=>{});
+ return {text,voice,play:async()=>{const u=await p;if(tok===speakTok)await playUrl(u,slow)}};
 }
-function speakSys(text,slow){
+function speakSys(text,slow,voice){
  return new Promise(res=>{
   if(!('speechSynthesis' in window)){toast('此浏览器不支持朗读');return res()}
-  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=pickVoice();if(v)u.voice=v;
+  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=(voice&&voice.sys&&voices.find(x=>voice.sys.test(x.name)))||pickVoice();if(v)u.voice=v;
   u.rate=Math.max(.5,S.cfg.rate*(slow?.7:1));UTT=u;
   const t=setTimeout(done,text.length*150+4000);
   function done(){clearTimeout(t);if(speakEnd===done)speakEnd=null;res()}
@@ -693,12 +867,12 @@ function speakSys(text,slow){
 }
 /* 阿里云流式发音：边收边播，第一块音频到了就开口 */
 const streamCache=new Map();
-function aliStreamJob(text,tok){
- const key=S.cfg.aliVoice+'|'+text;let j=streamCache.get(key);
+function aliStreamJob(text,tok,voice){
+ const vn=(voice&&voice.ali)||S.cfg.aliVoice,key=vn+'|'+text;let j=streamCache.get(key);
  if(!j||j.err){
   j={text,bufs:[],done:false,err:null,ls:[]};const J=j;
   const note=()=>J.ls.splice(0).forEach(f=>f());
-  (async()=>{try{for await(const b of aliStream(text))(J.bufs.push(b),note())}catch(e){J.err=e}J.done=true;note()})();
+  (async()=>{try{for await(const b of aliStream(text,vn))(J.bufs.push(b),note())}catch(e){J.err=e}J.done=true;note()})();
   streamCache.set(key,j);if(streamCache.size>120)streamCache.delete(streamCache.keys().next().value);
  }
  const J=j;
@@ -713,8 +887,8 @@ function aliStreamJob(text,tok){
   if(tok===speakTok)await playedOut();
  }};
 }
-async function* aliStream(text){
- const r=await fetchR(aliRoot()+'/api/v1/services/aigc/multimodal-generation/generation',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+aliKey(),'X-DashScope-SSE':'enable'},body:JSON.stringify({model:'qwen3-tts-flash',input:{text,voice:S.cfg.aliVoice,language_type:'English'}})});
+async function* aliStream(text,vn){
+ const r=await fetchR(aliRoot()+'/api/v1/services/aigc/multimodal-generation/generation',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+aliKey(),'X-DashScope-SSE':'enable'},body:JSON.stringify({model:'qwen3-tts-flash',input:{text,voice:vn||S.cfg.aliVoice,language_type:'English'}})});
  if(!r.ok)throw await apiErr(r);
  const rd=r.body.getReader(),dec=new TextDecoder(),ac=actx();let buf='',rate=24000,odd=null;
  for(;;){
@@ -739,8 +913,8 @@ async function* aliStream(text){
 }
 /* 非流式：慢速播放、OpenAI 用（音频元素可变速不变调） */
 const ttsCache=new Map();
-function synth(text,eng){
- const voice=eng==='ali'?S.cfg.aliVoice:S.cfg.oaiVoice,k=eng+'|'+voice+'|'+text;
+function synth(text,eng,vo){
+ const voice=eng==='ali'?((vo&&vo.ali)||S.cfg.aliVoice):((vo&&vo.oai)||S.cfg.oaiVoice),k=eng+'|'+voice+'|'+text;
  if(ttsCache.has(k))return ttsCache.get(k);
  const p=eng==='ali'?synthAli(text,voice):synthOAI(text,voice);
  ttsCache.set(k,p);p.catch(()=>ttsCache.delete(k));return p;
@@ -909,27 +1083,36 @@ async function runAI(s,hiddenUser){
  if(hiddenUser)s.msgs.push({role:'user',text:hiddenUser,hidden:true});
  const m={role:'ai',text:'',t:Date.now(),live:true};s.msgs.push(m);renderChat(true);
  const hist=s.msgs.filter(x=>x!==m&&x.role!=='err'&&x.role!=='note').slice(-24).map(x=>({role:x.role==='ai'?'assistant':'user',content:x.text}));
- const SYS=sysPrompt(s),needStep=/Also output this line: STEP/.test(SYS),zeroLv=/pre-A1/.test(SYS);
- if(hist.length&&hist[hist.length-1].role==='user')hist[hist.length-1]={role:'user',content:hist[hist.length-1].content+'\n\n(Answer in the REPLY / ZH / MEAN / BETTER / FIX / SAY'+(needStep?' / STEP':'')+' line format.'+(needStep?' Always include the STEP line, also on your last turn.':'')+(zeroLv?' End REPLY with You can say: "...".':'')+' No emojis or markdown.)'};
+ const SYS=sysPrompt(s),needStep=/STEP: </.test(SYS)||/Also output this line: STEP/.test(SYS),lesson=isLesson(s),zeroLv=lesson&&SCENE_BY[s.scene].lv===0;
+ const tags=['REPLY','ZH','MEAN','BETTER','FIX'].concat(lesson?['COACH']:[],['SAY'],needStep?['STEP']:[]);
+ if(hist.length&&hist[hist.length-1].role==='user')hist[hist.length-1]={role:'user',content:hist[hist.length-1].content+'\n\n(Answer in the '+tags.join(' / ')+' line format.'+(needStep?' Always include the STEP line, also on your last turn.':'')+(lesson?' Stay in character in REPLY.':'')+(zeroLv?' Always include COACH with You can say: "...".':'')+' No emojis or markdown.)'};
+ const vp=sceneVoices(s);
  let raw='',sp=null,fed=0,fin=false;const want=S.cfg.autoplay||CALL;callState('think');
  /* 回复一写完一句就交给发音，不等整段 */
  const feed=(reply,final)=>{
   if(!want||fin||!reply)return;
   const cut=final?reply.length:lastBound(reply,fed);
-  if(cut>fed){if(!sp){sp=newSpeech(false);if(CALL)callState('speak')}sp.push(reply.slice(fed,cut));fed=cut}
-  if(final){fin=true;if(sp)sp.end()}
+  if(cut>fed){if(!sp){sp=newSpeech(false,vp.main);if(CALL)callState('speak')}sp.push(reply.slice(fed,cut));fed=cut}
+  if(final)fin=true;
  };
  try{
   for await(const c of streamAI(SYS,hist,ctrl.signal)){
    raw+=c;const o=parseOut(raw);m.text=o.reply;updLive(m);feed(o.reply,replyDone(raw));
   }
   const o=parseOut(raw);
-  Object.assign(m,{text:o.reply||raw.trim(),zh:o.zh,say:o.say});delete m.live;
+  /* 说话识别出来的文字没有标点：只差标点、大小写、连字符的“纠错”直接丢掉；没有真错误时教练不出声 */
+  {const nz=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,''),lu=[...s.msgs].reverse().find(x=>x.role==='user'&&!x.hidden);
+   o.fix=o.fix.filter(f=>nz(f.from)!==nz(f.to));
+   if(o.better&&lu&&nz(o.better)===nz(lu.text))o.better='';
+   if(lesson&&!zeroLv&&!o.fix.length&&!o.better)o.coach='';}
+  Object.assign(m,{text:o.reply||raw.trim(),zh:o.zh,say:o.say});if(o.coach)m.coach=o.coach;delete m.live;
   {const u=[...s.msgs].reverse().find(x=>x.role==='user'&&!x.hidden&&x!==m);
    if(u&&!u.hidden&&s.msgs.indexOf(u)===s.msgs.indexOf(m)-1){if(o.fix.length)u.fix=o.fix;if(o.mean)u.mean=o.mean;if(o.better&&o.better.toLowerCase()!==u.text.trim().toLowerCase()&&!hasZh(o.better))u.better=o.better}}
   if(o.step)handleStep(s,o.step);
   save();busy=false;renderChat(true);
   feed(m.text,true);
+  if(want&&m.coach&&(zeroLv||S.cfg.sayFix!==false)){if(!sp)sp=newSpeech(false,vp.main);sp.push(m.coach,vp.coach)}
+  if(sp)sp.end();
   if(CALL){callCap(m);if(sp)await sp.done;if(!CALL)return;if(S.cfg.autoListen)callNext();else{const n=lkOn()?lkList(m.text).length:0;callState('idle',n?`这句有 ${n} 处连读（橙色），点“连读”跟读；想回答时点圆圈`:'轮到你了：可以先跟读，想回答时点圆圈')}}
  }catch(e){
   busy=false;s.msgs.splice(s.msgs.indexOf(m),1);
@@ -962,16 +1145,20 @@ function renderChat(scroll){
    <div class="btns"><button class="btn" data-a="toset">去填密钥</button></div></div>`)+`<div class="empty"><h2>Hi, I'm Sam 👋</h2><div><b>点一下麦克风</b>开口说，说完<b>再点一下</b>发送，中间想多久都行。<br>用英语聊天，或者用中文问“…用英语怎么说”。</div>
   <div class="chips">${['“我现在在桌子前用电脑呢”用英语怎么说？','Can we just chat for a bit?','“我有点社恐”地道的说法是什么？','帮我练一下点咖啡','How do Americans say “加油”?'].map(t=>`<button class="chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}</div>
   <div class="chips"><button class="chip" data-a="call" style="border-color:var(--pri);color:var(--pri);font-weight:600">📞 给 Sam 打电话，像真打电话一样聊</button></div></div>`;
- }else el.innerHTML=s.msgs.map((m,i)=>{
+ }else{const lessonS=isLesson(s)?SCENE_BY[s.scene]:null;el.innerHTML=s.msgs.map((m,i)=>{
   if(m.hidden)return '';
+  if(m.role==='note'&&m.kind==='scene')return `<div class="stage"><span class="tag">场景</span>${esc(m.text)}</div>`;
+  if(m.role==='note'&&m.kind==='done'&&m.stars)return debriefHTML(m,s);
   if(m.role==='user')return `<div class="msg me" data-i="${i}"><div class="bub">${esc(m.text)}</div>${m.mean||m.better?`<div class="card fix">${m.mean?`<div class="why" style="font-size:13.5px">Sam 理解的：${esc(m.mean)}</div>`:''}${m.better?`<div class="say" data-en="${esc(m.better)}" data-zh="${esc(m.mean||'')}" style="margin-top:4px"><div class="t"><span style="color:var(--sub);font-size:12.5px;display:block">完整地道说法</span><b style="color:var(--ok)">${esc(m.better)}</b></div><button class="ib" data-a="p">${I.play}</button><button class="ib" data-a="sh">${I.mic}</button><button class="ib ${inBook(m.better)?'on':''}" data-a="fav">${I.star}</button></div>`:''}</div>`:''}${(m.fix||[]).map(f=>`<div class="card fix"><button class="ib" data-a="pf" data-en="${esc(f.to)}" style="width:28px;height:28px">${I.play}</button><span class="from">${esc(f.from)}</span><br>更地道：<span class="to">${esc(f.to)}</span>${f.why?`<div class="why">${esc(f.why)}</div>`:''}</div>`).join('')}</div>`;
   if(m.role==='note')return `<div class="note-msg">${esc(m.text)}${m.kind==='call'?'<button data-a="review">复盘这次通话</button>':''}${m.kind==='done'?'<button data-a="review">复盘</button><button data-a="nextscene">下一课</button>':''}${m.kind==='gdone'?'<button data-a="review">复盘</button><button data-a="gagain">再来一轮</button>':''}${m.kind==='vdone'?'<button data-a="review">复盘</button><button data-a="vagain">再来一轮</button>':''}</div>`;
   if(m.role==='err')return `<div class="msg ai"><div class="bub err">${esc(m.text)}<div class="tools"><button data-a="retry">重试</button><button data-a="toset">去设置</button></div></div></div>`;
-  return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}><div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${m.live?esc(m.text):richText(m.text)}</div>
+  return `<div class="msg ai" data-i="${i}" ${m.live?'data-live':''}>${lessonS?`<div class="who">${esc(lessonS.ch.n)} · ${esc(lessonS.ch.r)}</div>`:''}<div class="bub"><div class="en ${S.cfg.blurEn&&!m.shown&&!m.live?'blur':''}" data-a="reveal">${m.live?esc(m.text):richText(m.text)}</div>
    ${m.zh?`<div class="zh" ${zhShown(m)?'':'hidden'}>${esc(m.zh)}</div>`:''}
    ${m.live?'':`<div class="tools"><button data-a="play">${I.play}播放</button><button data-a="slow">${I.slow}慢速</button><button data-a="zh" class="${zhShown(m)&&m.zh?'act':''}">中文</button><button data-a="ex">讲解</button><button data-a="sh">跟读</button>${lkOn()&&lkList(m.text).length?`<button data-a="lkall" class="lkbtn">连读 ${lkList(m.text).length}</button>`:''}<button data-a="favm" class="${inBook(m.text)?'act':''}">收藏</button></div>`}</div>
+   ${m.coach&&!m.live?`<div class="card coach" data-coach="${esc(m.coach)}"><span class="tag">教练</span><div class="en">${richText(m.coach,false)}</div><button class="ib" data-a="pcoach">${I.play}</button></div>`:''}
    ${(m.say||[]).map(x=>sayCard(x)).join('')}</div>`;
  }).join('');
+ if(lessonS){el.innerHTML=sceneBar(s)+el.innerHTML;const st=el.querySelector('.stasks'),cu=el.querySelector('.stk.cur')||[...el.querySelectorAll('.stk.ok')].pop();if(st&&cu)st.scrollLeft=Math.max(0,cu.offsetLeft-st.offsetLeft-40)}}
  renderBar2();if(!vis.length&&!busy)$('#main').scrollTop=0;else if(scroll)scrollEnd();
 }
 function renderBar2(){
@@ -983,7 +1170,7 @@ function renderBar2(){
 function renderHeader(v){
  const h=$('#hbtns');
  const cs=curSess();
- if(v==='chatv')h.innerHTML=`${cs&&cs.step?`<span class="hb" style="background:${cs.passed?'var(--ok)':'var(--pri2)'};color:${cs.passed?'#fff':'var(--pri)'}">${cs.scene.startsWith('g:')?'已答':cs.scene.startsWith('v:')?'用对':'任务'} ${cs.step[0]}/${cs.step[1]}</span> `:''}${cs&&(cs.scene||'free').match(/^(free|daily|topic|debate|custom)$/)||!cs?`<button class="hb" data-a="level">${LEVELS[S.cfg.level].n}</button> `:''}<button class="hb" data-a="new">新对话</button>`;
+ if(v==='chatv')h.innerHTML=`${cs&&cs.step&&!isLesson(cs)?`<span class="hb" style="background:${cs.passed?'var(--ok)':'var(--pri2)'};color:${cs.passed?'#fff':'var(--pri)'}">${cs.scene.startsWith('g:')?'已答':cs.scene.startsWith('v:')?'用对':'任务'} ${cs.step[0]}/${cs.step[1]}</span> `:''}${cs&&(cs.scene||'free').match(/^(free|daily|topic|debate|custom)$/)||!cs?`<button class="hb" data-a="level">${LEVELS[S.cfg.level].n}</button> `:''}<button class="hb" data-a="new">新对话</button>`;
  else if(v==='gramv'&&gramCur)h.innerHTML='<button class="hb" data-a="gback">返回</button>';
  else if((v==='vocv'&&vocCur)||(v==='lkv'&&lkCur)||v==='bookv')h.innerHTML=`<button class="hb" data-a="back" data-v="${v}">返回</button>`;
  else h.innerHTML='';
@@ -1069,11 +1256,12 @@ async function streamSheet(title,sys,user,render){
 }
 const transcript=s=>s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').map(m=>(m.role==='ai'?'Sam: ':'Learner: ')+m.text).join('\n');
 
+function hintCtx(s){if(!isLesson(s))return '';const sc=SCENE_BY[s.scene],n=s.step?s.step[0]:0,t=sc.tasks[Math.min(n,sc.tasks.length-1)];return `Situation: ${sc.sceneEn} The other person is ${sc.ch.n}, ${sc.ch.rEn}. The learner plays: ${sc.youEn}. The learner's current task: ${t[1]}. Suggestions must fit this situation and help with this task.\n`}
 function openHint(){
  const s=curSess();if(!s)return;
- if(CALL){callCap(null,'想几种说法…');askAI(SYS_HINT,'Conversation so far:\n'+transcript(s).slice(-3000)).then(t=>{const o=parseOut(t);callCap(null,o.opt.length?o.opt:t)}).catch(e=>callCap(null,e.message));return}
+ if(CALL){callCap(null,'想几种说法…');askAI(SYS_HINT,hintCtx(s)+'Conversation so far:\n'+transcript(s).slice(-3000)).then(t=>{const o=parseOut(t);callCap(null,o.opt.length?o.opt:t)}).catch(e=>callCap(null,e.message));return}
  sheet(sheetHead('可以这样接')+`<div class="pre" id="sp">想几种说法…</div>`);sheet.ctrl=new AbortController();
- askAI(SYS_HINT,'Conversation so far:\n'+transcript(s).slice(-3000),null,sheet.ctrl.signal).then(t=>{
+ askAI(SYS_HINT,hintCtx(s)+'Conversation so far:\n'+transcript(s).slice(-3000),null,sheet.ctrl.signal).then(t=>{
   const o=parseOut(t);if(!$('#sp'))return;
   $('#sp').outerHTML=(o.opt.length?o.opt:[{en:t,zh:''}]).map(x=>sayCard(x)).join('')+`<div class="note">点 ▶ 听一遍，点 🎤 跟着说；也可以直接回到对话自己说。</div>`;
  }).catch(e=>{if(e.name!=='AbortError'&&$('#sp'))$('#sp').textContent=e.message});
@@ -1176,8 +1364,8 @@ function callCap(m,opts){
  const i=s.msgs.indexOf(m),u=[...s.msgs.slice(0,i)].reverse().find(x=>x.role==='user'&&!x.hidden);
  const fix=u&&u.fix&&u.fix[0];
  el.classList.toggle('hidecap',!capOn);
- const tip=u&&u.better?u.better:fix&&fix.to;
- el.innerHTML=`<div class="en">${richText(m.text)}</div>${zhShown(m)&&m.zh?`<small>${esc(m.zh)}</small>`:''}${tip?`<div class="tip">更地道：${esc(tip)}</div>`:''}`;
+ const tip=m.coach||(u&&u.better?'更地道：'+u.better:fix&&fix.to?'更地道：'+fix.to:'');
+ el.innerHTML=`<div class="en">${richText(m.text)}</div>${zhShown(m)&&m.zh?`<small>${esc(m.zh)}</small>`:''}${tip?`<div class="tip">${m.coach?'教练：':''}${esc(tip)}</div>`:''}`;
  $('#czh').classList.toggle('on',!!(zhShown(m)&&m.zh));
 }
 function tickCall(){const t=Math.floor((Date.now()-callT0)/1000);$('#ctime').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
@@ -1192,7 +1380,7 @@ async function enterCall(){
  if(REC)REC.abort();stopSpeak();
  CALL=true;callT0=Date.now();callTurns=0;callMiss=0;capOn=!S.cfg.blurEn;
  $('#ccapbtn').classList.toggle('on',capOn);
- $('#call').classList.add('on');$('#cscene').textContent=sessTitle(s);updLangBtn();
+ $('#call').classList.add('on');{const sc=isLesson(s)?SCENE_BY[s.scene]:null;$('#cwho').textContent=sc?sc.ch.n:'Sam';$('#cscene').textContent=sc?sc.place:sessTitle(s)}updLangBtn();
  $('#cme').textContent='';callCap();tickCall();callTimer=setInterval(tickCall,1000);levelLoop();keepAwake();
  callState('wait');go('chatv');
  const last=s.msgs.filter(m=>!m.hidden&&m.role!=='err'&&m.role!=='note').slice(-1)[0];
@@ -1234,7 +1422,7 @@ $('#call .tools2').onclick=e=>{
   return ensureZh(m).then(()=>{m.zhOn=true;save();callCap()},err=>{const z=$('#ztmp');if(z)z.textContent=err.message})}
  if(!m)return;
  if(REC)REC.abort();
- callState('speak');speak(m.text,c==='slow').then(()=>{if(CALL&&!busy&&!REC&&!LISTENING)callState('idle','想回答时点圆圈')});
+ callState('speak');speak(m.text,c==='slow',sceneVoices(curSess()).main).then(()=>{if(CALL&&!busy&&!REC&&!LISTENING)callState('idle','想回答时点圆圈')});
 };
 document.addEventListener('visibilitychange',()=>{if(CALL&&!document.hidden){keepAwake();if(!REC&&!LISTENING&&!busy&&!SPEAKING)callState('idle','点圆圈继续说')}});
 
@@ -1316,24 +1504,6 @@ setInterval(()=>{
 /* ---------- 场景：分级、预习、任务进度 ---------- */
 const sceneDone=id=>!!(S.done&&S.done[id]);
 function nextScene(){return SCENE_DATA.find(x=>x.lv<4&&!sceneDone(x.id))||SCENE_DATA.find(x=>x.lv===4)}
-function renderScenes(){
- const nx=nextScene();
- $('#scenev').innerHTML=`<button class="card" data-a="sintro" data-id="${nx.id}" style="width:100%;text-align:left;border-color:var(--pri);margin-top:2px"><div class="note" style="margin:0">下一课 · ${SCENE_LV[nx.lv].n}</div><div style="font-size:18px;font-weight:700;margin-top:2px">${esc(nx.t)}</div><div class="note" style="margin:2px 0 0">${esc(nx.goal||nx.d)}</div></button>
- ${SCENE_LV.map((lv,k)=>{const list=SCENE_DATA.filter(x=>x.lv===k),done=list.filter(x=>sceneDone(x.id)).length;
-  return `<div class="sec lvh"><b>${k<4?(k+1)+'. ':''}${lv.n}</b><span>${lv.d}</span>${k<4?`<em>${done}/${list.length}</em>`:''}</div><div class="grid">${list.map(x=>`<button class="scene${sceneDone(x.id)?' done':''}${x===nx?' nx':''}" data-a="sintro" data-id="${x.id}"><b>${esc(x.t)}${sceneDone(x.id)?' ✓':''}</b><span>${esc(x.d)}</span></button>`).join('')}</div>`}).join('')}`;
-}
-function sceneIntro(id){
- const sc=SCENE_BY[id];if(!sc)return;
- if(id==='custom'){
-  sheet(sheetHead('自定义场景')+`<textarea id="cust" rows="4" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card)" placeholder="例如：我在美国租房，和房东沟通热水器坏了要修"></textarea><div class="btns"><button class="btn" data-a="custgo">开始练习</button><button class="btn g" data-a="custcall">📞 打电话练</button></div>`);
-  setTimeout(()=>$('#cust')&&$('#cust').focus(),300);return;
- }
- sheet(sheetHead(esc(sc.t))+`<div class="note" style="margin-top:-4px">${SCENE_LV[sc.lv].n} · ${esc(sc.d)}${sceneDone(id)?' · 已完成 ✓':''}</div>
-  ${sc.goal?`<div class="card"><b>这一课学会</b><div style="margin-top:4px">${esc(sc.goal)}</div></div>`:''}
-  ${sc.tasks?`<div class="card"><b>任务（Sam 会一步步带你完成）</b><ol style="margin:6px 0 0;padding-left:20px;line-height:1.8">${sc.tasks.map(x=>`<li>${esc(x[0])}</li>`).join('')}</ol></div>`:''}
-  ${sc.ph?`<div class="sec">先预习这几句，点 ▶ 听，点 🎤 跟读</div>${sc.ph.map(([en,zh])=>sayCard({en,zh})).join('')}`:''}
-  <div class="btns"><button class="btn" data-a="sgo" data-id="${id}">开始练习</button><button class="btn g" data-a="scall" data-id="${id}">📞 打电话练</button></div>`);
-}
 function openerFor(s,call){
  const id=s.scene||'free';
  if(id.startsWith('g:'))return '(Start the grammar practice: greet me in one short sentence, then ask your first question.)';
@@ -1346,7 +1516,9 @@ function openerFor(s,call){
  return call?'(We are now on a phone call. Answer like picking up the phone: greet me casually and ask what I want to talk about. Keep it short.)':'(Greet me casually and ask what I want to talk about. Keep it short.)';
 }
 function startLesson(id,call,custom){
- closeSheet();const s=newSession(id,custom||'');go('chatv');
+ closeSheet();const s=newSession(id,custom||''),sc=SCENE_BY[id];
+ if(sc&&sc.tasks){S.tw=S.tw||{};const k=((S.tw[id]!=null?S.tw[id]:-1)+1)%sc.tw.length;S.tw[id]=k;s.twist=k;s.msgs.push({role:'note',kind:'scene',text:sc.scene,t:Date.now()});save()}
+ go('chatv');
  if(call){freshAudio();enterCall()}else runAI(s,openerFor(s,false));
 }
 function handleStep(s,step){
@@ -1355,8 +1527,13 @@ function handleStep(s,step){
  if(n>=t&&!s.passed){
   s.passed=true;
   const kind=s.scene.startsWith('g:')?'gdone':s.scene.startsWith('v:')?'vdone':'done';
-  if(kind==='done'){S.done=S.done||{};S.done[s.scene]=Date.now()}
-  s.msgs.push({role:'note',kind,text:kind==='done'?'这个场景完成了！你做到了。':kind==='gdone'?'这一轮语法对话完成了！':'这一轮词汇对话完成了！',t:Date.now()});
+  if(kind==='done'){
+   S.done=S.done||{};S.done[s.scene]=Date.now();
+   const sc=SCENE_BY[s.scene],us=s.msgs.filter(x=>x.role==='user'&&!x.hidden),mist=us.filter(x=>x.fix&&x.fix.length).length,stars=mist<=1?3:mist<=3?2:1;
+   if(sc&&sc.tasks){S.sstars=S.sstars||{};S.sstars[s.scene]=Math.max(S.sstars[s.scene]||0,stars);
+    s.msgs.push({role:'note',kind,stars,turns:us.length,mist,tw:sc.tw?sc.tw[(s.twist|0)%sc.tw.length][0]:'',text:'通关：'+sc.t,t:Date.now()})}
+   else s.msgs.push({role:'note',kind,text:'这个场景完成了！你做到了。',t:Date.now()});
+  }else s.msgs.push({role:'note',kind,text:kind==='gdone'?'这一轮语法对话完成了！':'这一轮词汇对话完成了！',t:Date.now()});
   toast(kind==='done'?'场景完成 ✓':'这一轮完成了！');
  }
  save();if($('#chatv').classList.contains('on'))renderHeader('chatv');
@@ -1378,6 +1555,7 @@ RULES FOR THIS PRACTICE: Set up one realistic everyday situation where these wor
 Also output this line: STEP: <number of different category words the learner has used correctly so far>/8`);
  }
  const sc=SCENE_BY[id]||SCENE_BY.free;
+ if(sc.tasks)return scenePrompt(sess,sc);
  const levelP=sc.lv===4||!SCENE_LV[sc.lv].p?LEVELS[S.cfg.level].p:SCENE_LV[sc.lv].p;
  let scene=id==='custom'?'Role-play this situation the learner described (in Chinese or English): '+sess.custom+'. Stay in character and stay inside this situation.':(sc.role||'');
  if(sc.tasks)scene+=`\n\nThis is a structured lesson: "${sc.t}". The learner's tasks, in order:\n${sc.tasks.map((x,i)=>(i+1)+') '+x[1]).join('\n')}
@@ -1737,6 +1915,92 @@ function vocChat(id,call){
  go('chatv');if(call){freshAudio();enterCall()}else runAI(s,openerFor(s,false));
 }
 
+/* ---------- 剧本场景：提示词、声音、界面 ---------- */
+const isLesson=s=>!!(s&&SCENE_BY[s.scene]&&SCENE_BY[s.scene].tasks);
+const VOICE_SET={f:{ali:'Jennifer',oai:'marin',g:'f',sys:/Ava|Samantha|Allison|Susan|Zoe|Joelle|Nicky|Shelley|Victoria/},m:{ali:'Aiden',oai:'cedar',g:'m',sys:/Evan|Alex|Tom|Nathan|Aaron|Fred|Daniel|Reed|Ralph/}};
+function sceneVoices(s){
+ if(!isLesson(s))return {main:null,coach:null};
+ const g=SCENE_BY[s.scene].ch.g;return {main:VOICE_SET[g],coach:VOICE_SET[g==='f'?'m':'f']};
+}
+const PROP_NAME={menu:'菜单',tag:'价签',receipt:'小票',ticket:'订单',note:'信息'};
+function propHTML(p){return `<div class="prop prop-${p.type}"><div class="prop-h">${esc(p.title)}</div>${p.rows.map(r=>`<div class="prop-r"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('')}${p.note?`<div class="prop-n">${esc(p.note)}</div>`:''}</div>`}
+function scenePrompt(sess,sc){
+ const lv=SCENE_LV[sc.lv],tw=sc.tw&&sc.tw[(sess.twist|0)%sc.tw.length],zero=sc.lv===0,fixOn=S.cfg.sayFix!==false;
+ const facts=sc.prop?`${sc.prop.title}: ${sc.prop.rows.map(r=>r[0]+' '+r[1]).join('; ')}${sc.prop.note?'. '+sc.prop.note:''}`:'';
+ const coachRule=zero?'ALWAYS include this line: a short whisper from a coach standing next to the learner, giving a ready-made answer for their next line, in the form: You can say: "...". Keep it under 8 words and use ___ for personal facts like names.'
+  :fixOn?'Include this line ONLY when the learner\'s latest message had a real grammar or word-choice mistake, or when they seem stuck: one short, friendly tip in simple English from a coach standing next to them, e.g. Quick tip: say "a large latte", not "large latte". If there was no real mistake, leave the COACH line out completely: no praise, no "good job", no alternative phrasings.'
+  :'Include this line only when the learner seems stuck: one short hint in simple English from a coach standing next to them. Otherwise leave the line out.';
+ return `This is an immersive English role-play for an adult learner whose spoken English is still limited. ${lv.p}
+YOU PLAY: ${sc.ch.n}, ${sc.ch.rEn}. Personality: ${sc.ch.vEn}. Stay completely in character the whole time. Talk exactly like a real ${sc.ch.rEn} in the US would: natural, everyday spoken American English with the little reactions and small talk real people use, but keep each turn short (1-3 sentences) and easy enough for this learner.
+SETTING: ${sc.sceneEn}
+${facts?'FACTS (stay consistent with them and use the real prices and details): '+facts+'\n':''}THE LEARNER PLAYS: ${sc.youEn}.
+${tw?(sc.twNow?'TODAY\'S TOPIC (use it from your first line): ':'TODAY\'S TWIST (bring it up naturally at a good moment, not in your first line): ')+tw[1]+'\n':''}TASKS the learner must complete, in order:
+${sc.tasks.map((x,i)=>(i+1)+') '+x[1]).join('\n')}
+HOW TO RUN THE SCENE:
+- Lead the interaction the way the real ${sc.ch.rEn} would, so the learner naturally does each task in order. React to what they actually say, like a real person.
+- Inside REPLY never mention tasks, lessons, practice, grammar or English, and never say you are an AI or a teacher.
+- If the learner goes off-topic, react briefly the way a real person would and steer back to the situation.
+- If the learner makes a language mistake, do NOT break character in REPLY. You may naturally echo the correct form, the way people do ("A medium? Sure thing."). The teaching goes in the COACH and FIX lines.
+- When every task is done, wrap up naturally the way the real person would (for example "Here you go. Have a great day!").
+
+Every response MUST use exactly this plain-text format, one item per line, nothing else:
+REPLY: <what ${sc.ch.n} says out loud>
+ZH: <natural Chinese translation of REPLY>
+MEAN: <用一句中文、以“你想说”开头，写出你理解的对方这句话的意思>
+BETTER: <the learner's whole latest message, said the way a native speaker would say it in this situation; leave out if it was already natural or written in Chinese>
+FIX: <the learner's wrong or unnatural words> => <the natural way> || <一句简短的中文说明>   (0-3 lines, real mistakes only; ignore punctuation, fillers and speech-recognition noise; never correct Chinese)
+   IMPORTANT: missing information or a task the learner has not done yet is NOT a language mistake. Common, natural American phrasings are NOT mistakes and must never be "corrected" in FIX or COACH (for example "Can I get...", "I'll have...", "Yeah", "Two, please", "Just the two of us" are all perfectly natural).
+COACH: <${coachRule}>
+SAY: <a useful expression for this situation> || <中文意思> || <简短中文用法提示，可省略>   (0-2 lines)
+STEP: <number of tasks the learner has completed so far>/${sc.tasks.length}
+REPLY is read aloud: plain words only, no emojis, asterisks, brackets or stage directions.`;
+}
+const starsOf=id=>{const n=(S.sstars||{})[id];return n?'★'.repeat(n)+'☆'.repeat(3-n):sceneDone(id)?'✓':''};
+function renderScenes(){
+ const nx=nextScene();
+ const going=S.sessions.find(x=>isLesson(x)&&!x.passed&&x.msgs.some(m=>m.role==='user'&&!m.hidden));
+ let h='';
+ if(going){const sc=SCENE_BY[going.scene];h+=`<button class="srow cont" data-a="sresume" data-sid="${going.id}">${sicon(sc.ic,SCENE_LV[sc.lv].c)}<div class="t"><small>接着上次</small><b>${esc(sc.t)}</b><small>已完成 ${going.step?going.step[0]:0}/${sc.tasks.length} 项 · ${esc(sc.ch.n)}在等你</small></div><span class="hb">继续</span></button>`}
+ if(nx&&nx.tasks){const lv=SCENE_LV[nx.lv];h+=`<button class="shero" data-a="sintro" data-id="${nx.id}" style="--c:${lv.c}">${sicon(nx.ic,'rgba(255,255,255,.22)')}<div class="t"><div class="shero-lv">下一课 · ${esc(lv.ch)}</div><div class="shero-t">${esc(nx.t)}</div><div class="shero-p">${esc(nx.place)} · ${esc(nx.time)}</div><div class="shero-p">对方：${esc(nx.ch.n)}，${esc(nx.ch.r)}</div></div></button>`}
+ SCENE_LV.forEach((lv,k)=>{
+  const list=SCENE_DATA.filter(x=>x.lv===k),done=list.filter(x=>sceneDone(x.id)).length;
+  h+=`<div class="chap"><div class="chap-h"><b>${esc(lv.ch)}</b>${k<4?`<em style="color:${lv.c}">${done}/${list.length}</em>`:''}</div><div class="note" style="margin:2px 0 6px">${esc(lv.d)}</div>${k<4?`<div class="bar"><i style="width:${Math.round(100*done/list.length)}%;background:${lv.c}"></i></div>`:''}</div>`;
+  h+=list.map(x=>x.tasks?`<button class="srow${x===nx?' nx':''}" data-a="sintro" data-id="${x.id}" style="--c:${lv.c}">${sicon(x.ic,lv.c)}<div class="t"><b>${esc(x.t)}</b><small>${esc(x.place)} · ${esc(x.time)}</small><small>对方：${esc(x.ch.n)} · ${esc(x.ch.r)}</small></div><span class="sst">${starsOf(x.id)}</span></button>`
+   :`<button class="srow" data-a="sintro" data-id="${x.id}">${sicon(x.ic,lv.c)}<div class="t"><b>${esc(x.t)}</b><small>${esc(x.d)}</small></div></button>`).join('');
+ });
+ $('#scenev').innerHTML=h;
+}
+function sceneIntro(id,ro){
+ const sc=SCENE_BY[id];if(!sc)return;
+ if(id==='custom'){
+  sheet(sheetHead('自定义场景')+`<textarea id="cust" rows="4" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card)" placeholder="例如：我在美国租房，和房东沟通热水器坏了要修"></textarea><div class="btns"><button class="btn" data-a="custgo">开始练习</button><button class="btn g" data-a="custcall">📞 电话模式</button></div>`);
+  setTimeout(()=>$('#cust')&&$('#cust').focus(),300);return;
+ }
+ const lv=SCENE_LV[sc.lv];
+ if(!sc.tasks){sheet(sheetHead(esc(sc.t))+`<div class="note">${esc(sc.d)}</div><div class="btns"><button class="btn" data-a="sgo" data-id="${id}">开始</button><button class="btn g" data-a="scall" data-id="${id}">📞 电话模式</button></div>`);return}
+ const av=sc.ch.n.replace(/^(Dr\.|Prof\.)\s*/,'')[0];
+ sheet(sheetHead(esc(sc.t))+`<div class="shero" style="--c:${lv.c};margin-top:0">${sicon(sc.ic,'rgba(255,255,255,.22)')}<div class="t"><div class="shero-lv">${esc(lv.ch)}${starsOf(id)?' · '+starsOf(id):''}</div><div class="shero-p" style="font-size:15px">${esc(sc.place)}</div><div class="shero-p">${esc(sc.time)}</div></div></div>
+  <div class="stage"><span class="tag">场景</span>${esc(sc.scene)}</div>
+  <div class="card whoc"><span class="av" style="background:${lv.c}">${esc(av)}</span><div class="t"><b>${esc(sc.ch.n)}</b> · ${esc(sc.ch.r)}<small>${esc(sc.ch.v)}</small></div><span class="tag">${sc.ch.g==='f'?'女声':'男声'}</span></div>
+  <div class="card"><b>你的角色卡</b><ul class="rl">${sc.you.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+  ${sc.prop?propHTML(sc.prop):''}
+  <div class="card"><b>要办成的事</b><ol class="rl">${sc.tasks.map(x=>`<li>${esc(x[0])}</li>`).join('')}</ol><div class="note" style="margin:6px 0 0">每次都会遇到一个随机的小状况，见机行事。${sc.lv===0?'教练会在旁边悄悄告诉你每一句可以怎么说。':'说错时，教练会在旁边小声提醒你。'}</div></div>
+  <div class="sec">先预习这几句（点 ▶ 听，点 🎤 跟读）</div>${sc.ph.map(([en,zh])=>sayCard({en,zh})).join('')}
+  ${ro?'<button class="btn g" data-a="close">回到对话</button>':`<div class="btns"><button class="btn" data-a="sgo" data-id="${id}">开始</button><button class="btn g" data-a="scall" data-id="${id}">📞 电话模式</button></div>`}`);
+}
+function sceneBar(s){
+ const sc=SCENE_BY[s.scene],lv=SCENE_LV[sc.lv],n=s.step?s.step[0]:0;
+ return `<div class="sstick"><div class="sbar">${sicon(sc.ic,lv.c)}<div class="t"><b>${esc(sc.ch.n)} · ${esc(sc.ch.r)}</b><small>${esc(sc.place)} · ${esc(sc.time)}</small></div>${sc.prop?`<button class="hb" data-a="sprop" data-id="${sc.id}">${PROP_NAME[sc.prop.type]||'道具'}</button>`:''}<button class="hb" data-a="sbrief" data-id="${sc.id}">剧本</button></div>
+ <div class="stasks">${sc.tasks.map((x,i)=>`<span class="stk ${i<n?'ok':i===n&&!s.passed?'cur':''}">${i<n?'✓ ':''}${esc(x[0])}</span>`).join('')}</div></div>`;
+}
+function debriefHTML(m,s){
+ const sc=SCENE_BY[s.scene];
+ return `<div class="debrief"><div class="dstars">${'★'.repeat(m.stars)}${'☆'.repeat(3-m.stars)}</div><b>${esc(m.text)}</b>
+  <div class="note" style="margin:4px 0 0">${m.turns} 轮对话 · 被纠正 ${m.mist} 次${m.tw?` · 这次的状况：${esc(m.tw)}`:''}</div>
+  <div class="note" style="margin:2px 0 0">${m.stars===3?'非常顺！可以去下一课了。':m.stars===2?'办成了，有几个地方说得还不够地道，复盘看一下。':'办成了！先复盘看看被纠正的地方，再换个状况练一次。'}</div>
+  <div class="btns"><button class="btn g" data-a="review">复盘</button><button class="btn g" data-a="sagain" data-id="${sc?sc.id:''}">换个状况再来</button><button class="btn" data-a="nextscene">下一课</button></div></div>`;
+}
+
 /* ---------- 导航与事件 ---------- */
 function go(v){
  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===v));
@@ -1776,7 +2040,7 @@ document.body.addEventListener('click',async e=>{
   case 'vcall':return vocChat(t.dataset.id,true);
   case 'vagain':{const id=(s.scene||'').slice(2);if(!VOC)await loadVocab();return vocChat(id,false)}
   case 'goal':S.cfg.goal=+t.dataset.m;save();return renderMe();
-  case 'psn':{document.querySelectorAll('.sn.on').forEach(x=>x.classList.remove('on'));const sn=t.closest('.sn');if(sn)sn.classList.add('on');if(CALL&&REC)REC.abort();return speak(t.dataset.s).then(()=>sn&&sn.classList.remove('on'))}
+  case 'psn':{document.querySelectorAll('.sn.on').forEach(x=>x.classList.remove('on'));const sn=t.closest('.sn');if(sn)sn.classList.add('on');if(CALL&&REC)REC.abort();const vv=sceneVoices(curSess()),inAI=t.closest('.msg.ai')||t.closest('#ccap');return speak(t.dataset.s,false,inAI?(t.closest('.coach')?vv.coach:vv.main):null).then(()=>sn&&sn.classList.remove('on'))}
   case 'pw':return speak(t.dataset.en);
   case 'wfav':{const on=addBook({en:t.dataset.en,zh:t.dataset.zh,note:t.dataset.note});t.textContent=on?'已在表达本':'收藏这个词';t.classList.toggle('g',!!on);return}
   case 'sintro':return sceneIntro(t.dataset.id);
@@ -1795,8 +2059,13 @@ document.body.addEventListener('click',async e=>{
   case 'gskip':return drillSubmit(true);
   case 'gnext':GD.i++;return drillItem();
   case 'gmic':return drillMic();
-  case 'play':return speak(m.text);
-  case 'slow':return speak(m.text,true);
+  case 'play':return speak(m.text,false,sceneVoices(s).main);
+  case 'slow':return speak(m.text,true,sceneVoices(s).main);
+  case 'pcoach':return speak(t.closest('.coach').dataset.coach,false,sceneVoices(s).coach);
+  case 'sprop':{const sc=SCENE_BY[t.dataset.id];return sheet(sheetHead(PROP_NAME[sc.prop.type]||'道具')+propHTML(sc.prop)+'<button class="btn g" data-a="close" style="margin-top:10px">回到对话</button>')}
+  case 'sbrief':return sceneIntro(t.dataset.id,true);
+  case 'sagain':return startLesson(t.dataset.id,false);
+  case 'sresume':S.cur=t.dataset.sid;save();return go('chatv');
   case 'reveal':if(m&&!m.shown&&S.cfg.blurEn){m.shown=true;t.classList.remove('blur');save()}return;
   case 'zh':{if(m.zh){m.zhOn=!zhShown(m);save();return renderChat()}t.textContent='翻译中…';try{await ensureZh(m);m.zhOn=true;save()}catch(err){toast(err.message,4000)}return renderChat()}
   case 'ex':return openExplain(m.text);
