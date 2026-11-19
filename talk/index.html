@@ -265,6 +265,8 @@ main{position:absolute;inset:0;padding-top:var(--hdr);padding-bottom:var(--dock)
 .view{padding:10px 14px 22px}
 #dock{position:absolute;left:0;right:0;bottom:0;z-index:10;padding:0 10px calc(var(--bot) + 8px);pointer-events:none}
 #dock>*{pointer-events:auto}
+body.kb nav{display:none}
+body.kb #dock{padding-bottom:8px}
 #dock::before{content:'';position:absolute;left:0;right:0;top:-18px;bottom:0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 0%,transparent),color-mix(in srgb,var(--bg) 82%,transparent) 38%,color-mix(in srgb,var(--bg) 92%,transparent))}
 nav{margin-top:8px;padding:4px;border:1px solid var(--gbrd);border-radius:30px;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--gsh),var(--ghi)}
 nav button{border-radius:24px;padding:7px 0 6px;font-size:11.5px;transition:color .25s,background .25s,box-shadow .25s,transform .12s}
@@ -385,7 +387,7 @@ button:not(#orb):not(.sp):active{transform:scale(.96)}
 </div>
 <script>
 'use strict';
-const VER='2.0.1';
+const VER='2.0.2';
 const KEY='talk.v1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1952,7 +1954,7 @@ const lkCnt=id=>(S.lk&&S.lk[id])||0;
 function renderLk(){
  const v=$('#lkv');
  if(lkCur)return renderLkLesson(lkCur);
- v.innerHTML=`<div class="card" style="margin-top:2px;line-height:1.65"><b>为什么要练连读</b><div class="note" style="margin:4px 0 0">美国人说话不是一个词一个词蹦出来的，而是连成一串。听不懂美剧、跟不上对话，多半是因为不熟悉连读。<br>App 里 Sam 说的每句话，连读的地方都用橙色 <b class="lkm" style="pointer-events:none">‿</b> 标出来了，点一下就能听、能跟读。</div></div>
+ v.innerHTML=`<div class="card" style="margin-top:2px;margin-bottom:12px;line-height:1.65"><b>为什么要练连读</b><div class="note" style="margin:4px 0 0">美国人说话不是一个词一个词蹦出来的，而是连成一串。听不懂美剧、跟不上对话，多半是因为不熟悉连读。<br>App 里 Sam 说的每句话，连读的地方都用橙色 <b class="lkm" style="pointer-events:none">‿</b> 标出来了，点一下就能听、能跟读。</div></div>
  ${LK_LESSONS.map((x,i)=>`<button class="row" data-a="lkgo" data-id="${x.id}" style="width:100%;text-align:left"><div class="t"><div><b>${i+1}. ${esc(x.n)}</b> <small>${esc(x.en)}</small></div><small>${x.ex.length} 个例句${lkCnt(x.id)?` · 跟读过 ${lkCnt(x.id)} 次`:''}</small></div><span class="lkph" style="font-size:13px">${esc(x.ex[0][0])}</span></button>`).join('')}`;
 }
 function renderLkLesson(id){
@@ -1991,7 +1993,7 @@ async function renderVoc(){
  <div id="vres"></div>
  <div id="vmain"><button class="row" data-a="tobook" style="width:100%;text-align:left;border-color:var(--pri)"><div class="t"><div><b>我的表达本</b></div><small>收藏了 ${S.book.length} 条${due?` · 今天要复习 ${due} 条`:''}</small></div><span class="hb">${due?'去复习':'打开'}</span></button>
  <div class="note">${VOC.cats.length} 个分类，${total} 个美国人日常用的说法。点单词听发音，点 ☆ 收藏。</div>
- ${VOC.groups.map(g=>`<div class="sec">${esc(g)}</div><div class="grid">${VOC.cats.filter(c=>c.g===g).map(c=>`<button class="scene" data-a="vopen" data-id="${c.id}"><b>${esc(c.zh)}</b><span>${esc(c.en)} · ${c.n} 个</span></button>`).join('')}</div>`).join('')}</div>`;
+ ${VOC.groups.map(g=>`<div class="sec">${esc(g)}</div><div class="grid">${VOC.cats.filter(c=>c.g===g).map(c=>`<button class="scene" data-a="vopen" data-id="${c.id}"><b>${esc(c.zh)}</b><span>${esc(c.en)} · <i style="font-style:normal;white-space:nowrap">${c.n} 个</i></span></button>`).join('')}</div>`).join('')}</div>`;
  if(vocQ)vocSearch(vocQ);
 }
 function vocSearch(q){
@@ -2297,6 +2299,12 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){if(REC)REC
 function fitChrome(){const r=document.documentElement.style;r.setProperty('--hdr',$('header').offsetHeight+'px');r.setProperty('--dock',($('#dock').offsetHeight+10)+'px')}
 if(window.ResizeObserver){const ro=new ResizeObserver(fitChrome);ro.observe($('header'));ro.observe($('#dock'))}
 fitChrome();
+/* 键盘弹出时：整个界面缩到键盘上方，顶栏和最新消息都留在屏幕里，底部导航先收起 */
+if(window.visualViewport){const vv=visualViewport,app=$('#app');let kb=false;
+ const onVV=()=>{const k=document.documentElement.clientHeight-vv.height>120;
+  if(k){app.style.height=vv.height+'px';window.scrollTo(0,0)}else app.style.height='';
+  if(k!==kb){kb=k;document.body.classList.toggle('kb',k);fitChrome();if(k&&$('#chatv').classList.contains('on'))scrollEnd()}};
+ vv.addEventListener('resize',onVV);vv.addEventListener('scroll',onVV)}
 if(!S.cur||!curSess()){const s=S.sessions.find(x=>x.msgs.length===0);S.cur=s?s.id:null}
 go('chatv');
 /* 预热连接：打开或切回应用时先和服务器握好手，第一句话就不用等建连 */
